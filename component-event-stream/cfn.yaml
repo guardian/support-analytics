@@ -122,7 +122,7 @@ Resources:
     Properties:
       HostedZoneName: support.guardianapis.com.
       Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
-      Comment: !Sub CNAME for contributions referrals endpoint ${Stage}
+      Comment: !Sub CNAME for support components event stream ${Stage}
       Type: CNAME
       TTL: '120'
       ResourceRecords:
