@@ -13,6 +13,9 @@ Parameters:
     AllowedValues:
       - CODE
       - PROD
+  CertificateArn:
+    Description: ARN of the certificate
+    Type: String
 
 Mappings:
   StageMap:
@@ -27,14 +30,6 @@ Conditions:
   IsProd: !Equals [ !Ref Stage, "PROD" ]
 
 Globals:
-
-  EventStream:
-    Type: AWS::Kinesis::Stream
-    Properties: 
-      Name: !Ref support-components-event-stream-${Stage}
-      RetentionPeriodHours: 24
-      ShardCount: 1
-
   Api:
     Cors:
       AllowOrigin: !FindInMap [ StageMap, !Ref Stage, CorsOrigin ]
@@ -42,6 +37,13 @@ Globals:
       AllowMethods: "'*'"
 
 Resources:
+  EventStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub support-components-event-stream-${Stage}
+      RetentionPeriodHours: 24
+      ShardCount: 1
+
   ApiGatewayRole:
     Type: AWS::IAM::Role
     Properties:
@@ -66,7 +68,7 @@ Resources:
                   - kinesis:*
                 Resource: !GetAtt EventStream.Arn
 
-ApiGateway:
+  ApiGateway:
     Type: AWS::Serverless::Api
     Properties:
       StageName: Prod
@@ -75,6 +77,37 @@ ApiGateway:
         info:
           title: !Ref AWS::StackName
         paths:
+          "/epic-view":
+            "put":
+              responses:
+                "200":
+                  description: "200 response"
+                  schema:
+                    $ref: "#/definitions/Empty"
+              x-amazon-apigateway-integration:
+                credentials: !GetAtt ApiGatewayRole.Arn
+                httpMethod: "POST"
+                requestParameters:
+                  "integration.request.header.Content-Type": "'application/x-amz-json-1.1'"
+                requestTemplates:
+                  application/json: !Sub "{\n    \"StreamName\": \"support-components-event-stream-${Stage}\",\n    \"Records\": [\n#foreach($elem in $input.path('$.records'))\n          {\n            \"Data\": \"$util.base64Encode($elem.data)\",\n            \"PartitionKey\": \"1\"\n          }#if($foreach.hasNext),#end\n    #end\n]\n}"
+                  application/x-amz-json-1.1: !Sub "{\n  \"StreamName\": \"support-components-event-stream-${Stage}\",\n  \"records\" : [\n#foreach($elem in $input.path('$.records'))\n    {\n        \"Data\" : \"$elem.data\",\n        \"PartitionKey\" : \"1\"\n    }#if($foreach.hasNext),#end\n  #end\n]\n}"
+                responses:
+                  default:
+                    statusCode: "200"
+                passthroughBehavior: when_no_match
+                type: aws
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:kinesis:action/PutRecords"
+
+  DomainName:
+    Type: "AWS::ApiGateway::DomainName"
+    Properties:
+      RegionalCertificateArn: # only for *.support.guardianapis.com
+        !Ref CertificateArn
+      DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
 
   BasePathMapping:
     Type: "AWS::ApiGateway::BasePathMapping"
