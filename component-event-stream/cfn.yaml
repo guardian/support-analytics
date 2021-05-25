@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: 'AWS::Serverless-2016-10-31'
-Description: support components event stream api
+Description: support component events stream api
 
 Parameters:
   Stack:
@@ -40,7 +40,7 @@ Resources:
   EventStream:
     Type: AWS::Kinesis::Stream
     Properties:
-      Name: !Sub support-components-event-stream-${Stage}
+      Name: !Sub support-component-event-stream-${Stage}
       RetentionPeriodHours: 24
       ShardCount: 1
 
@@ -90,8 +90,8 @@ Resources:
                 requestParameters:
                   "integration.request.header.Content-Type": "'application/x-amz-json-1.1'"
                 requestTemplates:
-                  application/json: !Sub "{\n    \"StreamName\": \"support-components-event-stream-${Stage}\",\n    \"Records\": [\n#foreach($elem in $input.path('$.records'))\n          {\n            \"Data\": \"$util.base64Encode($elem.data)\",\n            \"PartitionKey\": \"1\"\n          }#if($foreach.hasNext),#end\n    #end\n]\n}"
-                  application/x-amz-json-1.1: !Sub "{\n  \"StreamName\": \"support-components-event-stream-${Stage}\",\n  \"records\" : [\n#foreach($elem in $input.path('$.records'))\n    {\n        \"Data\" : \"$elem.data\",\n        \"PartitionKey\" : \"1\"\n    }#if($foreach.hasNext),#end\n  #end\n]\n}"
+                  application/json: !Sub "{\n    \"StreamName\": \"support-component-event-stream-${Stage}\",\n    \"Records\": [\n#foreach($elem in $input.path('$.records'))\n          {\n            \"Data\": \"$util.base64Encode($elem.data)\",\n            \"PartitionKey\": \"1\"\n          }#if($foreach.hasNext),#end\n    #end\n]\n}"
+                  application/x-amz-json-1.1: !Sub "{\n  \"StreamName\": \"support-component-event-stream-${Stage}\",\n  \"records\" : [\n#foreach($elem in $input.path('$.records'))\n    {\n        \"Data\" : \"$elem.data\",\n        \"PartitionKey\" : \"1\"\n    }#if($foreach.hasNext),#end\n  #end\n]\n}"
                 responses:
                   default:
                     statusCode: "200"
@@ -122,7 +122,7 @@ Resources:
     Properties:
       HostedZoneName: support.guardianapis.com.
       Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
-      Comment: !Sub CNAME for support components event stream ${Stage}
+      Comment: !Sub CNAME for support component events stream ${Stage}
       Type: CNAME
       TTL: '120'
       ResourceRecords:
