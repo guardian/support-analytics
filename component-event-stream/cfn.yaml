@@ -78,7 +78,7 @@ Resources:
           title: !Ref AWS::StackName
         paths:
           "/epic-view":
-            "put":
+            "post":
               responses:
                 "200":
                   description: "200 response"
