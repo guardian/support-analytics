@@ -8,15 +8,13 @@ echo "Build number: '$BUILD_NUMBER'"
 mkdir $BUILD_NUMBER
 cp component-event-stream/cfn.yaml component-event-stream/riff-raff.yaml $BUILD_NUMBER/
 
-exit
-
 aws s3 cp --recursive $BUILD_NUMBER s3://riffraff-artifact/support:component-event-stream/$BUILD_NUMBER
 rm -rf $BUILD_NUMBER/
 
 now=`date -u +"%Y-%m-%dT%H:%M:%S.000Z"`
 echo "
 {
-  \"projectName\": \"support:support-component-event-stream\",
+  \"projectName\": \"support:component-event-stream\",
   \"buildNumber\": \"$BUILD_NUMBER\",
   \"startTime\": \"$now\",
   \"vcsURL\": \"git@github.com:guardian/support-analytics.git\",
