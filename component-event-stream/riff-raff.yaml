@@ -1,0 +1,12 @@
+stacks: [ support ]
+regions: [ eu-west-1 ]
+
+deployments:
+  component-event-stream-cloudformation:
+    type: cloud-formation
+    app: component-event-stream
+    parameters:
+      cloudFormationStackName: component-event-stream
+      templatePath: cfn.yaml
+      cloudFormationStackByTags: false
+
