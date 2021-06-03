@@ -6,7 +6,8 @@ if [ -z $BUILD_NUMBER ]; then BUILD_NUMBER="DEV"; fi
 echo "Uploading riff-raff.yaml and cfn.yaml files to riffraff-artifact bucket"
 echo "Build number: '$BUILD_NUMBER'"
 mkdir -p $BUILD_NUMBER/component-event-stream-cloudformation
-cp component-event-stream/cfn.yaml component-event-stream/riff-raff.yaml $BUILD_NUMBER/component-event-stream-cloudformation
+cp component-event-stream/cfn.yaml $BUILD_NUMBER/component-event-stream-cloudformation
+cp component-event-stream/riff-raff.yaml $BUILD_NUMBER/
 
 aws s3 cp --recursive $BUILD_NUMBER s3://riffraff-artifact/support:component-event-stream/$BUILD_NUMBER
 rm -rf $BUILD_NUMBER/
