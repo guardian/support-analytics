@@ -6,7 +6,7 @@ if [ -z $BUILD_NUMBER ]; then BUILD_NUMBER="DEV"; fi
 echo "Uploading riff-raff.yaml and cfn.yaml files to riffraff-artifact bucket"
 echo "Build number: '$BUILD_NUMBER'"
 mkdir $BUILD_NUMBER
-cp ./cfn.yaml ./riff-raff.yaml $BUILD_NUMBER/
+cp component-event-stream/cfn.yaml component-event-stream/riff-raff.yaml $BUILD_NUMBER/
 
 exit
 
