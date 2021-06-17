@@ -24,7 +24,7 @@ Mappings:
       CorsOrigin: "'*'"
     PROD:
       DomainName: component-events.support.guardianapis.com
-      CorsOrigin: "'*'"
+      CorsOrigin: "'https://www.theguardian.com'"
 
 Conditions:
   IsProd: !Equals [ !Ref Stage, "PROD" ]
@@ -84,6 +84,9 @@ Resources:
                   description: "200 response"
                   schema:
                     $ref: "#/definitions/Empty"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
               x-amazon-apigateway-integration:
                 credentials: !GetAtt ApiGatewayRole.Arn
                 httpMethod: "POST"
@@ -97,6 +100,8 @@ Resources:
                     statusCode: "200"
                     responseTemplates:
                       "application/json": "#set($inputRoot = $input.path('$'))"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: !FindInMap [ StageMap, !Ref Stage, CorsOrigin ]
                 passthroughBehavior: when_no_match
                 type: aws
                 uri: !Sub "arn:aws:apigateway:${AWS::Region}:kinesis:action/PutRecords"
