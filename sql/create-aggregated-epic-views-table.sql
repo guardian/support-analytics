@@ -1,4 +1,4 @@
-CREATE EXTERNAL TABLE IF NOT EXISTS acquisition.aggregated-epic-views-prod (
+CREATE EXTERNAL TABLE IF NOT EXISTS acquisition.aggregated_epic_views_prod (
   `url` string,
   `views` int
 )
