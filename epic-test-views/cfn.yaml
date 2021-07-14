@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Stack:
+    Description: Stack name
+    Type: String
+    Default: support
+  Stage:
+    Description: Set by RiffRaff on each deploy
+    Type: String
+    AllowedValues:
+      - CODE
+      - PROD
+  KinesisStreamArn:
+    Description: ARN of the epic views kinesis stream
+    Type: String
+
+Resources:
+  LogViewsLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: logViews.handler
+      Runtime: nodejs14.x
+      Timeout: 10
+      Tracing: Active
+      Events:
+        ViewEventsStream:
+          Type: Kinesis
+          Properties:
+            Stream: !Ref KinesisStreamArn
+            BatchSize: 10
+            StartingPosition: LATEST

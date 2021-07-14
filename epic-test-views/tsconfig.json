@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ESNEXT",
+    "module": "commonjs",
+    "strict": true,
+    "moduleResolution": "node",
+    "outDir": "dist"
+  },
+  "files": ["src/getViews.ts", "src/logViews.ts"]
+}

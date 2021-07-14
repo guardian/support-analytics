@@ -1,0 +1,20 @@
+{
+  "name": "epic-test-views",
+  "version": "1.0.0",
+  "description": "Lambdas for real time epic test views",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.78",
+    "@types/ioredis": "^4.26.5",
+    "@types/node": "^16.3.2",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "ioredis": "^4.27.6"
+  }
+}
