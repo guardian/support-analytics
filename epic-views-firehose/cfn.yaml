@@ -2,14 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Kinesis stream for epic view events'
 
 Parameters:
-  App:
-    Description: Application name
-    Type: String
-    Default: epic-views-firehose
-  Stack:
-    Description: Stack name
-    Type: String
-    Default: support
   Stage:
     Description: Stage name
     Type: String
