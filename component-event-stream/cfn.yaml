@@ -112,8 +112,7 @@ Resources:
                 requestParameters:
                   "integration.request.header.Content-Type": "'application/x-amz-json-1.1'"
                 requestTemplates:
-                  application/json: !Sub "{\n    \"StreamName\": \"support-epic-view-event-stream-${Stage}\",\n    \"Records\": [\n{ \"Data\": \"$util.base64Encode($input.json('$'))\", \"PartitionKey\": \"1\"\n }\n]\n}"
-                  application/x-amz-json-1.1: !Sub "{\n    \"StreamName\": \"support-epic-view-event-stream-${Stage}\",\n    \"Records\": [\n{ \"Data\": \"$util.base64Encode($input.json('$'))\", \"PartitionKey\": \"1\"\n }\n]\n}"
+                  application/json: !Sub "#set($payload = \"$input.json('$')\n\") \n {\n    \"StreamName\": \"support-epic-view-event-stream-${Stage}\",\n    \"Records\": [\n{ \"Data\": \"$util.base64Encode($payload)\", \"PartitionKey\": \"1\"\n }\n]\n}"
                 responses:
                   default:
                     statusCode: "200"
