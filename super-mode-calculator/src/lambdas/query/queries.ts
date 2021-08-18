@@ -30,7 +30,7 @@ WITH
   SELECT
     referrerurl AS url,
 	region,
-    SUM(annualisedValue) AS total_av
+    SUM(annualisedValueGBP) AS total_av
   FROM
     acquisitions_with_regions
   GROUP BY
