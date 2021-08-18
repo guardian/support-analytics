@@ -12,7 +12,7 @@ export const SUPER_MODE_MINIMUM_AV = 40;
 
 export const SUPER_MODE_AV_PER_VIEWS_THRESHOLDS = {
 	GB: 0.01,
-	US: 0.33,
+	US: 0.033,
 	AU: 0.015,
 	NZ: 0.015,
 	CA: 0.02,
