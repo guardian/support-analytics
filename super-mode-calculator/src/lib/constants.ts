@@ -15,7 +15,7 @@ export const SUPER_MODE_AV_PER_VIEWS_THRESHOLDS = {
 	US: 0.033,
 	AU: 0.01,
 	NZ: 0.01,
-	CA: 0.015,
-	EU: 0.01,
-	ROW: 0.01,
+	CA: 0.01,
+	EU: 0.005,
+	ROW: 0.005,
 };
