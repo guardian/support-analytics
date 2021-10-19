@@ -11,11 +11,11 @@ export const SUPER_MODE_MINIMUM_VIEWS = 100;
 export const SUPER_MODE_MINIMUM_AV = 40;
 
 export const SUPER_MODE_AV_PER_VIEWS_THRESHOLDS = {
-	GB: 0.005,
+	GB: 0.004,
 	US: 0.033,
-	AU: 0.01,
-	NZ: 0.01,
-	CA: 0.01,
-	EU: 0.005,
-	ROW: 0.005,
+	AU: 0.008,
+	NZ: 0.005,
+	CA: 0.005,
+	EU: 0.004,
+	ROW: 0.004,
 };
