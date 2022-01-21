@@ -10,7 +10,10 @@ const STAGE: string = process.env.Stage ?? 'PROD';
 const athena = new AWS.Athena({ region: 'eu-west-1' });
 const docClient = new AWS.DynamoDB.DocumentClient({ region: 'eu-west-1' });
 
-export async function handler(executionIds: QueryExecutionId[]): Promise<void> {
+export async function handler(
+	executionIds: QueryExecutionId[],
+	dateTime: Date = new Date(),
+): Promise<void> {
 	const executionId = executionIds[0];
 	const result = await getCheckedExecutionResult(executionId, athena);
 	const rows = parseResult(result);
@@ -26,5 +29,5 @@ export async function handler(executionIds: QueryExecutionId[]): Promise<void> {
 
 	console.log({ superModeRows });
 
-	await writeRows(superModeRows, STAGE, docClient);
+	await writeRows(superModeRows, STAGE, docClient, dateTime);
 }

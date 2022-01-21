@@ -17,28 +17,31 @@ export function writeRows(
 	rows: QueryRow[],
 	stage: string,
 	docClient: DocumentClient,
+	now: Date,
 ): Promise<
 	Array<PromiseResult<DocumentClient.BatchWriteItemOutput, AWSError>>
 > {
-	const batches = buildBatches(rows.map(buildWriteRequest));
+	const batches = buildBatches(
+		rows.map((row) => buildWriteRequest(row, now)),
+	);
 
 	return Promise.all(
 		batches.map((batch) => writeBatch(batch, stage, docClient)),
 	);
 }
 
-function buildWriteRequest(row: QueryRow): DocumentClient.WriteRequest {
+function buildWriteRequest(
+	row: QueryRow,
+	now: Date,
+): DocumentClient.WriteRequest {
 	return {
 		PutRequest: {
-			Item: buildDynamoRecord(row),
+			Item: buildDynamoRecord(row, now),
 		},
 	};
 }
 
-function buildDynamoRecord(
-	row: QueryRow,
-	now: Date = new Date(),
-): DynamoRecord {
+function buildDynamoRecord(row: QueryRow, now: Date): DynamoRecord {
 	const end = addHours(now, SUPER_MODE_DURATION_IN_HOURS);
 
 	return {
@@ -55,7 +58,7 @@ function writeBatch(
 	stage: string,
 	docClient: DocumentClient,
 ): Promise<PromiseResult<DocumentClient.BatchWriteItemOutput, AWSError>> {
-	const table = `super-mode-${stage.toUpperCase()}`;
+	const table = `reverse-super-mode-${stage.toUpperCase()}`;
 
 	return docClient
 		.batchWrite({
@@ -112,7 +115,7 @@ function queryDate(
 ) {
 	return docClient
 		.query({
-			TableName: `super-mode-${stage.toUpperCase()}`,
+			TableName: `reverse-super-mode-${stage.toUpperCase()}`,
 			IndexName: 'end',
 			KeyConditionExpression: 'endDate = :ed AND endTimestamp > :et ',
 			ExpressionAttributeValues: {

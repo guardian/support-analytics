@@ -38,6 +38,7 @@ function getConfig(): Config | null {
 
 export async function handler(
 	executionIds: QueryExecutionId[],
+	dateTime: Date = new Date(),
 ): Promise<QueryExecutionId[]> {
 	const config = getConfig();
 
@@ -50,7 +51,7 @@ export async function handler(
 	);
 	await Promise.all(completionResults.map(checkExecutionState));
 
-	const query = getQuery(config.Stage);
+	const query = getQuery(config.Stage, dateTime);
 
 	return executeQueries(
 		[query],

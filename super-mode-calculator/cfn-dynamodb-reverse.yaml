@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Reverse Super mode dynamodb table
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - CODE
+      - PROD
+
+Resources:
+  SuperMode:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub reverse-super-mode-${Stage}
+      AttributeDefinitions:
+        # id is "<region>_<b64-encoded url>", e.g. "US_https://theguardian.com/..."
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: startTimestamp
+          AttributeType: S
+        - AttributeName: endTimestamp
+          AttributeType: S
+        - AttributeName: endDate
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: startTimestamp
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      GlobalSecondaryIndexes:
+        - IndexName: end
+          KeySchema:
+            - AttributeName: endDate
+              KeyType: HASH
+            - AttributeName: endTimestamp
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5

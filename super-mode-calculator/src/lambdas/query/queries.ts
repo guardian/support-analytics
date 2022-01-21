@@ -14,6 +14,8 @@ export function getQuery(stage: string, now: Date = new Date()): Query {
 	const dateString = toDateString(windowStartDate);
 	const dateHourString = toDateHourString(windowStartDate);
 
+	const nowDateHourString = toDateHourString(now);
+
 	return new Query(
 		`
 WITH
@@ -22,10 +24,10 @@ WITH
     *,
 	${REGION_SQL}
   FROM
-    acquisition_events_${stage.toLowerCase()}
+    acquisition_events_prod
   WHERE
     acquisition_date >= DATE '${dateString}'
-    AND timestamp >= TIMESTAMP '${dateHourString}' ),
+    AND timestamp >= TIMESTAMP '${dateHourString}' AND timestamp <= TIMESTAMP '${nowDateHourString}' ),
   av AS (
   SELECT
     referrerurl AS url,
@@ -41,9 +43,9 @@ WITH
 	  *,
 	  ${REGION_SQL}
 	FROM
-	  epic_views_${stage.toLowerCase()}
+	  epic_views_prod
     WHERE
-    date_hour >= TIMESTAMP '${dateHourString}' ),
+    date_hour >= TIMESTAMP '${dateHourString}' AND date_hour <= TIMESTAMP '${nowDateHourString}' ),
   views AS (
   SELECT
     url,
@@ -68,7 +70,7 @@ ON
   av.url=views.url
   AND av.region=views.region
 WHERE views.total_views > ${SUPER_MODE_MINIMUM_VIEWS}
-AND  av.total_av > ${SUPER_MODE_MINIMUM_AV}
+
   `,
 		'query_acquisitions_and_epic_views',
 	);
