@@ -100,6 +100,8 @@ export async function queryActiveArticles(
 		queryDate(todayEndDate, endTimestamp, stage, docClient),
 		queryDate(tomorrowEndDate, endTimestamp, stage, docClient),
 	]);
+	console.log({todayResult})
+	console.log({tomorrowResult})
 
 	return [
 		...(todayResult.Items ?? []),

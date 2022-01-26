@@ -20,7 +20,11 @@ export async function handler(
 
 	console.log({ rows });
 
-	const activeArticles = await queryActiveArticles(STAGE, docClient);
+	const activeArticles = await queryActiveArticles(
+		STAGE,
+		docClient,
+		dateTime,
+	);
 	const superModeRows = rows.filter(
 		(r) =>
 			!isCurrentlyInSuperMode(r, activeArticles) &&
