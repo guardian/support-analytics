@@ -164,3 +164,22 @@ Resources:
       ResourceRecords:
         - !GetAtt [ DomainName, RegionalDomainName ]
 
+  EpicViewAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:marketing-dev
+      AlarmName: !Sub support-epic-view-event-stream-${Stage} events below minimum threshold
+      AlarmDescription: Epic impressions have dropped below the minimum threshold
+      MetricName: IncomingRecords
+      Namespace: AWS/Kinesis
+      Dimensions:
+        - Name: StreamName
+          Value: !Sub support-epic-view-event-stream-${Stage}
+      ComparisonOperator: LessThanThreshold
+      Threshold: 20000
+      Period: 3600
+      EvaluationPeriods: 1
+      Statistic: Sum
+
