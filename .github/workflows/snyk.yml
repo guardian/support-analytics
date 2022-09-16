@@ -1,22 +1,14 @@
-name: Snyk
+# This action is just a test
+name: Snyk (test)
 
-on:
-  push:
-    branches: [ main, jd-snyk-action ]
-  workflow_dispatch:
+on: push
 
 jobs:
-  snyk:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v2
-
-      - name: Yarn - Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@0.3.0
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --org=the-guardian-cuu --project-name=${{ github.repository }} --file=./super-mode-calculator/yarn.lock
-          command: monitor
+  security:
+    uses: guardian/.github/.github/workflows/sbt-node-snyk.yml@main
+    with:
+      DEBUG: true
+      ORG: guardian-test
+      SKIP_NODE: false
+    secrets:
+       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
