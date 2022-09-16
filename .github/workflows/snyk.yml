@@ -10,5 +10,6 @@ jobs:
       DEBUG: true
       ORG: guardian-test
       SKIP_NODE: false
+      NODE_VERSION_FILE: super-mode-calculator/.nvmrc
     secrets:
        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
