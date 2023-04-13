@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.948.0",
-    "date-fns": "^2.22.1",
+    "date-fns": "^2.29.3",
     "zod": "^3.5.1"
   }
 }
