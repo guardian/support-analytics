@@ -30,7 +30,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "aws-sdk": "^2.948.0",
+    "aws-sdk": "^2.1358.0",
     "date-fns": "^2.22.1",
     "zod": "^3.5.1"
   }
