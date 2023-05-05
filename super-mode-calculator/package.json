@@ -16,7 +16,7 @@
     "package": "ARTEFACT_PATH=$PWD/target VERBOSE=true riffraff-artefact"
   },
   "devDependencies": {
-    "@guardian/eslint-config-typescript": "^0.6.0",
+    "@guardian/eslint-config-typescript": "^0.7.0",
     "@guardian/prettier": "^0.6.0",
     "@types/node": "^16.3.3",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
