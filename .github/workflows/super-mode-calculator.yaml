@@ -27,9 +27,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version-file: './.nvmrc'
+          node-version-file: './super-mode-calculator/.nvmrc'
           cache: 'yarn'
-          working-directory: ./super-mode-calculator
+          cache-dependency-path: ./super-mode-calculator/yarn.lock
 
     - name: Yarn
       run: |
