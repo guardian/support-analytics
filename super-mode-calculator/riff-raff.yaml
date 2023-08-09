@@ -6,7 +6,7 @@ deployments:
     type: aws-lambda
     parameters:
       prefixStack: false
-      bucket: membership-dist
+      bucketSsmLookup: true
       fileName: super-mode-calculator.zip
       functionNames:
         - super-mode-calculator-partition-lambda-

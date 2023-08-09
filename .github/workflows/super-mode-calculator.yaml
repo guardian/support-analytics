@@ -1,0 +1,62 @@
+name: Upload super-mode-calculator to riff raff
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+jobs:
+  build_super-mode-calculator:
+    if: github.repository_owner == 'guardian'
+    name: Build super-mode-calculator
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # needed by actions-riff-raff
+      contents: read # needed because the repo is private
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials # needed by actions-riff-raff
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          aws-region: eu-west-1
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: './.nvmrc'
+          cache: 'yarn'
+          working-directory: ./super-mode-calculator
+
+    - name: Yarn
+      run: |
+        yarn install
+        yarn lint
+        yarn run build
+      working-directory: ./super-mode-calculator
+
+      - name: Copy files to Riff Raff package
+        run: cp package.json riff-raff.yaml target
+        working-directory: ./super-mode-calculator
+
+      - name: Yarn install in package
+        run: yarn install --production
+        working-directory: ./super-mode-calculator/target
+
+      - name: Zip target directory contents (quietly)
+        run: zip -qr super-mode-calculator.zip ./*
+        working-directory: ./super-mode-calculator/target
+
+      - uses: guardian/actions-riff-raff@v2
+        with:
+          projectName: Support:super-mode-calculator
+          configPath: ./super-mode-calculator/riff-raff.yaml
+          buildNumberOffset: 250
+          contentDirectories: |
+            super-mode-calculator:
+              - ./super-mode-calculator/target/super-mode-calculator.zip
+            super-mode-calculator-cloudformation:
+              - ./super-mode-calculator/cfn.yaml
