@@ -64,4 +64,4 @@ jobs:
             super-mode-calculator:
               - ./super-mode-calculator/target/super-mode-calculator.zip
             super-mode-calculator-cloudformation:
-              - ./super-mode-calculator/cloudformation/cfn.yaml
+              - ./super-mode-calculator/cfn.yaml

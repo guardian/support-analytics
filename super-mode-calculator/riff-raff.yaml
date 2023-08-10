@@ -17,4 +17,4 @@ deployments:
     type: cloud-formation
     app: super-mode-calculator
     parameters:
-      templatePath: cloudformation/cfn.yaml
+      templatePath: cfn.yaml
