@@ -16,6 +16,7 @@ jobs:
 
     name: Build super-mode-calculator
     runs-on: ubuntu-latest
+
     steps:
       - name: Env
         run: env
@@ -30,7 +31,7 @@ jobs:
           aws-region: eu-west-1
 
       - name: Setup Node
-        uses: guardian/setup-node@v3
+        uses: actions/setup-node@v3
         with:
           cache: 'yarn'
           cache-dependency-path: ./super-mode-calculator/yarn.lock
