@@ -30,7 +30,7 @@ jobs:
           aws-region: eu-west-1
 
       - name: Setup Node
-        uses: guardian/actions-setup-node@v2.4.1
+        uses: guardian/setup-node@v3
         with:
           cache: 'yarn'
           cache-dependency-path: ./super-mode-calculator/yarn.lock
