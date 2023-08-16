@@ -35,7 +35,7 @@ jobs:
         with:
           cache: 'yarn'
           cache-dependency-path: ./super-mode-calculator/yarn.lock
-          node-version: 14.16.0
+          node-version-file: super-mode-calculator/.nvmrc
 
       - name: Yarn
         run: |
