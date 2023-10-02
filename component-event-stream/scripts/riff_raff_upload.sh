@@ -2,6 +2,11 @@
 
 set -e
 
+GITHUB_RUN_NUMBER="${GITHUB_RUN_NUMBER}"
+BUILD_NUMBER=$((GITHUB_RUN_NUMBER + 50))
+
+echo "GITHUB_RUN_NUMBER: $GITHUB_RUN_NUMBER"
+
 if [ -z $BUILD_NUMBER ]; then BUILD_NUMBER="DEV"; fi
 echo "Uploading riff-raff.yaml and cfn.yaml files to riffraff-artifact bucket"
 echo "Build number: '$BUILD_NUMBER'"
