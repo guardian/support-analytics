@@ -35,12 +35,4 @@ jobs:
         env:
           BUILD_NUMBER: ${{ github.run_number }}
 
-#      - uses: guardian/actions-riff-raff@v2
-#        with:
-#          projectName: support:component-event-stream
-#          configPath: ./component-event-stream/riff-raff.yaml
-#          buildNumberOffset: 100
-#          contentDirectories: |
-#            component-event-stream-cloudformation:
-#              - ./component-event-stream/cfn.yaml
 
