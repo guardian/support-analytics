@@ -1,0 +1,38 @@
+name: Upload component-event-stream to riff raff
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+jobs:
+  super_mode_calculator_build:
+    if: github.repository_owner == 'guardian'
+    # Required by actions-riff-raff
+    permissions:
+      id-token: write
+      contents: read
+
+    name: Upload component-event-stream
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Env
+        run: env
+
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials # needed by actions-riff-raff
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          aws-region: eu-west-1
+
+      - name: Run the script
+        run: component-event-stream/scripts/riff_raff_upload.sh
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+
+
