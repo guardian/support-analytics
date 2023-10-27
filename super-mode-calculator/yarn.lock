@@ -355,9 +355,9 @@ available-typed-arrays@^1.0.5:
   version "1.0.5"
   resolved "https://registry.npmjs.org/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz"
 
-aws-sdk@^2.1435.0:
-  version "2.1467.0"
-  resolved "https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.1467.0.tgz"
+aws-sdk@^2.1482.0:
+  version "2.1482.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1482.0.tgz#26c1dbcea5703fed73e11c913826fbe509eccb23"
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
