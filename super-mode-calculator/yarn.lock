@@ -132,9 +132,11 @@
   version "7.0.8"
   resolved "https://registry.npmjs.org/@types/json-schema/-/json-schema-7.0.8.tgz"
 
-"@types/node@^20.5.0":
-  version "20.7.2"
-  resolved "https://registry.npmjs.org/@types/node/-/node-20.7.2.tgz"
+"@types/node@^20.8.10":
+  version "20.8.10"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.8.10.tgz#a5448b895c753ae929c26ce85cab557c6d4a365e"
+  dependencies:
+    undici-types "~5.26.4"
 
 "@typescript-eslint/eslint-plugin@4.29.2":
   version "4.29.2"
@@ -1598,6 +1600,10 @@ unbox-primitive@^1.0.1:
     has-bigints "^1.0.1"
     has-symbols "^1.0.2"
     which-boxed-primitive "^1.0.2"
+
+undici-types@~5.26.4:
+  version "5.26.5"
+  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-5.26.5.tgz#bcd539893d00b56e964fd2657a4866b221a65617"
 
 uri-js@^4.2.2:
   version "4.4.1"
