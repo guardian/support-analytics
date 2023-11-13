@@ -45,3 +45,6 @@ Resources:
           ProvisionedThroughput:
             ReadCapacityUnits: 5
             WriteCapacityUnits: 5
+      Tags:
+        - Key: devx-backup-enabled
+          Value: true
