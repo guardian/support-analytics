@@ -56,7 +56,7 @@ jobs:
         run: zip -qr super-mode-calculator.zip ./*
         working-directory: ./super-mode-calculator/target
 
-      - uses: guardian/actions-riff-raff@v2
+      - uses: guardian/actions-riff-raff@v3
         with:
           projectName: Support::super-mode-calculator
           configPath: ./super-mode-calculator/riff-raff.yaml
