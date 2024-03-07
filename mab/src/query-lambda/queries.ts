@@ -1,4 +1,4 @@
-import {Query} from "./query";
+import {Query} from "../lib/query";
 
 export interface Test {
 	name: string;
@@ -6,30 +6,26 @@ export interface Test {
 	endDate: string;
 }
 
-const buildQuery = (test: Test, stage: 'CODE' | 'PROD'): Query => {
-	const dateHourString = `${test.launchDate} 00:00:00`;
+const buildQuery = (test: Test, dateHourString: string, stage: 'CODE' | 'PROD'): Query => {
 	const query = `
-	  WITH epic_views AS (
-	      SELECT ab_test_name, ab_test_variant, COUNT(*) AS views
-		  FROM epic_views_${stage.toLowerCase()}
-		  WHERE date_hour >= TIMESTAMP '${dateHourString}' ),
-	      GROUP BY 1,2
-	  ),
-	  acqs AS (
-	      SELECT ab_test_name, ab_test_variant, SUM(annualisedValueGBP) AS total_av
-		  FROM acquisition_events_${stage.toLowerCase()}
-		  WHERE acquisition_date >= DATE '${test.launchDate}'
-	  )
-	  SELECT
-	      epic_views.ab_test_name,
-	      epic_views.ab_test_variant,
-	      (acqs.total_av / epic_views.views)*1000 AS av_per_1000_views
-	  FROM epic_views
-	  INNER JOIN acqs USING (ab_test_name, ab_test_variant)
+		WITH views AS (
+			SELECT test, variant, SUM(views) AS views FROM mab_test_views
+			WHERE hour <= timestamp'${dateHourString}'
+			AND test = '${test.name}'
+		    GROUP BY 1,2
+		),
+		acqs AS (
+			SELECT test, variant, SUM(av_gbp) AS av_gbp FROM mab_test_acquisitions
+			WHERE hour <= timestamp'${dateHourString}'
+		    AND test = '${test.name}'
+		    GROUP BY 1,2
+		)
+		SELECT * FROM views
+		JOIN acqs USING (test,variant)
 	`;
 
-	return new Query(query, `query_${test.name}`);
+	return new Query(query, `query_${test.name}_${dateHourString}`);
 };
 
-export const getQueries = (tests: Test[], stage: 'CODE' | 'PROD'): [Test,Query][] =>
-	tests.map(test => [test, buildQuery(test, stage)]);
+export const getQueries = (tests: Test[], dateHourString: string, stage: 'CODE' | 'PROD'): [Test,Query][] =>
+	tests.map(test => [test, buildQuery(test, dateHourString, stage)]);
