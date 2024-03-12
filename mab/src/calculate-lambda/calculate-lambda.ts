@@ -12,7 +12,7 @@ export async function run(events: QueryExecution[]): Promise<QueryRow[]> {
 	const result = await getCheckedExecutionResult(executionId, athena);
 	const rows = parseResult(result);
 
-	// console.log({ rows });
+	// TODO - calculate values as write to Dynamodb
 
 	return rows;
 }
