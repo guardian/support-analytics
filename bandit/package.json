@@ -1,5 +1,5 @@
 {
-	"name": "mab-lambda",
+	"name": "bandit",
 	"version": "1.0.0",
 	"description": "Lambda for updating multi-armed bandit data",
 	"buildDir": "./target",
