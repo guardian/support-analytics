@@ -6,7 +6,7 @@
 	"scripts": {
 		"lint": "eslint 'src/**/*.ts'",
 		"build": "tsc",
-		"local": "stage=CODE ts-node ./src/query-lambda/local.ts"
+		"local": "Stage=CODE ts-node ./src/query-lambda/local.ts"
 	},
 	"dependencies": {
 		"aws-sdk": "^2.1177.0",

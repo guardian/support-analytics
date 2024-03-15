@@ -3,10 +3,11 @@ import {QueryReturnedInvalidDataError} from "../lib/errors";
 import { z } from 'zod';
 
 const queryRowSchema = z.object({
-	test: z.string(),
-	variant: z.string(),
+	testName: z.string(),
+	variantName: z.string(),
 	views: z.number(),
-	av_gbp: z.number(),
+	avGbp: z.number(),
+	acquisitions: z.number(),
 });
 
 export type QueryRow = z.infer<typeof queryRowSchema>;
@@ -19,12 +20,14 @@ export function parseResult(result: GetQueryResultsOutput): QueryRow[] {
 		if (!data) {
 			return;
 		}
+		console.log({data})
 
 		return {
-			test: data[0].VarCharValue,
-			variant: data[1].VarCharValue,
+			testName: data[0].VarCharValue,
+			variantName: data[1].VarCharValue,
 			views: parseInt(data[2].VarCharValue ?? ''),
-			av_gbp: parseFloat(data[3].VarCharValue ?? ''),
+			avGbp: parseFloat(data[3].VarCharValue ?? ''),
+			acquisitions: parseInt(data[4].VarCharValue ?? ''),
 		};
 	});
 
