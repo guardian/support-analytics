@@ -17,6 +17,7 @@ const now = () => {
 	return now.toISOString()
 }
 
+// TODO - remove hour parameter and query for all data up to now
 export async function run(tests: Test[], hour: string | undefined): Promise<QueryExecution[]> {
 	const dateHourString = hour ?? now();
 	if (stage !== 'CODE' && stage !== 'PROD') {

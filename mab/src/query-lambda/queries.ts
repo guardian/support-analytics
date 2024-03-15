@@ -6,6 +6,7 @@ export interface Test {
 	endDate: string;
 }
 
+// TODO - rewrite query to use real data to get sum of views and sum of AV GBP
 const buildQuery = (test: Test, dateHourString: string, stage: 'CODE' | 'PROD'): Query => {
 	const query = `
 		WITH views AS (
