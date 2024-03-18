@@ -1,12 +1,16 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
-import { RemovalPolicy, type App } from 'aws-cdk-lib';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
-import { StateMachine, Succeed } from 'aws-cdk-lib/aws-stepfunctions';
-import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
+import { type App, RemovalPolicy } from 'aws-cdk-lib';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import {
+	DefinitionBody,
+	StateMachine,
+	Succeed,
+} from 'aws-cdk-lib/aws-stepfunctions';
+import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 
 const appName = 'support-bandit';
 
@@ -80,12 +84,14 @@ export class Bandit extends GuStack {
 			lambdaFunction: calculateLambda,
 		});
 
-		const stateMachine = new StateMachine(this, 'state-machine', {
+		new StateMachine(this, 'state-machine', {
 			stateMachineName: `${appName}-${this.stage}`,
-			definition: getBanditTestsTask
-				.next(queryTask)
-				.next(calculateTask)
-				.next(new Succeed(this, 'state-machine-success')),
+			definitionBody: DefinitionBody.fromChainable(
+				getBanditTestsTask
+					.next(queryTask)
+					.next(calculateTask)
+					.next(new Succeed(this, 'state-machine-success')),
+			),
 		});
 	}
 }
