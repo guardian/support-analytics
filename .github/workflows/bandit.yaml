@@ -1,0 +1,99 @@
+name: Build support bandit testing
+
+on:
+  pull_request:
+    branches:
+      - "**"
+  push:
+    branches:
+      - main
+
+jobs:
+  bandit-build:
+    if: >-
+      (github.actor != 'dependabot[bot]') &&
+        (github.event.pull_request.head.repo.owner.login == 'guardian' ||
+          github.event_name == 'push')
+
+    name:
+      support bandit build
+      # Required by actions-assume-aws-role
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with: "bandit/.nvmrc"
+
+      - name: bandit test + build
+        working-directory: ./bandit
+        run: |
+          yarn install
+          yarn lint
+          yarn run build
+
+          cp package.json target
+          pushd target
+          yarn install --production
+          zip -r support-bandit ./*
+          popd
+
+      - name: Build cdk
+        working-directory: ./cdk
+        run: |
+          yarn install
+          yarn lint
+          yarn test
+          yarn synth
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          aws-region: eu-west-1
+
+      - name: bandit riff-raff
+        uses: guardian/actions-riff-raff@v4
+        with:
+          app: support-bandit
+          config: |
+            stacks:
+              - support
+            regions:
+              - eu-west-1
+            allowedStages:
+              - CODE
+              - PROD
+            deployments:
+              support-bandit-cloudformation:
+                type: cloud-formation
+                app: support-bandit
+                parameters:
+                  cloudFormationStackName: support-bandit
+                  templateStagePaths:
+                    CODE: SupportBandit-CODE.template.json
+                    PROD: SupportBandit-PROD.template.json
+                  cloudFormationStackByTags: false
+                  prependStackToCloudFormationStackName: false
+                
+              support-bandit:
+                type: aws-lambda
+                parameters:
+                  prefix-stack: false
+                  fileName: support-bandit.zip
+                  functionNames:
+                    - support-bandit-get-bandit-tests-
+                    - support-bandit-query-
+                    - support-bandit-calculate-
+
+          contentDirectories: |
+            support-bandit:
+              - bandit/target/support-bandit.zip
+            support-bandit-cloudformation:
+              - cdk/cdk.out/SupportBandit-CODE.template.json
+              - cdk/cdk.out/SupportBandit-PROD.template.json

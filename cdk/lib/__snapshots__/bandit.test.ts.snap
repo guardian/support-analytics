@@ -192,7 +192,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "deploy/TEST/support-bandit/support-bandit-calculate.zip",
+          "S3Key": "deploy/TEST/support-bandit/support-bandit.zip",
         },
         "Environment": {
           "Variables": {
@@ -202,7 +202,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "support-bandit-calculate-TEST",
-        "Handler": "",
+        "Handler": "calculate-lambda/calculate-lambda.run",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -339,7 +339,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/deploy/TEST/support-bandit/support-bandit-calculate.zip",
+                      "/deploy/TEST/support-bandit/support-bandit.zip",
                     ],
                   ],
                 },
@@ -410,7 +410,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "deploy/TEST/support-bandit/support-bandit-get-bandit-tests.zip",
+          "S3Key": "deploy/TEST/support-bandit/support-bandit.zip",
         },
         "Environment": {
           "Variables": {
@@ -420,7 +420,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "support-bandit-get-bandit-tests-TEST",
-        "Handler": "",
+        "Handler": "get-bandit-tests/get-bandit-tests.run",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -547,7 +547,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/deploy/TEST/support-bandit/support-bandit-get-bandit-tests.zip",
+                      "/deploy/TEST/support-bandit/support-bandit.zip",
                     ],
                   ],
                 },
@@ -618,7 +618,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "deploy/TEST/support-bandit/support-bandit-query.zip",
+          "S3Key": "deploy/TEST/support-bandit/support-bandit.zip",
         },
         "Environment": {
           "Variables": {
@@ -628,7 +628,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "support-bandit-query-TEST",
-        "Handler": "",
+        "Handler": "query-lambda/query-lambda.run",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -755,7 +755,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/deploy/TEST/support-bandit/support-bandit-query.zip",
+                      "/deploy/TEST/support-bandit/support-bandit.zip",
                     ],
                   ],
                 },

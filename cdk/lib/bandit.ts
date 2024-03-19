@@ -25,8 +25,8 @@ export class Bandit extends GuStack {
 				app: appName,
 				functionName: `${appName}-get-bandit-tests-${this.stage}`,
 				runtime: Runtime.NODEJS_20_X,
-				handler: '',
-				fileName: `${appName}-get-bandit-tests.zip`,
+				handler: 'get-bandit-tests/get-bandit-tests.run',
+				fileName: `${appName}.zip`,
 			},
 		);
 
@@ -42,8 +42,8 @@ export class Bandit extends GuStack {
 			app: appName,
 			functionName: `${appName}-query-${this.stage}`,
 			runtime: Runtime.NODEJS_20_X,
-			handler: '',
-			fileName: `${appName}-query.zip`,
+			handler: 'query-lambda/query-lambda.run',
+			fileName: `${appName}.zip`,
 		});
 
 		const queryTask = new LambdaInvoke(this, 'query-task', {
@@ -70,8 +70,8 @@ export class Bandit extends GuStack {
 			app: appName,
 			functionName: `${appName}-calculate-${this.stage}`,
 			runtime: Runtime.NODEJS_20_X,
-			handler: '',
-			fileName: `${appName}-calculate.zip`,
+			handler: 'calculate-lambda/calculate-lambda.run',
+			fileName: `${appName}.zip`,
 			initialPolicy: [
 				new PolicyStatement({
 					actions: ['dynamodb:BatchWriteItem'],
