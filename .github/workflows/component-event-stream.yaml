@@ -23,6 +23,7 @@ jobs:
 
       - name: Checkout repo
         uses: actions/checkout@v4
+      # testing
 
       - name: Configure AWS credentials # needed by actions-riff-raff
         uses: aws-actions/configure-aws-credentials@v4
