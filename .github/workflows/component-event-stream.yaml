@@ -23,7 +23,6 @@ jobs:
 
       - name: Checkout repo
         uses: actions/checkout@v4
-      # testing
 
       - name: Configure AWS credentials # needed by actions-riff-raff
         uses: aws-actions/configure-aws-credentials@v4
@@ -31,9 +30,35 @@ jobs:
           role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           aws-region: eu-west-1
 
-      - name: Run the script
-        run: component-event-stream/scripts/riff_raff_upload.sh
-        env:
-          BUILD_NUMBER: ${{ github.run_number }}
+#      - name: Run the script
+#        run: component-event-stream/scripts/riff_raff_upload.sh
+#        env:
+#          BUILD_NUMBER: ${{ github.run_number }}
 
+      - name: Upload to riff-raff
+        uses: guardian/actions-riff-raff@v4
+        with:
+          app: component-event-stream
+          config: |
+            stacks:
+              - support
+            regions:
+              - eu-west-1
+            allowedStages:
+              - CODE
+              - PROD
+            deployments:
+              component-event-stream-cloudformation:
+                type: cloud-formation
+                app: component-event-stream
+                parameters:
+                  cloudFormationStackName: component-event-stream
+                  templateStagePaths:
+                    CODE: cfn.yaml
+                    PROD: cfn.yaml
+                  cloudFormationStackByTags: false
+                  prependStackToCloudFormationStackName: false
 
+          contentDirectories: |
+            component-event-stream-cloudformation:
+              - component-event-stream/cfn.yaml
