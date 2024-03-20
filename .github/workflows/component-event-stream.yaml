@@ -35,11 +35,36 @@ jobs:
 #        env:
 #          BUILD_NUMBER: ${{ github.run_number }}
 
-      - uses: guardian/actions-riff-raff@v2
+#      - uses: guardian/actions-riff-raff@v2
+#        with:
+#          projectName: support::component-event-stream
+#          configPath: ./component-event-stream/riff-raff.yaml
+#          buildNumberOffset: 300
+#          contentDirectories: |
+#            super-mode-calculator-cloudformation:
+#              - ./super-mode-calculator/cfn.yaml
+
+      - uses: guardian/actions-riff-raff@v4
         with:
-          projectName: support::component-event-stream
+          app: component-event-stream
           configPath: ./component-event-stream/riff-raff.yaml
           buildNumberOffset: 300
+          roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          config: |
+            stacks:
+              - support
+            regions:
+              - eu-west-1
+            allowedStages:
+              - CODE
+              - PROD
+            deployments:
+              component-event-stream-cloudformation:
+                type: cloud-formation
+                templateStagePaths:
+                  CODE: cfn.yaml
+                  PROD: cfn.yaml
           contentDirectories: |
             super-mode-calculator-cloudformation:
               - ./super-mode-calculator/cfn.yaml
