@@ -53,7 +53,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           config: |
             stacks:
-              - Support
+              - support
             regions:
               - eu-west-1
             allowedStages:
