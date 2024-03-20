@@ -17,10 +17,12 @@ jobs:
 
     name:
       support bandit build
-      # Required by actions-assume-aws-role
+      # These permissions are required by guardian/actions-riff-raff
     permissions:
       id-token: write
       contents: read
+      pull-requests: write
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
