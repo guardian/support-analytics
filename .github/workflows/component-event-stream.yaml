@@ -13,6 +13,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      pull-requests: write
 
     name: Upload component-event-stream
     runs-on: ubuntu-latest
