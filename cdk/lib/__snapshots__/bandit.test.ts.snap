@@ -128,60 +128,6 @@ exports[`The Bandit stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "banditstableFE34CD9A": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AttributeDefinitions": [
-          {
-            "AttributeName": "testNameWithAlgorithm",
-            "AttributeType": "S",
-          },
-          {
-            "AttributeName": "timestamp",
-            "AttributeType": "S",
-          },
-        ],
-        "BillingMode": "PAY_PER_REQUEST",
-        "KeySchema": [
-          {
-            "AttributeName": "testNameWithAlgorithm",
-            "KeyType": "HASH",
-          },
-          {
-            "AttributeName": "timestamp",
-            "KeyType": "RANGE",
-          },
-        ],
-        "PointInTimeRecoverySpecification": {
-          "PointInTimeRecoveryEnabled": false,
-        },
-        "TableName": "support-bandit-TEST",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-analytics",
-          },
-          {
-            "Key": "Stack",
-            "Value": "deploy",
-          },
-          {
-            "Key": "Stage",
-            "Value": "TEST",
-          },
-        ],
-        "TimeToLiveSpecification": {
-          "AttributeName": "ttlInSeconds",
-          "Enabled": true,
-        },
-      },
-      "Type": "AWS::DynamoDB::Table",
-      "UpdateReplacePolicy": "Retain",
-    },
     "calculatelambda56A947D3": {
       "DependsOn": [
         "calculatelambdaServiceRoleDefaultPolicy3A5C4AF2",
@@ -294,16 +240,6 @@ exports[`The Bandit stack matches the snapshot 1`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": "dynamodb:BatchWriteItem",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "banditstableFE34CD9A",
-                  "Arn",
-                ],
-              },
-            },
             {
               "Action": [
                 "s3:GetObject*",
