@@ -83,11 +83,12 @@ jobs:
               support-bandit:
                 type: aws-lambda
                 parameters:
+                  prefixStack: false
                   fileName: support-bandit.zip
                   functionNames:
-                    - bandit-get-bandit-tests-
-                    - bandit-query-
-                    - bandit-calculate-
+                    - support-bandit-get-bandit-tests-
+                    - support-bandit-query-
+                    - support-bandit-calculate-
 
           contentDirectories: |
             support-bandit:
