@@ -7,7 +7,7 @@ on:
     branches:
       - main
 jobs:
-  super_mode_calculator_build:
+  component_event_stream_build:
     if: github.repository_owner == 'guardian'
     # Required by actions-riff-raff
     permissions:
@@ -35,30 +35,11 @@ jobs:
 #        env:
 #          BUILD_NUMBER: ${{ github.run_number }}
 
-      - name: Upload to riff-raff
-        uses: guardian/actions-riff-raff@v4
+      - uses: guardian/actions-riff-raff@v2
         with:
-          app: component-event-stream
-          config: |
-            stacks:
-              - support
-            regions:
-              - eu-west-1
-            allowedStages:
-              - CODE
-              - PROD
-            deployments:
-              component-event-stream-cloudformation:
-                type: cloud-formation
-                app: component-event-stream
-                parameters:
-                  cloudFormationStackName: component-event-stream
-                  templateStagePaths:
-                    CODE: cfn.yaml
-                    PROD: cfn.yaml
-                  cloudFormationStackByTags: false
-                  prependStackToCloudFormationStackName: false
-
+          projectName: support::component-event-stream
+          configPath: ./component-event-stream/riff-raff.yaml
+          buildNumberOffset: 300
           contentDirectories: |
-            component-event-stream-cloudformation:
-              - component-event-stream/cfn.yaml
+            super-mode-calculator-cloudformation:
+              - ./super-mode-calculator/cfn.yaml
