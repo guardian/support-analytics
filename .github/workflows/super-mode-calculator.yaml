@@ -58,9 +58,8 @@ jobs:
 
       - uses: guardian/actions-riff-raff@v2
         with:
-          projectName: Support::super-mode-calculator
+          projectName: support::super-mode-calculator
           configPath: ./super-mode-calculator/riff-raff.yaml
-          buildNumberOffset: 250
           contentDirectories: |
             super-mode-calculator:
               - ./super-mode-calculator/target/super-mode-calculator.zip
