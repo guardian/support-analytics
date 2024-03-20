@@ -52,16 +52,12 @@ jobs:
           yarn test
           yarn synth
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
-          aws-region: eu-west-1
-
       - name: bandit riff-raff
         uses: guardian/actions-riff-raff@v4
         with:
           app: bandit
+          roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
           config: |
             stacks:
               - support
