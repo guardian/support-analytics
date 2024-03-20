@@ -61,7 +61,7 @@ jobs:
       - name: bandit riff-raff
         uses: guardian/actions-riff-raff@v4
         with:
-          app: support-bandit
+          app: bandit
           config: |
             stacks:
               - support
@@ -73,9 +73,9 @@ jobs:
             deployments:
               support-bandit-cloudformation:
                 type: cloud-formation
-                app: support-bandit
+                app: bandit
                 parameters:
-                  cloudFormationStackName: support-bandit
+                  cloudFormationStackName: bandit
                   templateStagePaths:
                     CODE: SupportBandit-CODE.template.json
                     PROD: SupportBandit-PROD.template.json
