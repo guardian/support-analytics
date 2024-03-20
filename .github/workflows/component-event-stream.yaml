@@ -53,7 +53,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           config: |
             stacks:
-              - support
+              - Support
             regions:
               - eu-west-1
             allowedStages:
@@ -66,5 +66,5 @@ jobs:
                   CODE: cfn.yaml
                   PROD: cfn.yaml
           contentDirectories: |
-            super-mode-calculator-cloudformation:
-              - ./super-mode-calculator/cfn.yaml
+            component-event-stream-cloudformation:
+              - ./component-event-stream/cfn.yaml
