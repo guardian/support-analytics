@@ -1,7 +1,9 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
-import { type App } from 'aws-cdk-lib';
+import { type App, RemovalPolicy } from 'aws-cdk-lib';
+import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
 	DefinitionBody,
@@ -48,21 +50,21 @@ export class Bandit extends GuStack {
 			lambdaFunction: queryLambda,
 		});
 
-		// const banditsTable = new Table(this, 'bandits-table', {
-		// 	tableName: `support-bandit-${this.stage}`,
-		// 	removalPolicy: RemovalPolicy.RETAIN,
-		// 	billingMode: BillingMode.PAY_PER_REQUEST,
-		// 	partitionKey: {
-		// 		name: 'testNameWithAlgorithm',
-		// 		type: AttributeType.STRING,
-		// 	},
-		// 	sortKey: {
-		// 		name: 'timestamp',
-		// 		type: AttributeType.STRING,
-		// 	},
-		// 	pointInTimeRecovery: this.stage === 'PROD',
-		// 	timeToLiveAttribute: 'ttlInSeconds',
-		// });
+		const banditsTable = new Table(this, 'bandits-table', {
+			tableName: `support-bandit-${this.stage}`,
+			removalPolicy: RemovalPolicy.RETAIN,
+			billingMode: BillingMode.PAY_PER_REQUEST,
+			partitionKey: {
+				name: 'testNameWithAlgorithm',
+				type: AttributeType.STRING,
+			},
+			sortKey: {
+				name: 'timestamp',
+				type: AttributeType.STRING,
+			},
+			pointInTimeRecovery: this.stage === 'PROD',
+			timeToLiveAttribute: 'ttlInSeconds',
+		});
 
 		const calculateLambda = new GuLambdaFunction(this, 'calculate-lambda', {
 			app: appName,
@@ -70,12 +72,12 @@ export class Bandit extends GuStack {
 			runtime: Runtime.NODEJS_20_X,
 			handler: 'calculate-lambda/calculate-lambda.run',
 			fileName: `${appName}.zip`,
-			// initialPolicy: [
-			// 	new PolicyStatement({
-			// 		actions: ['dynamodb:BatchWriteItem'],
-			// 		resources: [banditsTable.tableArn],
-			// 	}),
-			// ],
+			initialPolicy: [
+				new PolicyStatement({
+					actions: ['dynamodb:BatchWriteItem'],
+					resources: [banditsTable.tableArn],
+				}),
+			],
 		});
 
 		const calculateTask = new LambdaInvoke(this, 'calculate-task', {
