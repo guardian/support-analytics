@@ -73,8 +73,8 @@ jobs:
                 parameters:
                   cloudFormationStackName: bandit
                   templateStagePaths:
-                    CODE: SupportBandit-CODE.template.json
-                    PROD: SupportBandit-PROD.template.json
+                    CODE: Bandit-CODE.template.json
+                    PROD: Bandit-PROD.template.json
                   cloudFormationStackByTags: false
                   prependStackToCloudFormationStackName: false
                 
@@ -92,5 +92,5 @@ jobs:
             support-bandit:
               - bandit/target/support-bandit.zip
             support-bandit-cloudformation:
-              - cdk/cdk.out/SupportBandit-CODE.template.json
-              - cdk/cdk.out/SupportBandit-PROD.template.json
+              - cdk/cdk.out/Bandit-CODE.template.json
+              - cdk/cdk.out/Bandit-PROD.template.json
