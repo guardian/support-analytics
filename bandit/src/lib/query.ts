@@ -1,10 +1,10 @@
-import {
+import type * as AWS from 'aws-sdk';
+import type {
 	GetQueryExecutionOutput, GetQueryResultsOutput,
 	QueryExecutionId, QueryExecutionState,
 	StartQueryExecutionInput,
 } from "aws-sdk/clients/athena";
-import * as AWS from 'aws-sdk';
-import {QueryExecutionNotFoundError, QueryPendingError, QueryFailedError} from "./errors";
+import {QueryExecutionNotFoundError, QueryFailedError, QueryPendingError} from "./errors";
 
 export class Query {
 	query: string;
@@ -62,9 +62,9 @@ export function checkExecutionState(
 	state: QueryExecutionState,
 ): Promise<QueryExecutionState> {
 	if (state === 'QUEUED' || state === 'RUNNING')
-		return Promise.reject(new QueryPendingError());
+		{return Promise.reject(new QueryPendingError());}
 	else if (state === 'FAILED' || state === 'CANCELLED')
-		return Promise.reject(new QueryFailedError());
+		{return Promise.reject(new QueryFailedError());}
 	else return Promise.resolve(state);
 }
 

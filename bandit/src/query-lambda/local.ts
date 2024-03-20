@@ -1,7 +1,7 @@
-import {run as runQuery} from "./query-lambda";
-import {run as runCalculate} from "../calculate-lambda/calculate-lambda";
 import * as fs from 'fs';
 import * as dateFns from 'date-fns';
+import {run as runCalculate} from "../calculate-lambda/calculate-lambda";
+import {run as runQuery} from "./query-lambda";
 
 const tests = [
 	{

@@ -1,5 +1,5 @@
-import {Query} from "../lib/query";
 import { format } from "date-fns";
+import {Query} from "../lib/query";
 
 export interface Test {
 	name: string;
@@ -46,5 +46,5 @@ const buildQuery = (test: Test, date: Date, stage: 'CODE' | 'PROD'): Query => {
 	return new Query(query, `query_${test.name}_${date.toISOString()}`);
 };
 
-export const getQueries = (tests: Test[], dateHourString: Date, stage: 'CODE' | 'PROD'): [Test,Query][] =>
+export const getQueries = (tests: Test[], dateHourString: Date, stage: 'CODE' | 'PROD'): Array<[Test,Query]> =>
 	tests.map(test => [test, buildQuery(test, dateHourString, stage)]);

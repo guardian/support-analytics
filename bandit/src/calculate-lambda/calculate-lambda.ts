@@ -1,7 +1,8 @@
-import {QueryExecution} from "../lib/models";
-import {getCheckedExecutionResult} from "../lib/query";
 import * as AWS from "aws-sdk";
-import {parseResult, QueryRow} from "./parse";
+import type {QueryExecution} from "../lib/models";
+import {getCheckedExecutionResult} from "../lib/query";
+import type { QueryRow} from "./parse";
+import {parseResult} from "./parse";
 
 const athena = new AWS.Athena({region: 'eu-west-1'});
 

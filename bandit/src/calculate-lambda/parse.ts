@@ -1,6 +1,6 @@
-import {GetQueryResultsOutput} from "aws-sdk/clients/athena";
-import {QueryReturnedInvalidDataError} from "../lib/errors";
+import type {GetQueryResultsOutput} from "aws-sdk/clients/athena";
 import { z } from 'zod';
+import {QueryReturnedInvalidDataError} from "../lib/errors";
 
 const queryRowSchema = z.object({
 	testName: z.string(),
@@ -33,7 +33,7 @@ export function parseResult(result: GetQueryResultsOutput): QueryRow[] {
 
 	const parse = queryRowsSchema.safeParse(data);
 
-	if (parse.success === false) {
+	if (!parse.success) {
 		console.log(parse.error);
 		throw new QueryReturnedInvalidDataError();
 	}
