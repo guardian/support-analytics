@@ -78,7 +78,7 @@ jobs:
                     CODE: Bandit-CODE.template.json
                     PROD: Bandit-PROD.template.json
                   cloudFormationStackByTags: false
-                  prependStackToCloudFormationStackName: false
+                  prependStackToCloudFormationStackName: true
                 
               support-bandit:
                 type: aws-lambda
