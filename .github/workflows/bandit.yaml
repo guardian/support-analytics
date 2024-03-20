@@ -83,7 +83,6 @@ jobs:
               support-bandit:
                 type: aws-lambda
                 parameters:
-                  prefix-stack: false
                   fileName: support-bandit.zip
                   functionNames:
                     - support-bandit-get-bandit-tests-
