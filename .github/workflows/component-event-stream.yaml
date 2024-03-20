@@ -63,9 +63,10 @@ jobs:
             deployments:
               component-event-stream-cloudformation:
                 type: cloud-formation
-                templateStagePaths:
-                  CODE: cfn.yaml
-                  PROD: cfn.yaml
+                parameters:
+                  templateStagePaths:
+                    CODE: cfn.yaml
+                    PROD: cfn.yaml
           contentDirectories: |
             component-event-stream-cloudformation:
               - ./component-event-stream/cfn.yaml
