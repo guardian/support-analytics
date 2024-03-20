@@ -47,7 +47,7 @@ jobs:
       - uses: guardian/actions-riff-raff@v4
         with:
           app: component-event-stream
-          configPath: ./component-event-stream/riff-raff.yaml
+#          configPath: ./component-event-stream/riff-raff.yaml
           buildNumberOffset: 300
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
