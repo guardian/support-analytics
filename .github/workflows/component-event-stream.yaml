@@ -31,24 +31,9 @@ jobs:
           role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           aws-region: eu-west-1
 
-#      - name: Run the script
-#        run: component-event-stream/scripts/riff_raff_upload.sh
-#        env:
-#          BUILD_NUMBER: ${{ github.run_number }}
-
-#      - uses: guardian/actions-riff-raff@v2
-#        with:
-#          projectName: support::component-event-stream
-#          configPath: ./component-event-stream/riff-raff.yaml
-#          buildNumberOffset: 300
-#          contentDirectories: |
-#            super-mode-calculator-cloudformation:
-#              - ./super-mode-calculator/cfn.yaml
-
       - uses: guardian/actions-riff-raff@v4
         with:
           app: component-event-stream
-#          configPath: ./component-event-stream/riff-raff.yaml
           buildNumberOffset: 300
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
