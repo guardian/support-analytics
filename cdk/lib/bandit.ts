@@ -50,21 +50,21 @@ export class Bandit extends GuStack {
 			lambdaFunction: queryLambda,
 		});
 
-		const banditsTable = new Table(this, 'bandits-table', {
-			tableName: `support-bandit-${this.stage}`,
-			removalPolicy: RemovalPolicy.RETAIN,
-			billingMode: BillingMode.PAY_PER_REQUEST,
-			partitionKey: {
-				name: 'testNameWithAlgorithm',
-				type: AttributeType.STRING,
-			},
-			sortKey: {
-				name: 'timestamp',
-				type: AttributeType.STRING,
-			},
-			pointInTimeRecovery: this.stage === 'PROD',
-			timeToLiveAttribute: 'ttlInSeconds',
-		});
+		// const banditsTable = new Table(this, 'bandits-table', {
+		// 	tableName: `support-bandit-${this.stage}`,
+		// 	removalPolicy: RemovalPolicy.RETAIN,
+		// 	billingMode: BillingMode.PAY_PER_REQUEST,
+		// 	partitionKey: {
+		// 		name: 'testNameWithAlgorithm',
+		// 		type: AttributeType.STRING,
+		// 	},
+		// 	sortKey: {
+		// 		name: 'timestamp',
+		// 		type: AttributeType.STRING,
+		// 	},
+		// 	pointInTimeRecovery: this.stage === 'PROD',
+		// 	timeToLiveAttribute: 'ttlInSeconds',
+		// });
 
 		const calculateLambda = new GuLambdaFunction(this, 'calculate-lambda', {
 			app: appName,
@@ -72,12 +72,12 @@ export class Bandit extends GuStack {
 			runtime: Runtime.NODEJS_20_X,
 			handler: 'calculate-lambda/calculate-lambda.run',
 			fileName: `${appName}.zip`,
-			initialPolicy: [
-				new PolicyStatement({
-					actions: ['dynamodb:BatchWriteItem'],
-					resources: [banditsTable.tableArn],
-				}),
-			],
+			// initialPolicy: [
+			// 	new PolicyStatement({
+			// 		actions: ['dynamodb:BatchWriteItem'],
+			// 		resources: [banditsTable.tableArn],
+			// 	}),
+			// ],
 		});
 
 		const calculateTask = new LambdaInvoke(this, 'calculate-task', {
