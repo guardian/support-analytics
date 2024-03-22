@@ -1,15 +1,10 @@
 import { format } from "date-fns";
-import {Query} from "../lib/query";
-
-export interface Test {
-	name: string;
-	launchDate: string;
-	endDate: string;
-}
+import type { Test } from "../lib/models";
+import { Query } from "../lib/query";
 
 // TODO - rewrite query to use real data to get sum of views and sum of AV GBP
-const buildQuery = (test: Test, date: Date, stage: 'CODE' | 'PROD'): Query => {
-	const timestamp = date.toISOString().replace('T', ' ');
+const buildQuery = (test: Test, date: Date, stage: "CODE" | "PROD"): Query => {
+	const timestamp = date.toISOString().replace("T", " ");
 	const query = `
 		WITH views AS (
 			SELECT
@@ -46,5 +41,9 @@ const buildQuery = (test: Test, date: Date, stage: 'CODE' | 'PROD'): Query => {
 	return new Query(query, `query_${test.name}_${date.toISOString()}`);
 };
 
-export const getQueries = (tests: Test[], dateHourString: Date, stage: 'CODE' | 'PROD'): Array<[Test,Query]> =>
-	tests.map(test => [test, buildQuery(test, dateHourString, stage)]);
+export const getQueries = (
+	tests: Test[],
+	dateHourString: Date,
+	stage: "CODE" | "PROD"
+): Array<[Test, Query]> =>
+	tests.map((test) => [test, buildQuery(test, dateHourString, stage)]);

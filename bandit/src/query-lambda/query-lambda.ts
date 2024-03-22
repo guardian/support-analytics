@@ -1,7 +1,6 @@
 import * as AWS from "aws-sdk";
-import type { QueryExecution } from "../lib/models";
+import type { QueryExecution, Test } from "../lib/models";
 import { executeQuery } from "../lib/query";
-import type { Test } from "./queries";
 import { getQueries } from "./queries";
 
 const athena = new AWS.Athena({ region: "eu-west-1" });
