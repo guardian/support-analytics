@@ -6,7 +6,7 @@
 	"scripts": {
 		"lint": "eslint 'src/**/*.ts'",
 		"build": "tsc",
-		"local": "Stage=CODE ts-node ./src/query-lambda/local.ts",
+		"local": "Stage=CODE AWS_PROFILE=membership ts-node ./src/query-lambda/local.ts",
 		"gbt-local": "Stage=CODE AWS_PROFILE=membership ts-node ./src/get-bandit-tests/local.ts"
 	},
 	"dependencies": {

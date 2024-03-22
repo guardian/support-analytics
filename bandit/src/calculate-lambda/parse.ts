@@ -1,37 +1,37 @@
-import type {GetQueryResultsOutput} from "aws-sdk/clients/athena";
-import { z } from 'zod';
-import {QueryReturnedInvalidDataError} from "../lib/errors";
+import type { GetQueryResultsOutput } from "aws-sdk/clients/athena";
+import { z } from "zod";
+import { QueryReturnedInvalidDataError } from "../lib/errors";
 
-const queryRowSchema = z.object({
+const variantQueryRowSchema = z.object({
 	testName: z.string(),
 	variantName: z.string(),
 	views: z.number(),
-	avGbp: z.number(),
+	avGbpPerView: z.number(),
 	acquisitions: z.number(),
 });
 
-export type QueryRow = z.infer<typeof queryRowSchema>;
+export type VariantQueryRow = z.infer<typeof variantQueryRowSchema>;
 
-const queryRowsSchema = z.array(queryRowSchema);
+const variantQueryRowsSchema = z.array(variantQueryRowSchema);
 
-export function parseResult(result: GetQueryResultsOutput): QueryRow[] {
+export function parseResult(result: GetQueryResultsOutput): VariantQueryRow[] {
 	const rows = (result.ResultSet?.Rows ?? []).slice(1);
 	const data = rows.map(({ Data: data }) => {
 		if (!data) {
 			return;
 		}
-		console.log({data})
+		console.log({ data });
 
 		return {
 			testName: data[0].VarCharValue,
 			variantName: data[1].VarCharValue,
-			views: parseInt(data[2].VarCharValue ?? ''),
-			avGbp: parseFloat(data[3].VarCharValue ?? ''),
-			acquisitions: parseInt(data[4].VarCharValue ?? ''),
+			views: parseInt(data[2].VarCharValue ?? ""),
+			avGbpPerView: parseFloat(data[3].VarCharValue ?? ""),
+			acquisitions: parseInt(data[4].VarCharValue ?? ""),
 		};
 	});
 
-	const parse = queryRowsSchema.safeParse(data);
+	const parse = variantQueryRowsSchema.safeParse(data);
 
 	if (!parse.success) {
 		console.log(parse.error);

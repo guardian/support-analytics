@@ -1,19 +1,25 @@
 import * as AWS from "aws-sdk";
-import type {QueryExecution} from "../lib/models";
-import {getCheckedExecutionResult} from "../lib/query";
-import type { QueryRow} from "./parse";
-import {parseResult} from "./parse";
+import type { QueryExecution } from "../lib/models";
+import { getCheckedExecutionResult } from "../lib/query";
+import { buildWriteRequest, writeBatch } from "./dynamo";
+import { parseResult } from "./parse";
 
-const athena = new AWS.Athena({region: 'eu-west-1'});
+const athena = new AWS.Athena({ region: "eu-west-1" });
 
-const stage = process.env.Stage;
+const stage = process.env.Stage ?? "PROD";
+const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
 
-export async function run(events: QueryExecution[]): Promise<QueryRow[]> {
-	const executionId = events[0].executionId;
-	const result = await getCheckedExecutionResult(executionId, athena);
-	const rows = parseResult(result);
+export async function run(events: QueryExecution[]): Promise<void> {
+	const batches = await Promise.all(
+		events.map(async (event) => {
+			const executionId = event.executionId;
+			const result = await getCheckedExecutionResult(executionId, athena);
+			const rows = parseResult(result);
+			return buildWriteRequest(rows, event.testName);
+		})
+	);
 
-	// TODO - calculate AV/view and write to Dynamodb
+	await writeBatch(batches, stage, docClient);
 
-	return rows;
+	return;
 }
