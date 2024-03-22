@@ -1,5 +1,3 @@
-import * as fs from "fs";
-import * as dateFns from "date-fns";
 import { run as runCalculate } from "../calculate-lambda/calculate-lambda";
 import { run as runQuery } from "./query-lambda";
 
@@ -7,7 +5,6 @@ const tests = [
 	{
 		name: "2024-03-05_EPIC_PRIMARY__US",
 		launchDate: "2024-03-15",
-		endDate: "2024-02-29",
 	},
 ];
 
@@ -43,7 +40,7 @@ const wait = () =>
 // 	console.log(err);
 // });
 
-runQuery(tests, new Date("2024-03-20 10:00:00"))
+runQuery(tests)
 	.then(async (result) => {
 		await wait();
 		return result;
