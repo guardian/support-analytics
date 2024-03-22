@@ -35,9 +35,6 @@ export class Bandit extends GuStack {
 						],
 					}),
 				],
-				environment: {
-					Stage: this.stage,
-				},
 			},
 		);
 
@@ -55,9 +52,6 @@ export class Bandit extends GuStack {
 			runtime: Runtime.NODEJS_20_X,
 			handler: 'query-lambda/query-lambda.run',
 			fileName: `${appName}.zip`,
-			environment: {
-				Stage: this.stage,
-			},
 		});
 
 		const queryTask = new LambdaInvoke(this, 'query-task', {
@@ -92,9 +86,6 @@ export class Bandit extends GuStack {
 					resources: [banditsTable.tableArn],
 				}),
 			],
-			environment: {
-				Stage: this.stage,
-			},
 		});
 
 		const calculateTask = new LambdaInvoke(this, 'calculate-task', {
