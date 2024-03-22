@@ -77,6 +77,12 @@ export class Bandit extends GuStack {
 					actions: ['dynamodb:BatchWriteItem'],
 					resources: [banditsTable.tableArn],
 				}),
+				new PolicyStatement({
+					actions: ['dynamodb:Query'],
+					resources: [
+						`arn:aws:dynamodb:eu-west-1:${this.account}:table/support-admin-console-channel-tests-${this.stage}`,
+					],
+				}),
 			],
 		});
 
