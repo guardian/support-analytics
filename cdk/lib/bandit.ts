@@ -27,6 +27,14 @@ export class Bandit extends GuStack {
 				runtime: Runtime.NODEJS_20_X,
 				handler: 'get-bandit-tests/get-bandit-tests.run',
 				fileName: `${appName}.zip`,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['dynamodb:Query'],
+						resources: [
+							`arn:aws:dynamodb:eu-west-1:${this.account}:table/support-admin-console-channel-tests-${this.stage}`,
+						],
+					}),
+				],
 			},
 		);
 
@@ -76,12 +84,6 @@ export class Bandit extends GuStack {
 				new PolicyStatement({
 					actions: ['dynamodb:BatchWriteItem'],
 					resources: [banditsTable.tableArn],
-				}),
-				new PolicyStatement({
-					actions: ['dynamodb:Query'],
-					resources: [
-						`arn:aws:dynamodb:eu-west-1:${this.account}:table/support-admin-console-channel-tests-${this.stage}`,
-					],
 				}),
 			],
 		});
