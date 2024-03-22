@@ -3,7 +3,8 @@ import type { Test } from "../lib/models";
 import { Query } from "../lib/query";
 
 // TODO - rewrite query to use real data to get sum of views and sum of AV GBP
-const buildQuery = (test: Test, date: Date, stage: "CODE" | "PROD"): Query => {
+const buildQuery = (test: Test, stage: "CODE" | "PROD"): Query => {
+	const date = new Date(test.launchDate);
 	const timestamp = date.toISOString().replace("T", " ");
 	const query = `
 		WITH views AS (
@@ -43,7 +44,6 @@ const buildQuery = (test: Test, date: Date, stage: "CODE" | "PROD"): Query => {
 
 export const getQueries = (
 	tests: Test[],
-	dateHourString: Date,
 	stage: "CODE" | "PROD"
 ): Array<[Test, Query]> =>
-	tests.map((test) => [test, buildQuery(test, dateHourString, stage)]);
+	tests.map((test) => [test, buildQuery(test, stage)]);
