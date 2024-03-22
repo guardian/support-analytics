@@ -9,12 +9,12 @@ const stage = process.env.STAGE;
 const athenaOutputBucket = process.env.AthenaOutputBucket ?? "";
 const schemaName = "acquisition";
 
-export async function run(
-	tests: Test[],
-): Promise<QueryExecution[]> {
+export async function run(tests: Test[]): Promise<QueryExecution[]> {
 	if (stage !== "CODE" && stage !== "PROD") {
 		return Promise.reject(`Invalid stage: ${stage ?? ""}`);
 	}
+
+	console.log("tests: ", tests);
 
 	const queries = getQueries(tests, stage);
 
