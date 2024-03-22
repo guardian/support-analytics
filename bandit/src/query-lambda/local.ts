@@ -1,19 +1,20 @@
-import * as fs from 'fs';
-import * as dateFns from 'date-fns';
-import {run as runCalculate} from "../calculate-lambda/calculate-lambda";
-import {run as runQuery} from "./query-lambda";
+import * as fs from "fs";
+import * as dateFns from "date-fns";
+import { run as runCalculate } from "../calculate-lambda/calculate-lambda";
+import { run as runQuery } from "./query-lambda";
 
 const tests = [
 	{
-		name: '2024-03-05_EPIC_PRIMARY__US',
-		launchDate: '2024-03-15',
-		endDate: '2024-02-29'
-	}
-]
+		name: "2024-03-05_EPIC_PRIMARY__US",
+		launchDate: "2024-03-15",
+		endDate: "2024-02-29",
+	},
+];
 
-const wait = () => new Promise((resolve) => {
-	setTimeout(resolve, 5000);
-});
+const wait = () =>
+	new Promise((resolve) => {
+		setTimeout(resolve, 12000);
+	});
 
 // const meanStream = fs.createWriteStream('./means.csv', {flags: 'a'});
 
@@ -42,17 +43,17 @@ const wait = () => new Promise((resolve) => {
 // 	console.log(err);
 // });
 
-runQuery(tests, new Date('2024-03-15 10:00:00'))
-	.then(async result => {
+runQuery(tests, new Date("2024-03-20 10:00:00"))
+	.then(async (result) => {
 		await wait();
 		return result;
 	})
-	.then(result => {
+	.then((result) => {
 		return runCalculate(result);
 	})
-	.then(result => {
+	.then((result) => {
 		console.log(result);
 	})
-	.catch(err => {
+	.catch((err) => {
 		console.error(err);
 	});
