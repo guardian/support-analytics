@@ -56,6 +56,7 @@ export class Bandit extends GuStack {
 
 		const queryTask = new LambdaInvoke(this, 'query-task', {
 			lambdaFunction: queryLambda,
+			inputPath: '$.Payload',
 		});
 
 		const banditsTable = new Table(this, 'bandits-table', {
@@ -90,6 +91,7 @@ export class Bandit extends GuStack {
 
 		const calculateTask = new LambdaInvoke(this, 'calculate-task', {
 			lambdaFunction: calculateLambda,
+			inputPath: '$.Payload',
 		});
 
 		new StateMachine(this, 'state-machine', {
