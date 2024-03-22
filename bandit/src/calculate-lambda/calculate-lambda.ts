@@ -6,7 +6,7 @@ import { parseResult } from "./parse";
 
 const athena = new AWS.Athena({ region: "eu-west-1" });
 
-const stage = process.env.Stage ?? "PROD";
+const stage = process.env.STAGE ?? "PROD";
 const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
 
 export async function run(events: QueryExecution[]): Promise<void> {
