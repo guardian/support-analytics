@@ -61,10 +61,17 @@ export class Bandit extends GuStack {
 					],
 				}),
 				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['athena:StartQueryExecution'],
-					resources: ['*'],
+					actions: ['s3:*'],
+					resources: [
+						`arn:aws:s3:::acquisition-events/*`,
+						`arn:aws:s3:::acquisition-events`,
+					],
 				}),
+				// new PolicyStatement({
+				// 	effect: Effect.ALLOW,
+				// 	actions: ['athena:StartQueryExecution'],
+				// 	resources: ['*'],
+				// }),
 			],
 			environment: {
 				AthenaOutputBucket: 'gu-support-analytics',

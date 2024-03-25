@@ -766,9 +766,12 @@ exports[`The Bandit stack matches the snapshot 1`] = `
               ],
             },
             {
-              "Action": "athena:StartQueryExecution",
+              "Action": "s3:*",
               "Effect": "Allow",
-              "Resource": "*",
+              "Resource": [
+                "arn:aws:s3:::acquisition-events/*",
+                "arn:aws:s3:::acquisition-events",
+              ],
             },
             {
               "Action": [
