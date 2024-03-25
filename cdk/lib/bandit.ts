@@ -52,6 +52,18 @@ export class Bandit extends GuStack {
 			runtime: Runtime.NODEJS_20_X,
 			handler: 'query-lambda/query-lambda.run',
 			fileName: `${appName}.zip`,
+			initialPolicy: [
+				new PolicyStatement({
+					actions: ['s3:*'],
+					resources: [
+						`arn:aws:s3:::gu-support-analytics/*`,
+						`arn:aws:s3:::gu-support-analytics`,
+					],
+				}),
+			],
+			environment: {
+				AthenaOutputBucket: 'gu-support-analytics',
+			},
 		});
 
 		const queryTask = new LambdaInvoke(this, 'query-task', {

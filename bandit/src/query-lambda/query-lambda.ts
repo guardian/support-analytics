@@ -14,8 +14,6 @@ export async function run(tests: Test[]): Promise<QueryExecution[]> {
 		return Promise.reject(`Invalid stage: ${stage ?? ""}`);
 	}
 
-	console.log("tests: ", tests);
-
 	const queries = getQueries(tests, stage);
 
 	const results: Array<Promise<QueryExecution>> = queries.map(
