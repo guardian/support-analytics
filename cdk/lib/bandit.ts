@@ -67,11 +67,6 @@ export class Bandit extends GuStack {
 						`arn:aws:s3:::acquisition-events`,
 					],
 				}),
-				// new PolicyStatement({
-				// 	effect: Effect.ALLOW,
-				// 	actions: ['athena:StartQueryExecution'],
-				// 	resources: ['*'],
-				// }),
 			],
 			environment: {
 				AthenaOutputBucket: 'gu-support-analytics',
@@ -113,6 +108,13 @@ export class Bandit extends GuStack {
 				new PolicyStatement({
 					actions: ['dynamodb:BatchWriteItem'],
 					resources: [banditsTable.tableArn],
+				}),
+				new PolicyStatement({
+					actions: ['s3:*'],
+					resources: [
+						`arn:aws:s3:::gu-support-analytics/*`,
+						`arn:aws:s3:::gu-support-analytics`,
+					],
 				}),
 				new PolicyStatement({
 					effect: Effect.ALLOW,
