@@ -715,6 +715,18 @@ exports[`The Bandit stack matches the snapshot 1`] = `
               ],
             ],
           },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonAthenaFullAccess",
+              ],
+            ],
+          },
         ],
         "Tags": [
           {

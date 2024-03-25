@@ -3,7 +3,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
-import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Effect, ManagedPolicy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
 	DefinitionBody,
@@ -70,6 +70,10 @@ export class Bandit extends GuStack {
 				AthenaOutputBucket: 'gu-support-analytics',
 			},
 		});
+
+		queryLambda.role?.addManagedPolicy(
+			ManagedPolicy.fromAwsManagedPolicyName('AmazonAthenaFullAccess'),
+		);
 
 		const queryTask = new LambdaInvoke(this, 'query-task', {
 			lambdaFunction: queryLambda,
