@@ -1,12 +1,5 @@
-import * as AWS from "aws-sdk";
-import { queryChannelTests } from "./dynamo";
+import { run } from "./get-bandit-tests";
 
-const STAGE: string = process.env.Stage ?? "PROD";
-
-const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
-
-queryChannelTests(STAGE, docClient)
-	.then((tests) => {
-		console.log(tests.Items);
-	})
+run()
+	.then((tests) => console.log(tests))
 	.catch((e) => console.log(e));

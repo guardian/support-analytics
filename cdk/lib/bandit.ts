@@ -3,7 +3,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
-import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Effect, ManagedPolicy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
 	DefinitionBody,
@@ -27,6 +27,14 @@ export class Bandit extends GuStack {
 				runtime: Runtime.NODEJS_20_X,
 				handler: 'get-bandit-tests/get-bandit-tests.run',
 				fileName: `${appName}.zip`,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['dynamodb:Query'],
+						resources: [
+							`arn:aws:dynamodb:eu-west-1:${this.account}:table/support-admin-console-channel-tests-${this.stage}`,
+						],
+					}),
+				],
 			},
 		);
 
@@ -44,10 +52,34 @@ export class Bandit extends GuStack {
 			runtime: Runtime.NODEJS_20_X,
 			handler: 'query-lambda/query-lambda.run',
 			fileName: `${appName}.zip`,
+			initialPolicy: [
+				new PolicyStatement({
+					actions: ['s3:*'],
+					resources: [
+						`arn:aws:s3:::gu-support-analytics/*`,
+						`arn:aws:s3:::gu-support-analytics`,
+					],
+				}),
+				new PolicyStatement({
+					actions: ['s3:*'],
+					resources: [
+						`arn:aws:s3:::acquisition-events/*`,
+						`arn:aws:s3:::acquisition-events`,
+					],
+				}),
+			],
+			environment: {
+				AthenaOutputBucket: 'gu-support-analytics',
+			},
 		});
+
+		queryLambda.role?.addManagedPolicy(
+			ManagedPolicy.fromAwsManagedPolicyName('AmazonAthenaFullAccess'),
+		);
 
 		const queryTask = new LambdaInvoke(this, 'query-task', {
 			lambdaFunction: queryLambda,
+			inputPath: '$.Payload',
 		});
 
 		const banditsTable = new Table(this, 'bandits-table', {
@@ -77,11 +109,27 @@ export class Bandit extends GuStack {
 					actions: ['dynamodb:BatchWriteItem'],
 					resources: [banditsTable.tableArn],
 				}),
+				new PolicyStatement({
+					actions: ['s3:*'],
+					resources: [
+						`arn:aws:s3:::gu-support-analytics/*`,
+						`arn:aws:s3:::gu-support-analytics`,
+					],
+				}),
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: [
+						'athena:GetQueryExecution',
+						'athena:GetQueryResults',
+					],
+					resources: ['*'],
+				}),
 			],
 		});
 
 		const calculateTask = new LambdaInvoke(this, 'calculate-task', {
 			lambdaFunction: calculateLambda,
+			inputPath: '$.Payload',
 		});
 
 		new StateMachine(this, 'state-machine', {

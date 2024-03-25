@@ -2,7 +2,7 @@ import * as AWS from "aws-sdk";
 import type { Test } from "../lib/models";
 import { queryChannelTests } from "./dynamo";
 
-const STAGE: string = process.env.Stage ?? "PROD";
+const STAGE: string = process.env.STAGE ?? "PROD";
 
 const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
 

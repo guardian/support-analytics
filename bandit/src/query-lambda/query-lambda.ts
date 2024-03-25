@@ -5,13 +5,11 @@ import { getQueries } from "./queries";
 
 const athena = new AWS.Athena({ region: "eu-west-1" });
 
-const stage = process.env.Stage;
+const stage = process.env.STAGE;
 const athenaOutputBucket = process.env.AthenaOutputBucket ?? "";
 const schemaName = "acquisition";
 
-export async function run(
-	tests: Test[],
-): Promise<QueryExecution[]> {
+export async function run(tests: Test[]): Promise<QueryExecution[]> {
 	if (stage !== "CODE" && stage !== "PROD") {
 		return Promise.reject(`Invalid stage: ${stage ?? ""}`);
 	}
