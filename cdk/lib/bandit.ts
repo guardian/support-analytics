@@ -3,7 +3,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
-import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
 	DefinitionBody,
@@ -60,6 +60,11 @@ export class Bandit extends GuStack {
 						`arn:aws:s3:::gu-support-analytics`,
 					],
 				}),
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['athena:StartQueryExecution'],
+					resources: ['*'],
+				}),
 			],
 			environment: {
 				AthenaOutputBucket: 'gu-support-analytics',
@@ -97,6 +102,14 @@ export class Bandit extends GuStack {
 				new PolicyStatement({
 					actions: ['dynamodb:BatchWriteItem'],
 					resources: [banditsTable.tableArn],
+				}),
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: [
+						'athena:GetQueryExecution',
+						'athena:GetQueryResults',
+					],
+					resources: ['*'],
 				}),
 			],
 		});

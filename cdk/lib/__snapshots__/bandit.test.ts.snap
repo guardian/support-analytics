@@ -306,6 +306,14 @@ exports[`The Bandit stack matches the snapshot 1`] = `
             },
             {
               "Action": [
+                "athena:GetQueryExecution",
+                "athena:GetQueryResults",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -744,6 +752,11 @@ exports[`The Bandit stack matches the snapshot 1`] = `
                 "arn:aws:s3:::gu-support-analytics/*",
                 "arn:aws:s3:::gu-support-analytics",
               ],
+            },
+            {
+              "Action": "athena:StartQueryExecution",
+              "Effect": "Allow",
+              "Resource": "*",
             },
             {
               "Action": [
