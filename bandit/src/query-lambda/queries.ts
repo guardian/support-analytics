@@ -3,10 +3,7 @@ import type { Test } from "../lib/models";
 import { Query } from "../lib/query";
 
 const buildQuery = (test: Test, stage: "CODE" | "PROD"): Query => {
-	const end = set(
-		new Date(),
-		{ minutes: 0, seconds: 0, milliseconds: 0 },
-	);
+	const end = set(new Date(), { minutes: 0, seconds: 0, milliseconds: 0 });
 	const start = subHours(end, 1);
 	const endTimestamp = end.toISOString().replace("T", " ");
 	const startTimestamp = start.toISOString().replace("T", " ");
@@ -18,8 +15,7 @@ const buildQuery = (test: Test, stage: "CODE" | "PROD"): Query => {
 				ab.variant variant_name,
 				COUNT(*) views
 			FROM acquisition.epic_views_prod, UNNEST(abtests) t(ab)
-			WHERE
-			AND date_hour >= timestamp'${startTimestamp}' AND date_hour < timestamp'${endTimestamp}'
+			WHERE date_hour >= timestamp'${startTimestamp}' AND date_hour < timestamp'${endTimestamp}'
 			AND ab.name = '${test.name}'
 			GROUP BY 1,2
 		),
