@@ -11,33 +11,36 @@ interface VariantModel {
 export interface BanditModel {
 	testName: string;
 	variants: VariantModel[];
+	// the start of the interval
 	timestamp: string;
 }
 
 export function buildWriteRequest(
 	rows: VariantQueryRow[],
-	testName: string
+	testName: string,
+	startTimestamp: string
 ): DocumentClient.WriteRequest {
 	return {
 		PutRequest: {
-			Item: buildDynamoRecord(rows, testName),
+			Item: buildDynamoRecord(rows, testName, startTimestamp),
 		},
 	};
 }
 
 function buildDynamoRecord(
 	rows: VariantQueryRow[],
-	testName: string
+	testName: string,
+	startTimestamp: string
 ): BanditModel {
-	const variants = rows.map((x) => ({
-		variantName: x.variantName,
-		avGbpPerView: x.avGbpPerView,
+	const variants = rows.map((row) => ({
+		variantName: row.variantName,
+		avGbpPerView: row.avGbpPerView,
 	}));
 
 	return {
 		testName,
 		variants,
-		timestamp: new Date().toISOString(),
+		timestamp: startTimestamp,
 	};
 }
 
