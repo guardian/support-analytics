@@ -87,7 +87,7 @@ export class Bandit extends GuStack {
 			removalPolicy: RemovalPolicy.RETAIN,
 			billingMode: BillingMode.PAY_PER_REQUEST,
 			partitionKey: {
-				name: 'testNameWithAlgorithm',
+				name: 'testName',
 				type: AttributeType.STRING,
 			},
 			sortKey: {
