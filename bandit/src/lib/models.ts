@@ -8,5 +8,5 @@ export interface Test {
 export interface QueryExecution {
 	executionId: QueryExecutionId;
 	testName: string;
-	start: Date;
+	startTimestamp: string;
 }

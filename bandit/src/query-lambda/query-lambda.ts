@@ -23,7 +23,11 @@ export async function run(tests: Test[]): Promise<QueryExecution[]> {
 	const results: Array<Promise<QueryExecution>> = queries.map(
 		([test, query]) =>
 			executeQuery(query, athenaOutputBucket, schemaName, athena).then(
-				(executionId) => ({ executionId, testName: test.name, start })
+				(executionId) => ({
+					executionId,
+					testName: test.name,
+					startTimestamp: start.toISOString(),
+				})
 			)
 	);
 

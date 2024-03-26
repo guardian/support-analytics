@@ -15,7 +15,11 @@ export async function run(events: QueryExecution[]): Promise<void> {
 			const executionId = event.executionId;
 			const result = await getCheckedExecutionResult(executionId, athena);
 			const rows = parseResult(result);
-			return buildWriteRequest(rows, event.testName, event.start);
+			return buildWriteRequest(
+				rows,
+				event.testName,
+				event.startTimestamp
+			);
 		})
 	);
 

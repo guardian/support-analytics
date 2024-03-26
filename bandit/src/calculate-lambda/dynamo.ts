@@ -18,11 +18,11 @@ export interface BanditModel {
 export function buildWriteRequest(
 	rows: VariantQueryRow[],
 	testName: string,
-	start: Date
+	startTimestamp: string
 ): DocumentClient.WriteRequest {
 	return {
 		PutRequest: {
-			Item: buildDynamoRecord(rows, testName, start),
+			Item: buildDynamoRecord(rows, testName, startTimestamp),
 		},
 	};
 }
@@ -30,7 +30,7 @@ export function buildWriteRequest(
 function buildDynamoRecord(
 	rows: VariantQueryRow[],
 	testName: string,
-	start: Date
+	startTimestamp: string
 ): BanditModel {
 	const variants = rows.map((row) => ({
 		variantName: row.variantName,
@@ -40,7 +40,7 @@ function buildDynamoRecord(
 	return {
 		testName,
 		variants,
-		timestamp: start.toISOString(),
+		timestamp: startTimestamp,
 	};
 }
 
