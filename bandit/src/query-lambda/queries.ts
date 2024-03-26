@@ -1,10 +1,13 @@
-import { format, set, subHours } from "date-fns";
+import { format } from "date-fns";
 import type { Test } from "../lib/models";
 import { Query } from "../lib/query";
 
-const buildQuery = (test: Test, stage: "CODE" | "PROD"): Query => {
-	const end = set(new Date(), { minutes: 0, seconds: 0, milliseconds: 0 });
-	const start = subHours(end, 1);
+const buildQuery = (
+	test: Test,
+	stage: "CODE" | "PROD",
+	start: Date,
+	end: Date
+): Query => {
 	const endTimestamp = end.toISOString().replace("T", " ");
 	const startTimestamp = start.toISOString().replace("T", " ");
 
@@ -46,5 +49,8 @@ const buildQuery = (test: Test, stage: "CODE" | "PROD"): Query => {
 
 export const getQueries = (
 	tests: Test[],
-	stage: "CODE" | "PROD"
-): Array<[Test, Query]> => tests.map((test) => [test, buildQuery(test, stage)]);
+	stage: "CODE" | "PROD",
+	start: Date,
+	end: Date
+): Array<[Test, Query]> =>
+	tests.map((test) => [test, buildQuery(test, stage, start, end)]);

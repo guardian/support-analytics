@@ -11,33 +11,35 @@ interface VariantModel {
 export interface BanditModel {
 	testName: string;
 	variants: VariantModel[];
-	timestamp: string;
+	startTimestamp: string;
 }
 
 export function buildWriteRequest(
 	rows: VariantQueryRow[],
-	testName: string
+	testName: string,
+	start: Date
 ): DocumentClient.WriteRequest {
 	return {
 		PutRequest: {
-			Item: buildDynamoRecord(rows, testName),
+			Item: buildDynamoRecord(rows, testName, start),
 		},
 	};
 }
 
 function buildDynamoRecord(
 	rows: VariantQueryRow[],
-	testName: string
+	testName: string,
+	start: Date
 ): BanditModel {
-	const variants = rows.map((x) => ({
-		variantName: x.variantName,
-		avGbpPerView: x.avGbpPerView,
+	const variants = rows.map((row) => ({
+		variantName: row.variantName,
+		avGbpPerView: row.avGbpPerView,
 	}));
 
 	return {
 		testName,
 		variants,
-		timestamp: new Date().toISOString(),
+		startTimestamp: start.toISOString(),
 	};
 }
 
