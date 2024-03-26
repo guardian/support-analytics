@@ -11,7 +11,6 @@ interface VariantModel {
 export interface BanditModel {
 	testName: string;
 	variants: VariantModel[];
-	testNameWithAlgorithm: string;
 	timestamp: string;
 }
 
@@ -38,7 +37,6 @@ function buildDynamoRecord(
 	return {
 		testName,
 		variants,
-		testNameWithAlgorithm: `${testName}-epsilon-greedy`,
 		timestamp: new Date().toISOString(),
 	};
 }

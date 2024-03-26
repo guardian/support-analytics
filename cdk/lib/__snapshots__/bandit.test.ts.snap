@@ -133,7 +133,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
       "Properties": {
         "AttributeDefinitions": [
           {
-            "AttributeName": "testNameWithAlgorithm",
+            "AttributeName": "testName",
             "AttributeType": "S",
           },
           {
@@ -144,7 +144,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
         "BillingMode": "PAY_PER_REQUEST",
         "KeySchema": [
           {
-            "AttributeName": "testNameWithAlgorithm",
+            "AttributeName": "testName",
             "KeyType": "HASH",
           },
           {
