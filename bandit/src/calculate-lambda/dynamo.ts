@@ -6,6 +6,7 @@ import type { VariantQueryRow } from "./parse";
 interface VariantModel {
 	variantName: string;
 	avGbpPerView: number;
+	views: number;
 }
 
 export interface BanditModel {
@@ -35,6 +36,7 @@ function buildDynamoRecord(
 	const variants = rows.map((row) => ({
 		variantName: row.variantName,
 		avGbpPerView: row.avGbpPerView,
+		views: row.views,
 	}));
 
 	return {
