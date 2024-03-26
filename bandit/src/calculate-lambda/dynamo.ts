@@ -11,7 +11,8 @@ interface VariantModel {
 export interface BanditModel {
 	testName: string;
 	variants: VariantModel[];
-	startTimestamp: string;
+	// the start of the interval
+	timestamp: string;
 }
 
 export function buildWriteRequest(
@@ -39,7 +40,7 @@ function buildDynamoRecord(
 	return {
 		testName,
 		variants,
-		startTimestamp: start.toISOString(),
+		timestamp: start.toISOString(),
 	};
 }
 
