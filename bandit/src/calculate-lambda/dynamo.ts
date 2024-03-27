@@ -3,14 +3,16 @@ import type { DocumentClient } from "aws-sdk/clients/dynamodb";
 import type { PromiseResult } from "aws-sdk/lib/request";
 import type { VariantQueryRow } from "./parse";
 
-interface VariantModel {
+interface VariantSample {
 	variantName: string;
+	avGbp: number;
 	avGbpPerView: number;
+	views: number;
 }
 
-export interface BanditModel {
+export interface TestSample {
 	testName: string;
-	variants: VariantModel[];
+	variants: VariantSample[];
 	// the start of the interval
 	timestamp: string;
 }
@@ -31,10 +33,12 @@ function buildDynamoRecord(
 	rows: VariantQueryRow[],
 	testName: string,
 	startTimestamp: string
-): BanditModel {
+): TestSample {
 	const variants = rows.map((row) => ({
 		variantName: row.variantName,
+		avGbp: row.avGbp,
 		avGbpPerView: row.avGbpPerView,
+		views: row.views,
 	}));
 
 	return {
