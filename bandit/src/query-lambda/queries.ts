@@ -38,6 +38,7 @@ const buildQuery = (
 		    test_name,
 			variant_name,
 			views,
+			av_gbp,
 			av_gbp / views,
 			acquisitions
 		FROM views

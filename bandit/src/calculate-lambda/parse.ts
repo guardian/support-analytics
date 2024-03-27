@@ -6,6 +6,7 @@ const variantQueryRowSchema = z.object({
 	testName: z.string(),
 	variantName: z.string(),
 	views: z.number(),
+	avGbp: z.number(),
 	avGbpPerView: z.number(),
 	acquisitions: z.number(),
 });
@@ -26,8 +27,9 @@ export function parseResult(result: GetQueryResultsOutput): VariantQueryRow[] {
 			testName: data[0].VarCharValue,
 			variantName: data[1].VarCharValue,
 			views: parseInt(data[2].VarCharValue ?? ""),
-			avGbpPerView: parseFloat(data[3].VarCharValue ?? ""),
-			acquisitions: parseInt(data[4].VarCharValue ?? ""),
+			avGbp: parseFloat(data[3].VarCharValue ?? ""),
+			avGbpPerView: parseFloat(data[4].VarCharValue ?? ""),
+			acquisitions: parseInt(data[5].VarCharValue ?? ""),
 		};
 	});
 
