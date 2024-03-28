@@ -7,7 +7,8 @@
 		"lint": "eslint 'src/**/*.ts'",
 		"build": "tsc",
 		"local": "STAGE=CODE AWS_PROFILE=membership ts-node ./src/query-lambda/local.ts",
-		"gbt-local": "STAGE=CODE AWS_PROFILE=membership ts-node ./src/get-bandit-tests/local.ts"
+		"gbt-local": "STAGE=CODE AWS_PROFILE=membership ts-node ./src/get-bandit-tests/local.ts",
+		"backfill": "STAGE=CODE AWS_PROFILE=membership AthenaOutputBucket=gu-support-analytics ts-node ./src/scripts/backfill.ts"
 	},
 	"dependencies": {
 		"aws-sdk": "^2.1177.0",
