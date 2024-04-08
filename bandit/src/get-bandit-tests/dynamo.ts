@@ -12,9 +12,10 @@ export function queryChannelTests(
 			ExpressionAttributeValues: {
 				":channel": "Epic",
 				":draft": "Draft",
-				":banditTest": true,
+				":isBanditTest": true,
 			},
-			FilterExpression: "#status <> :draft AND banditTest = :banditTest",
+			FilterExpression:
+				"#status <> :draft AND isBanditTest = :isBanditTest",
 		})
 		.promise();
 }
