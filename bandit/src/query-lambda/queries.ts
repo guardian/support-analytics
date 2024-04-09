@@ -38,11 +38,11 @@ const buildQuery = (
 		    test_name,
 			variant_name,
 			views,
-			av_gbp,
-			av_gbp / views,
-			acquisitions
+			COALESCE(av_gbp, 0),
+			COALESCE(av_gbp, 0) / views,
+			COALESCE(acquisitions, 0)
 		FROM views
-		JOIN acquisitions USING (test_name, variant_name)
+		LEFT JOIN acquisitions USING (test_name, variant_name)
 	`;
 
 	return new Query(query, `query_${test.name}_${start.toISOString()}`);
