@@ -5,8 +5,8 @@ import type { VariantQueryRow } from "./parse";
 
 interface VariantSample {
 	variantName: string;
-	avGbp: number;
-	avGbpPerView: number;
+	annualisedValueInGBP: number;
+	annualisedValueInGBPPerView: number;
 	views: number;
 }
 
@@ -36,8 +36,8 @@ function buildDynamoRecord(
 ): TestSample {
 	const variants = rows.map((row) => ({
 		variantName: row.variantName,
-		avGbp: row.avGbp,
-		avGbpPerView: row.avGbpPerView,
+		annualisedValueInGBP: row.avGbp,
+		annualisedValueInGBPPerView: row.avGbpPerView,
 		views: row.views,
 	}));
 
