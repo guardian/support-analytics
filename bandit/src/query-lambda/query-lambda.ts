@@ -10,7 +10,7 @@ const stage = process.env.STAGE;
 const athenaOutputBucket = process.env.AthenaOutputBucket ?? "";
 const schemaName = "acquisition";
 
-interface QueryLambdaInput {
+export interface QueryLambdaInput {
 	tests: Test[];
 	date?: Date;
 }
