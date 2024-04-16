@@ -10,21 +10,23 @@ const stage = process.env.STAGE;
 const athenaOutputBucket = process.env.AthenaOutputBucket ?? "";
 const schemaName = "acquisition";
 
-export async function run(tests: Test[], inputDate?: Date): Promise<QueryExecution[]> {
+interface QueryLambdaInput {
+	tests: Test[];
+	date?: Date;
+}
+
+export async function run(input: QueryLambdaInput): Promise<QueryExecution[]> {
 	if (stage !== "CODE" && stage !== "PROD") {
 		return Promise.reject(`Invalid stage: ${stage ?? ""}`);
 	}
 
-	console.log({inputDate});
-
-	const date = inputDate ?? new Date(Date.now());
-	console.log({date});
+	const date = input.date ?? new Date(Date.now());
 	const end = set(date, { minutes: 0, seconds: 0, milliseconds: 0 });
 	const start = subHours(end, 1);
 	console.log({start, end});
 	console.log(`start.toISOString(): ${start.toISOString()}`);
 
-	const queries = getQueries(tests, stage, start, end);
+	const queries = getQueries(input.tests, stage, start, end);
 
 	const results: Array<Promise<QueryExecution>> = queries.map(
 		([test, query]) =>

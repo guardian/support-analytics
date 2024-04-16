@@ -45,7 +45,7 @@ const result = dates.reduce(
 	(prev, date) => {
 		return prev.then(() => {
 			console.log('Running for date', date);
-			return runQuery(tests, date)
+			return runQuery({tests, date})
 				.then((result) => {
 					return retry(() => runCalculate(result));
 				})
