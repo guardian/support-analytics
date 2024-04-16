@@ -17,7 +17,7 @@ const buildQuery = (
 				ab.name test_name,
 				ab.variant variant_name,
 				COUNT(*) views
-			FROM acquisition.epic_views_prod, UNNEST(abtests) t(ab)
+			FROM acquisition.epic_views_${stage}, UNNEST(abtests) t(ab)
 			WHERE date_hour >= timestamp'${startTimestamp}' AND date_hour < timestamp'${endTimestamp}'
 			AND ab.name = '${test.name}'
 			GROUP BY 1,2
@@ -28,7 +28,7 @@ const buildQuery = (
 				ab.variant variant_name,
 				SUM(annualisedvaluegbp) av_gbp,
 				COUNT(*) acquisitions
-			FROM acquisition.acquisition_events_prod, UNNEST(abtests) t(ab)
+			FROM acquisition.acquisition_events_${stage}, UNNEST(abtests) t(ab)
 			WHERE acquisition_date >= date'${format(start, "yyyy-MM-dd")}'
 			AND timestamp >= timestamp'${startTimestamp}' AND timestamp < timestamp'${endTimestamp}'
 			AND ab.name = '${test.name}'
