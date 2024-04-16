@@ -23,7 +23,11 @@ export async function run(events: QueryExecution[]): Promise<void> {
 		})
 	);
 
-	await writeBatch(batches, stage, docClient);
+	if (batches.length > 0) {
+		await writeBatch(batches, stage, docClient);
+	} else {
+		console.log("No data to write");
+	}
 
 	return;
 }

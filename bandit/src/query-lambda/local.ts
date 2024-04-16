@@ -13,7 +13,7 @@ const wait = () =>
 		setTimeout(resolve, 12000);
 	});
 
-runQuery(tests)
+runQuery({tests})
 	.then(async (result) => {
 		await wait();
 		return result;
