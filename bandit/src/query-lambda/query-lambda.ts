@@ -23,8 +23,6 @@ export async function run(input: QueryLambdaInput): Promise<QueryExecution[]> {
 	const date = input.date ?? new Date(Date.now());
 	const end = set(date, { minutes: 0, seconds: 0, milliseconds: 0 });
 	const start = subHours(end, 1);
-	console.log({start, end});
-	console.log(`start.toISOString(): ${start.toISOString()}`);
 
 	const queries = getQueries(input.tests, stage, start, end);
 
