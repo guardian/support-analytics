@@ -954,6 +954,64 @@ exports[`The Bandit stack matches the snapshot 1`] = `
       "Type": "AWS::StepFunctions::StateMachine",
       "UpdateReplacePolicy": "Delete",
     },
+    "statemachineEventsRole4DAD46F3": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-analytics",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "statemachineEventsRoleDefaultPolicy317047D5": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "statemachine3BB5DA23",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "statemachineEventsRoleDefaultPolicy317047D5",
+        "Roles": [
+          {
+            "Ref": "statemachineEventsRole4DAD46F3",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "statemachineRole8DD785C2": {
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -1090,6 +1148,29 @@ exports[`The Bandit stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "supportbanditStartupF0906432": {
+      "Properties": {
+        "Name": "support-bandit-startup-TEST",
+        "ScheduleExpression": "cron(0 * * * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Ref": "statemachine3BB5DA23",
+            },
+            "Id": "Target0",
+            "Input": "{}",
+            "RoleArn": {
+              "Fn::GetAtt": [
+                "statemachineEventsRole4DAD46F3",
+                "Arn",
+              ],
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
     },
   },
 }

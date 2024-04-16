@@ -3,6 +3,8 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
+import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, ManagedPolicy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
@@ -132,7 +134,7 @@ export class Bandit extends GuStack {
 			inputPath: '$.Payload',
 		});
 
-		new StateMachine(this, 'state-machine', {
+		const stateMachine = new StateMachine(this, 'state-machine', {
 			stateMachineName: `${appName}-${this.stage}`,
 			definitionBody: DefinitionBody.fromChainable(
 				getBanditTestsTask
@@ -146,6 +148,17 @@ export class Bandit extends GuStack {
 					)
 					.next(new Succeed(this, 'state-machine-success')),
 			),
+		});
+
+		new Rule(this, `${appName}Startup`, {
+			enabled: true,
+			targets: [
+				new SfnStateMachine(stateMachine, {
+					input: RuleTargetInput.fromObject({}),
+				}),
+			],
+			schedule: Schedule.cron({ minute: '0' }),
+			ruleName: `${appName}-startup-${this.stage}`,
 		});
 	}
 }
