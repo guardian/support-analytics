@@ -15,7 +15,7 @@ export async function run(tests: Test[], inputDate?: Date): Promise<QueryExecuti
 		return Promise.reject(`Invalid stage: ${stage ?? ""}`);
 	}
 
-	const date = inputDate ?? new Date();
+	const date = inputDate ?? new Date(Date.now());
 	const end = set(date, { minutes: 0, seconds: 0, milliseconds: 0 });
 	const start = subHours(end, 1);
 
