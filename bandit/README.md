@@ -1,6 +1,6 @@
 ## support-bandit
 
-Defines three lambdas `get-bandit-tests`, `query-lambda` and `calculate-lambda` that form a state machine (using Step Functions) to record view and acquisition data for multi-armed bandit experiments. RRCP channel tests (only Epics for now) that are marked as bandit experiments will be picked up and their performance data written to a DynamoDB table. The state machine is scheduled to run once an hour.
+Defines three lambdas `get-bandit-tests`, `query-lambda` and `calculate-lambda` that form a state machine (using Step Functions) to record view and acquisition data for [multi-armed bandit](https://vwo.com/blog/multi-armed-bandit-algorithm/) experiments. RRCP channel tests (only Epics for now) that are marked as bandit experiments will be picked up and their performance data written to a DynamoDB table. The state machine is scheduled to run once an hour.
 
 ![Overall architecture](docs/overall-architecture.png)
 Diagram showing how this state machine fits into the existing architecture.
