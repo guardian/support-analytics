@@ -1152,7 +1152,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
     "supportbanditStartupF0906432": {
       "Properties": {
         "Name": "support-bandit-startup-TEST",
-        "ScheduleExpression": "cron(0 * * * ? *)",
+        "ScheduleExpression": "cron(15 * * * ? *)",
         "State": "ENABLED",
         "Targets": [
           {
