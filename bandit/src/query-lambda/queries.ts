@@ -2,6 +2,8 @@ import { format } from "date-fns";
 import type { Test } from "../lib/models";
 import { Query } from "../lib/query";
 
+const ANNUALISED_VALUE_CAP_GBP = 250;
+
 const buildQuery = (
 	test: Test,
 	stage: "CODE" | "PROD",
@@ -26,7 +28,7 @@ const buildQuery = (
 			SELECT
 				ab.name test_name,
 				ab.variant variant_name,
-				SUM(annualisedvaluegbp) av_gbp,
+				SUM(IF(annualisedvaluegbp >= ${ANNUALISED_VALUE_CAP_GBP}, ${ANNUALISED_VALUE_CAP_GBP}, annualisedvaluegbp)) av_gbp,
 				COUNT(*) acquisitions
 			FROM acquisition.acquisition_events_prod, UNNEST(abtests) t(ab)
 			WHERE acquisition_date >= date'${format(start, "yyyy-MM-dd")}'
