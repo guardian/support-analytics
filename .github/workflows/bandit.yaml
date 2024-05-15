@@ -11,9 +11,8 @@ on:
 jobs:
   bandit-build:
     if: >-
-      (github.actor != 'dependabot[bot]') &&
-        (github.event.pull_request.head.repo.owner.login == 'guardian' ||
-          github.event_name == 'push')
+      (github.event.pull_request.head.repo.owner.login == 'guardian' ||
+        github.event_name == 'push')
 
     name:
       support bandit build
