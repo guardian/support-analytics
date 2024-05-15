@@ -11,7 +11,7 @@ jobs:
     uses: guardian/.github/.github/workflows/sbt-node-snyk.yml@main
     with:
       DEBUG: true
-      ORG: guardian-portfolio-and-platform
+      ORG: guardian-growth
       SKIP_NODE: false
       NODE_VERSION_FILE: super-mode-calculator/.nvmrc
     secrets:
