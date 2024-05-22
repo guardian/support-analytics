@@ -169,7 +169,7 @@ Resources:
     Condition: IsProd
     Properties:
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:marketing-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
       AlarmName: !Sub support-epic-view-event-stream-${Stage} events below minimum threshold
       AlarmDescription: Epic impressions have dropped below the minimum threshold
       MetricName: IncomingRecords
