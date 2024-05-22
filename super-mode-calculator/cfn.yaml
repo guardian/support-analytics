@@ -44,9 +44,6 @@ Parameters:
     AllowedValues:
       - ENABLED
       - DISABLED
-  SNSTopicForAlerts:
-    Description: Name of the SNS topic for alerts
-    Type: String
 
 Conditions:
   IsProd: !Equals [!Ref "Stage", "PROD"]
@@ -269,7 +266,7 @@ Resources:
     Condition: IsProd
     Properties:
       AlarmActions:
-      - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${SNSTopicForAlerts}
+      - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
       AlarmName: !Sub ${App}-failed-${Stage}
       AlarmDescription: !Sub Super Mode calculation failed
       MetricName: ExecutionsFailed
