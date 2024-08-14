@@ -642,8 +642,8 @@ exports[`The Bandit stack matches the snapshot 1`] = `
     },
     "querylambda0C45C633": {
       "DependsOn": [
-        "querylambdaServiceRoleDefaultPolicy28BED9DF",
-        "querylambdaServiceRole96274B16",
+        "querylambdaroleDefaultPolicy929B9FB7",
+        "querylambdaroleC6C8A94B",
       ],
       "Properties": {
         "Code": {
@@ -665,7 +665,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "querylambdaServiceRole96274B16",
+            "querylambdaroleC6C8A94B",
             "Arn",
           ],
         },
@@ -696,7 +696,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "querylambdaServiceRole96274B16": {
+    "querylambdaroleC6C8A94B": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -719,28 +719,13 @@ exports[`The Bandit stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::Partition",
                 },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
                 ":iam::aws:policy/AmazonAthenaFullAccess",
               ],
             ],
           },
         ],
+        "RoleName": "bandit-query-TEST",
         "Tags": [
-          {
-            "Key": "App",
-            "Value": "support-bandit",
-          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -761,10 +746,19 @@ exports[`The Bandit stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "querylambdaServiceRoleDefaultPolicy28BED9DF": {
+    "querylambdaroleDefaultPolicy929B9FB7": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
             {
               "Action": "s3:*",
               "Effect": "Allow",
@@ -868,10 +862,10 @@ exports[`The Bandit stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "querylambdaServiceRoleDefaultPolicy28BED9DF",
+        "PolicyName": "querylambdaroleDefaultPolicy929B9FB7",
         "Roles": [
           {
-            "Ref": "querylambdaServiceRole96274B16",
+            "Ref": "querylambdaroleC6C8A94B",
           },
         ],
       },
