@@ -2,7 +2,10 @@ import * as AWS from "aws-sdk";
 import { set, subHours } from "date-fns";
 import type { QueryExecution, Test } from "../lib/models";
 import { executeQuery } from "../lib/query";
+import {banditTestingData, buildAuthClient} from "./bigquery";
 import { getQueries } from "./queries";
+import {getSSMParam} from "./ssm";
+
 
 const athena = new AWS.Athena({ region: "eu-west-1" });
 
@@ -19,6 +22,15 @@ export async function run(input: QueryLambdaInput): Promise<QueryExecution[]> {
 	if (stage !== "CODE" && stage !== "PROD") {
 		return Promise.reject(`Invalid stage: ${stage ?? ""}`);
 	}
+
+	const ssmPath = `/bandit-testing/${stage}/gcp-wif-credentials-config`;
+
+	const bigQueryData= await getSSMParam(ssmPath)
+		.then(buildAuthClient)
+		.then(authClient =>
+			banditTestingData(authClient, stage));
+
+	console.log("BigQueryData",bigQueryData);
 
 	const date = input.date ?? new Date(Date.now());
 	const end = set(date, { minutes: 0, seconds: 0, milliseconds: 0 });
@@ -39,3 +51,5 @@ export async function run(input: QueryLambdaInput): Promise<QueryExecution[]> {
 
 	return Promise.all(results);
 }
+
+

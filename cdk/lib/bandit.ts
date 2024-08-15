@@ -66,6 +66,14 @@ export class Bandit extends GuStack {
 		);
 		queryLambdaRole.addToPolicy(
 			new PolicyStatement({
+				actions: ['ssm:GetParameter'],
+				resources: [
+					`arn:aws:ssm:${this.region}:${this.account}:parameter/bandit-testing/${this.stage}/gcp-wif-credentials-config`,
+				],
+			}),
+		);
+		queryLambdaRole.addToPolicy(
+			new PolicyStatement({
 				actions: ['s3:*'],
 				resources: [
 					`arn:aws:s3:::gu-support-analytics/*`,
