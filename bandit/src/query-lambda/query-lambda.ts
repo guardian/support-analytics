@@ -6,7 +6,6 @@ import {banditTestingData, buildAuthClient} from "./bigquery";
 import { getQueries } from "./queries";
 import {getSSMParam} from "./ssm";
 
-
 const athena = new AWS.Athena({ region: "eu-west-1" });
 
 const stage = process.env.STAGE;
@@ -28,9 +27,9 @@ export async function run(input: QueryLambdaInput): Promise<QueryExecution[]> {
 	const bigQueryData= await getSSMParam(ssmPath)
 		.then(buildAuthClient)
 		.then(authClient =>
-			banditTestingData(authClient, stage));
+			banditTestingData(authClient, stage, input));
 
-	console.log("BigQueryData",bigQueryData);
+	console.log("bigQueryData", bigQueryData);
 
 	const date = input.date ?? new Date(Date.now());
 	const end = set(date, { minutes: 0, seconds: 0, milliseconds: 0 });
