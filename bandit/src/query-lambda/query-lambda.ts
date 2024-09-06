@@ -32,12 +32,11 @@ export async function run(input: QueryLambdaInput): Promise<QueryExecution[]> {
 		.then(authClient =>
 			banditTestingData(authClient, stage, input));
 
+	const testNames =  bigQueryData.map((data) => data.testName);
 	const result =  bigQueryData.map((data) => data.rows);
-	const rows = parseResultFromBigQuery(result);
-
 	console.log("bigQueryData", bigQueryData);
-	console.log("bigQueryData Result", result);
-	console.log("ParsedRows", rows);
+	console.log("bigQueryData Testname Result", testNames);
+	console.log("bigQueryData Variant Result", result);
 
 	const date = input.date ?? new Date(Date.now());
 	const end = set(date, { minutes: 0, seconds: 0, milliseconds: 0 });
