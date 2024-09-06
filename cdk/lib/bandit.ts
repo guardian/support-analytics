@@ -94,23 +94,6 @@ export class Bandit extends GuStack {
 			ManagedPolicy.fromAwsManagedPolicyName('AmazonAthenaFullAccess'),
 	   	);
 
-		const queryLambda = new GuLambdaFunction(this, 'query-lambda', {
-			app: appName,
-			functionName: `${appName}-query-${this.stage}`,
-			runtime: Runtime.NODEJS_20_X,
-			handler: 'query-lambda/query-lambda.run',
-			fileName: `${appName}.zip`,
-			environment: {
-				AthenaOutputBucket: 'gu-support-analytics',
-			},
-			role: queryLambdaRole,
-		});
-
-		const queryTask = new LambdaInvoke(this, 'query-task', {
-			lambdaFunction: queryLambda,
-			inputPath: '$.Payload',
-		});
-
 		const banditsTable = new Table(this, 'bandits-table', {
 			tableName: `support-bandit-${this.stage}`,
 			removalPolicy: RemovalPolicy.RETAIN,
@@ -125,6 +108,29 @@ export class Bandit extends GuStack {
 			},
 			pointInTimeRecovery: this.stage === 'PROD',
 			timeToLiveAttribute: 'ttlInSeconds',
+		});
+
+		const queryLambda = new GuLambdaFunction(this, 'query-lambda', {
+			app: appName,
+			functionName: `${appName}-query-${this.stage}`,
+			runtime: Runtime.NODEJS_20_X,
+			handler: 'query-lambda/query-lambda.run',
+			fileName: `${appName}.zip`,
+			environment: {
+				AthenaOutputBucket: 'gu-support-analytics',
+			},
+			initialPolicy: [
+				new PolicyStatement({
+					actions: ['dynamodb:BatchWriteItem'],
+					resources: [banditsTable.tableArn],
+				}),
+			],
+			role: queryLambdaRole,
+		});
+
+		const queryTask = new LambdaInvoke(this, 'query-task', {
+			lambdaFunction: queryLambda,
+			inputPath: '$.Payload',
 		});
 
 		const calculateLambda = new GuLambdaFunction(this, 'calculate-lambda', {

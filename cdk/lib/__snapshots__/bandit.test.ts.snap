@@ -796,6 +796,16 @@ exports[`The Bandit stack matches the snapshot 1`] = `
               ],
             },
             {
+              "Action": "dynamodb:BatchWriteItem",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "banditstableFE34CD9A",
+                  "Arn",
+                ],
+              },
+            },
+            {
               "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
