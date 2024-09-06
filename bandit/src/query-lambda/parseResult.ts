@@ -21,10 +21,10 @@ export function parseResultFromBigQuery(result: SimpleQueryRowsResponse): Varian
 		return {
 			testName: "test",
 			variantName: "test",
-			views:  "test",
-			avGbp: "test",
-			avGbpPerView:"test",
-			acquisitions: "test",
+			views:  "",
+			avGbp: "",
+			avGbpPerView:"",
+			acquisitions: "",
 		};
 	});
 
