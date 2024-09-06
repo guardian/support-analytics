@@ -3,7 +3,6 @@ import { set, subHours } from "date-fns";
 import type { QueryExecution, Test } from "../lib/models";
 import { executeQuery } from "../lib/query";
 import {banditTestingData, buildAuthClient} from "./bigquery";
-import {parseResultFromBigQuery} from "./parseResult";
 import { getQueries } from "./queries";
 import {getSSMParam} from "./ssm";
 
@@ -50,10 +49,10 @@ export async function run(input: QueryLambdaInput): Promise<QueryExecution[]> {
 	for (let i = 0; i < testNamesResult.length; i++) {
 		const testName = testNamesResult[i];
 		const variant= variantResult[i];
-		const parsedVariant = parseResultFromBigQuery(variant);
-		console.log("parsedVariantResult", parsedVariant);
-
-		console.log("Final Data", testName,parsedVariant,startTimestamp);
+		// const parsedVariant = parseResultFromBigQuery(variant);
+		// console.log("parsedVariantResult", parsedVariant);
+		//
+		console.log("Final Data", testName,variant,startTimestamp);
 		// buildWriteRequest(
 		// 	parsedVariant,
 		// 	testName,
