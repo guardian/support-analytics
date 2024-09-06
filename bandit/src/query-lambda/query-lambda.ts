@@ -3,15 +3,13 @@ import { set, subHours } from "date-fns";
 import type { QueryExecution, Test } from "../lib/models";
 import { executeQuery } from "../lib/query";
 import {banditTestingData, buildAuthClient} from "./bigquery";
+import {parseResultFromBigQuery} from "./parseResult";
 import { getQueries } from "./queries";
 import {getSSMParam} from "./ssm";
-import {parseResult} from "../calculate-lambda/parse";
-import {parseResultFromBigQuery} from "./parseResult";
-import {buildWriteRequest} from "../calculate-lambda/dynamo";
 
 const athena = new AWS.Athena({ region: "eu-west-1" });
 
-const stage = process.env.STAGE ?? "PROD";
+const stage = process.env.STAGE;
 const athenaOutputBucket = process.env.AthenaOutputBucket ?? "";
 const schemaName = "acquisition";
 const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
