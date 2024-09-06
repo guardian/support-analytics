@@ -6,7 +6,6 @@ import {banditTestingData, buildAuthClient} from "./bigquery";
 import {parseResultFromBigQuery} from "./parseResult";
 import { getQueries } from "./queries";
 import {getSSMParam} from "./ssm";
-import {buildWriteRequest} from "../calculate-lambda/dynamo";
 
 const athena = new AWS.Athena({ region: "eu-west-1" });
 
