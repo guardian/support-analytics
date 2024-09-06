@@ -2,7 +2,6 @@ import * as AWS from 'aws-sdk';
 
 export const getSSMParam = (path: string): Promise<string> => {
 	const ssm = new AWS.SSM({ region: 'eu-west-1' });
-    console.log("Step 1")
 	return ssm
 		.getParameter({
 			Name: path,

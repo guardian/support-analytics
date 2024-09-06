@@ -15,12 +15,12 @@ export type VariantQueryRow = z.infer<typeof variantQueryRowSchema>;
 
 const variantQueryRowsSchema = z.array(variantQueryRowSchema);
 
-export function parseResultFromBigQuery(result: SimpleQueryRowsResponse[]): VariantQueryRow[] {
+export function parseResultFromBigQuery(result: SimpleQueryRowsResponse): VariantQueryRow[] {
 	console.log("ResultFromBigQuery", result);
 	const parsedResult= result.map((row) => {
 		return {
-			testName: row[0],
-			variantName: row[1],
+			testName: "test",
+			variantName: "test",
 			views:  "test",
 			avGbp: "test",
 			avGbpPerView:"test",
