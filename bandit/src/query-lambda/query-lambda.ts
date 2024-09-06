@@ -5,12 +5,17 @@ import { executeQuery } from "../lib/query";
 import {banditTestingData, buildAuthClient} from "./bigquery";
 import { getQueries } from "./queries";
 import {getSSMParam} from "./ssm";
+import {parseResult} from "../calculate-lambda/parse";
+import {parseResultFromBigQuery} from "./parseResult";
+import {buildWriteRequest} from "../calculate-lambda/dynamo";
 
 const athena = new AWS.Athena({ region: "eu-west-1" });
 
-const stage = process.env.STAGE;
+const stage = process.env.STAGE ?? "PROD";
 const athenaOutputBucket = process.env.AthenaOutputBucket ?? "";
 const schemaName = "acquisition";
+const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
+
 
 export interface QueryLambdaInput {
 	tests: Test[];
@@ -29,7 +34,12 @@ export async function run(input: QueryLambdaInput): Promise<QueryExecution[]> {
 		.then(authClient =>
 			banditTestingData(authClient, stage, input));
 
+	const result =  bigQueryData.map((data) => data.rows);
+	const rows = parseResultFromBigQuery(result);
+
 	console.log("bigQueryData", bigQueryData);
+	console.log("bigQueryData Result", result);
+	console.log("ParsedRows", rows);
 
 	const date = input.date ?? new Date(Date.now());
 	const end = set(date, { minutes: 0, seconds: 0, milliseconds: 0 });

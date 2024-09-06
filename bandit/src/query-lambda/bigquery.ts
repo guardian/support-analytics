@@ -8,7 +8,6 @@ import {buildQuery} from "./queryBigQueryData";
 export const buildAuthClient = (clientConfig: string): Promise<BaseExternalAccountClient> => new Promise((resolve, reject) => {
 	const parsedConfig = JSON.parse(clientConfig) as ExternalAccountClientOptions;
 	const authClient = ExternalAccountClient.fromJSON(parsedConfig);
-	console.log("Step 2")
 	if (authClient) {
 		resolve(authClient);
 	} else {
@@ -17,7 +16,6 @@ export const buildAuthClient = (clientConfig: string): Promise<BaseExternalAccou
 });
 
 export const banditTestingData = async (authClient: BaseExternalAccountClient, stage: 'CODE' | 'PROD',input: QueryLambdaInput)=> {
-	console.log("Step 3")
 	const bigquery = new BigQuery({
 		projectId: `datatech-platform-${stage.toLowerCase()}`,
 		authClient,
@@ -28,8 +26,9 @@ export const banditTestingData = async (authClient: BaseExternalAccountClient, s
 	const start = subHours(end, 1);
 	const tests = input.tests;
 	const promises = tests.map(async (test) => {
+		const testName = test.name;
 		const rows= await bigquery.query(buildQuery(test, stage, start, end));
-		return { test, rows };
+		return { testName, rows };
 	});
 
 	return await Promise.all(promises);
