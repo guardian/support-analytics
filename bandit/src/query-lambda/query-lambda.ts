@@ -1,7 +1,7 @@
 import type {SimpleQueryRowsResponse} from "@google-cloud/bigquery";
 import * as AWS from "aws-sdk";
 import { set, subHours } from "date-fns";
-import {buildWriteRequest, writeBatch} from "../calculate-lambda/dynamo";
+import {buildWriteRequest, writeBatch} from "./dynamo";
 import type { QueryExecution, Test } from "../lib/models";
 import { executeQuery } from "../lib/query";
 import { buildAuthClient, getDataForBanditTest} from "./bigquery";
@@ -22,7 +22,7 @@ export interface QueryLambdaInput {
 	date?: Date;
 }
 
-export async function run(input: QueryLambdaInput): Promise<QueryExecution[]> {
+export async function run(input: QueryLambdaInput): Promise<void> {
 	if (stage !== "CODE" && stage !== "PROD") {
 		return Promise.reject(`Invalid stage: ${stage ?? ""}`);
 	}
@@ -45,27 +45,14 @@ export async function run(input: QueryLambdaInput): Promise<QueryExecution[]> {
 	});
 	const batches = await Promise.all(parsedResults);
 	console.log("Parsed results: ", batches);
-
 	if (batches.length > 0) {
+		console.log("Parsed results batch length more: ", batches);
 		await writeBatch(batches, stage, docClient);
 	} else {
 		console.log("No data to write");
 	}
 
-	const queries = getQueries(input.tests, stage, start, end);
-
-	const results: Array<Promise<QueryExecution>> = queries.map(
-		([test, query]) =>
-			executeQuery(query, athenaOutputBucket, schemaName, athena).then(
-				(executionId) => ({
-					executionId,
-					testName: test.name,
-					startTimestamp: start.toISOString(),
-				})
-			)
-	);
-
-	return Promise.all(results);
+	return;
 }
 
 

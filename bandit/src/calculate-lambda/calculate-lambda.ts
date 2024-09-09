@@ -1,7 +1,7 @@
 import * as AWS from "aws-sdk";
 import type { QueryExecution } from "../lib/models";
 import { getCheckedExecutionResult } from "../lib/query";
-import { buildWriteRequest, writeBatch } from "./dynamo";
+import { buildWriteRequest, writeBatch } from "../query-lambda/dynamo";
 import { parseResult } from "./parse";
 
 const athena = new AWS.Athena({ region: "eu-west-1" });
