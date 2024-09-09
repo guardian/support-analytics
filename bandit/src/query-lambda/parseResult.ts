@@ -16,11 +16,6 @@ export type VariantQueryRow = z.infer<typeof variantQueryRowSchema>;
 const variantQueryRowsSchema = z.array(variantQueryRowSchema);
 
 export function parseResultFromBigQuery(result: SimpleQueryRowsResponse): VariantQueryRow[] {
-	console.log("ResultFromBigQuery", result);
-<<<<<<< HEAD
-=======
-
->>>>>>> ac928a8 (Remove unwanted console statements)
 	const parse = variantQueryRowsSchema.safeParse(result[0]);
 
 	if (!parse.success) {
