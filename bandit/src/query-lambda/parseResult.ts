@@ -17,18 +17,18 @@ const variantQueryRowsSchema = z.array(variantQueryRowSchema);
 
 export function parseResultFromBigQuery(result: SimpleQueryRowsResponse): VariantQueryRow[] {
 	console.log("ResultFromBigQuery", result);
-	const parsedResult= result.map((row) => {
-		return {
-			testName: "test",
-			variantName: "test",
-			views:  "",
-			avGbp: "",
-			avGbpPerView:"",
-			acquisitions: "",
-		};
-	});
+	// const parsedResult= result.map((row) => {
+	// 	return {
+	// 		testName: "test",
+	// 		variantName: "test",
+	// 		views:  "",
+	// 		avGbp: "",
+	// 		avGbpPerView:"",
+	// 		acquisitions: "",
+	// 	};
+	// });
 
-	const parse = variantQueryRowsSchema.safeParse(parsedResult);
+	const parse = variantQueryRowsSchema.safeParse(result[0]);
 
 	if (!parse.success) {
 		console.log(parse.error);
