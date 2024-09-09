@@ -32,6 +32,7 @@ export async function run(input: QueryLambdaInput): Promise<QueryExecution[]> {
 	const end = set(date, { minutes: 0, seconds: 0, milliseconds: 0 });
 	const start = subHours(end, 1);
 	const startTimestamp = start.toISOString().replace("T", " ");
+  
 	const client = await getSSMParam(ssmPath).then(buildAuthClient)
 		// .then(authClient =>
 		// 	banditTestingData(authClient, stage, input));
@@ -72,10 +73,6 @@ export async function run(input: QueryLambdaInput): Promise<QueryExecution[]> {
 	// 	// );
 	//
 	// }
-
-
-
-
 
 
 	const queries = getQueries(input.tests, stage, start, end);

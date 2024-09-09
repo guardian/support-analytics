@@ -17,6 +17,7 @@ const variantQueryRowsSchema = z.array(variantQueryRowSchema);
 
 export function parseResultFromBigQuery(result: SimpleQueryRowsResponse): VariantQueryRow[] {
 	console.log("ResultFromBigQuery", result);
+  
 	// const parsedResult= result.map((row) => {
 	// 	return {
 	// 		testName: "test",
@@ -29,6 +30,7 @@ export function parseResultFromBigQuery(result: SimpleQueryRowsResponse): Varian
 	// });
 
 	const parse = variantQueryRowsSchema.safeParse(result[0]);
+
 
 	if (!parse.success) {
 		console.log(parse.error);
