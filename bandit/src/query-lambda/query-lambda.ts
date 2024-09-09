@@ -1,19 +1,13 @@
 import type {SimpleQueryRowsResponse} from "@google-cloud/bigquery";
 import * as AWS from "aws-sdk";
 import { set, subHours } from "date-fns";
-import {buildWriteRequest, writeBatch} from "./dynamo";
-import type { QueryExecution, Test } from "../lib/models";
-import { executeQuery } from "../lib/query";
+import type {  Test } from "../lib/models";
 import { buildAuthClient, getDataForBanditTest} from "./bigquery";
+import {buildWriteRequest, writeBatch} from "./dynamo";
 import {parseResultFromBigQuery} from "./parseResult";
-import { getQueries } from "./queries";
 import {getSSMParam} from "./ssm";
 
-const athena = new AWS.Athena({ region: "eu-west-1" });
-
 const stage = process.env.STAGE;
-const athenaOutputBucket = process.env.AthenaOutputBucket ?? "";
-const schemaName = "acquisition";
 const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
 
 
@@ -41,12 +35,9 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	const parsedResults = resultsFromBigQuery.map(({testName, rows}) => {
 		const parsed = parseResultFromBigQuery(rows);
 		return buildWriteRequest(parsed, testName, startTimestamp);
-		// TODO - send request to dynamodb as batch
 	});
 	const batches = await Promise.all(parsedResults);
-	console.log("Parsed results: ", batches);
 	if (batches.length > 0) {
-		console.log("Parsed results batch length more: ", batches);
 		await writeBatch(batches, stage, docClient);
 	} else {
 		console.log("No data to write");

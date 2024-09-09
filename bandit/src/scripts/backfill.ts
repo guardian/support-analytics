@@ -1,5 +1,4 @@
 import * as dateFns from 'date-fns';
-import { run as runCalculate } from "../calculate-lambda/calculate-lambda";
 import { run as runQuery } from "../query-lambda/query-lambda";
 
 /**
@@ -46,9 +45,6 @@ const result = dates.reduce(
 		return prev.then(() => {
 			console.log('Running for date', date);
 			return runQuery({tests, date})
-				.then((result) => {
-					return retry(() => runCalculate(result));
-				})
 				.then((result) => {
 					console.log(result);
 				})

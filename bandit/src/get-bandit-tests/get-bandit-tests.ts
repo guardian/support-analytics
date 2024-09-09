@@ -1,6 +1,6 @@
 import * as AWS from "aws-sdk";
 import type { Test } from "../lib/models";
-import type {QueryLambdaInput} from "../query-lambda/query-lambda";
+import type { QueryLambdaInput } from "../query-lambda/query-lambda";
 import { queryChannelTests } from "./dynamo";
 
 const STAGE: string = process.env.STAGE ?? "PROD";
