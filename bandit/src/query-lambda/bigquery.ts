@@ -23,7 +23,7 @@ export const getDataForBanditTest = async (
 	date: Date = new Date(Date.now()),
 ): Promise<{testName: string; rows: SimpleQueryRowsResponse}> => {
 	const bigquery = new BigQuery({
-		projectId: `datatech-platform-prod`,
+		projectId: `datatech-platform-${stage.toLowerCase()}`,
 		authClient,
 	});
 
