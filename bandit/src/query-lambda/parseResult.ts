@@ -3,11 +3,11 @@ import { z } from "zod";
 import { QueryReturnedInvalidDataError } from "../lib/errors";
 
 const variantQueryRowSchema = z.object({
-	testName: z.string(),
-	variantName: z.string(),
+	test_name: z.string(),
+	variant_name: z.string(),
 	views: z.number(),
-	avGbp: z.number(),
-	avGbpPerView: z.number(),
+	sum_av_eur: z.number(),
+	sum_av_eur_per_view: z.number(),
 	acquisitions: z.number(),
 });
 

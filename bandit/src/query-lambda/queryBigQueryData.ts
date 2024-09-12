@@ -103,9 +103,16 @@ views AS (
   AND ce.ab_test_name = '${test.name}'
   GROUP BY 1,2
 )
-SELECT *
+SELECT
+	views.test_name,
+	views.variant_name,
+	views.views,
+	COALESCE(acquisitions_agg.sum_av_eur, 0) AS sum_av_eur,
+	SAFE_DIVIDE(COALESCE(acquisitions_agg.sum_av_eur, 0), views.views) AS sum_av_eur_per_view ,
+	COALESCE(acquisitions_agg.acquisitions,0) AS acquisitions
 FROM views
-LEFT JOIN acquisitions_agg USING (test_name, variant_name)
+		 LEFT JOIN acquisitions_agg
+				   USING (test_name, variant_name)
 	`;
 	return new Query(query, `${test.name}_${start.toISOString()}`);
 
