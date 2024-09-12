@@ -3,7 +3,7 @@ import type {Test} from "../lib/models";
 import {Query} from "../lib/query";
 
 
-// const ANNUALISED_VALUE_CAP_GBP = 250;
+const ANNUALISED_VALUE_CAP = 250;
 export const buildQuery = (
 	test: Test,
 	stage: "CODE" | "PROD",
@@ -85,7 +85,7 @@ acquisitions_agg AS (
   SELECT
     test_name,
     variant_name,
-    SUM(av_eur) sum_av_eur,
+    SUM(IF( av_eur >= ${ANNUALISED_VALUE_CAP}, ${ANNUALISED_VALUE_CAP},  av_eur)) sum_av_eur,
     COUNT(*) acquisitions
   FROM acqusitions_with_av
   GROUP BY 1,2
