@@ -1,7 +1,7 @@
 import type { AWSError } from "aws-sdk";
 import type { DocumentClient } from "aws-sdk/clients/dynamodb";
 import type { PromiseResult } from "aws-sdk/lib/request";
-import type { VariantQueryRow } from "./parseResult";
+import type { VariantQueryRow } from "./parse-result";
 
 interface VariantSample {
 	variantName: string;

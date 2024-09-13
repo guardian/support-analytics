@@ -4,7 +4,7 @@ import {set, subHours} from "date-fns";
 import type { BaseExternalAccountClient, ExternalAccountClientOptions } from 'google-auth-library';
 import { ExternalAccountClient } from 'google-auth-library';
 import type {Test} from "../lib/models";
-import {buildQuery} from "./queryBigQueryData";
+import {buildQuery} from "./build-query";
 
 export const buildAuthClient = (clientConfig: string): Promise<BaseExternalAccountClient> => new Promise((resolve, reject) => {
 	const parsedConfig = JSON.parse(clientConfig) as ExternalAccountClientOptions;
@@ -30,7 +30,8 @@ export const getDataForBanditTest = async (
 	const end = set(date, { minutes: 0, seconds: 0, milliseconds: 0 });
 	const start = subHours(end, 1);
 	const testName = test.name;
-	const rows = await bigquery.query(buildQuery(test, stage, start, end));
+	const rows = await bigquery.query({query: buildQuery(test, 'PROD', start, end)});
+	//stage is hardcoded to PROD above as we don't have sufficient data for page views in the CODE tables to run the query successfully
 	return { testName, rows };
 }
 

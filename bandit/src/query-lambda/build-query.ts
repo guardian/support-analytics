@@ -1,7 +1,5 @@
 import {format, subDays} from "date-fns";
 import type {Test} from "../lib/models";
-import {Query} from "../lib/query";
-
 
 const ANNUALISED_VALUE_CAP = 250;
 export const buildQuery = (
@@ -9,13 +7,13 @@ export const buildQuery = (
 	stage: "CODE" | "PROD",
 	start: Date,
 	end: Date,
-): Query => {
+)=> {
 	const endTimestamp = end.toISOString().replace("T", " ");
 	const startTimestamp = start.toISOString().replace("T", " ");
 	const dateForCurrencyConversionTable = subDays(start, 1); //This table is updated daily  but has a lag of 1 day
-	const query = `
+	return `
 WITH exchange_rates AS (
-    SELECT target, (1/rate) AS reverse_rate from datatech-platform-prod.datalake.fixer_exchange_rates
+    SELECT target, (1/rate) AS reverse_rate from datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
 	WHERE date = '${format(dateForCurrencyConversionTable, "yyyy-MM-dd")}'),
 acquisitions AS (
     SELECT
@@ -62,7 +60,7 @@ acquisitions AS (
       product,
       currency,
       payment_frequency,
-    FROM datatech-platform-prod.datalake.fact_acquisition_event AS acq
+    FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event AS acq
     CROSS JOIN UNNEST(ab_tests) AS ab
     WHERE event_timestamp >= timestamp '${startTimestamp}' AND event_timestamp <  timestamp '${endTimestamp}'
     AND component_type = "ACQUISITIONS_EPIC"
@@ -95,7 +93,7 @@ views AS (
     ce.ab_test_name AS test_name,
     ce.ab_test_variant AS variant_name,
     COUNT(*) views
-  FROM datatech-platform-prod.online_traffic.fact_page_view
+  FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view
   CROSS JOIN UNNEST(component_event_array) as ce
   WHERE received_date = '${format(start, "yyyy-MM-dd")}'
   AND ce.event_action = "VIEW"
@@ -114,6 +112,5 @@ FROM views
 		 LEFT JOIN acquisitions_agg
 				   USING (test_name, variant_name)
 	`;
-	return new Query(query, `${test.name}_${start.toISOString()}`);
 
 }

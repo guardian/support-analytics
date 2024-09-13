@@ -4,7 +4,7 @@ import { set, subHours } from "date-fns";
 import type {  Test } from "../lib/models";
 import { buildAuthClient, getDataForBanditTest} from "./bigquery";
 import {buildWriteRequest, writeBatch} from "./dynamo";
-import {parseResultFromBigQuery} from "./parseResult";
+import {parseResultFromBigQuery} from "./parse-result";
 import {getSSMParam} from "./ssm";
 
 const stage = process.env.STAGE;
