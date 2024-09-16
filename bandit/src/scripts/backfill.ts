@@ -7,22 +7,6 @@ import { run as runQuery } from "../query-lambda/query-lambda";
  * START="2024-03-28T01:00:00.000Z" TEST_NAME="2024-03-05_EPIC_PRIMARY__US" yarn backfill
  */
 
-
-const wait = () =>
-	new Promise((resolve) => {
-		setTimeout(resolve, 2000);
-	});
-
-const retry = (fn: () => Promise<void>, retries = 5): Promise<void> => {
-	return fn().catch((err) => {
-		console.log('Retrying...');
-		if (retries > 0) {
-			return wait().then(() => retry(fn, retries - 1));
-		}
-		throw err;
-	});
-}
-
 const testName = process.env['TEST_NAME'] as string;
 const start = process.env['START'] as string;
 if (!testName || !start) {

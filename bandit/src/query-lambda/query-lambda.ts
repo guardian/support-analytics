@@ -32,13 +32,12 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 		input.tests.map(test => getDataForBanditTest(client, stage, test, input.date))
 	);
 
-	const parsedResults = resultsFromBigQuery.map(({testName, rows}) => {
+	const writeRequests = resultsFromBigQuery.map(({testName, rows}) => {
 		const parsed = parseResultFromBigQuery(rows);
 		return buildWriteRequest(parsed, testName, startTimestamp);
 	});
-	const batches = await Promise.all(parsedResults);
-	if (batches.length > 0) {
-		await writeBatch(batches, stage, docClient);
+	if (writeRequests.length > 0) {
+		await writeBatch(writeRequests, stage, docClient);
 	} else {
 		console.log("No data to write");
 	}

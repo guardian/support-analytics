@@ -1,7 +1,7 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
-import { type App, Duration, RemovalPolicy } from 'aws-cdk-lib';
+import { type App, RemovalPolicy } from 'aws-cdk-lib';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
@@ -142,11 +142,7 @@ export class Bandit extends GuStack {
 			stateMachineName: `${appName}-${this.stage}`,
 			definitionBody: DefinitionBody.fromChainable(
 				getBanditTestsTask
-					.next(queryTask.addRetry({
-						errors: ['QueryPendingError'],
-						interval: Duration.seconds(10),
-						maxAttempts: 5,
-					}),)
+					.next(queryTask)
 					.next(new Succeed(this, 'state-machine-success')),
 			),
 		});
