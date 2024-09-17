@@ -13,8 +13,13 @@ export const buildQuery = (
 	const dateForCurrencyConversionTable = subDays(start, 1); //This table is updated daily  but has a lag of 1 day
 	return `
 WITH exchange_rates AS (
-    SELECT target, (1/rate) AS reverse_rate from datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
+    SELECT target, date, (1/rate) AS reverse_rate FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
 	WHERE date = '${format(dateForCurrencyConversionTable, "yyyy-MM-dd")}'),
+gbp_rate AS (
+	SELECT
+	 rate, date
+	FROM  datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
+	WHERE target = 'GBP' AND  date = '${format(dateForCurrencyConversionTable, "yyyy-MM-dd")}'),
 acquisitions AS (
     SELECT
       ab.name AS  test_name,
@@ -69,6 +74,7 @@ acquisitions AS (
 acqusitions_with_av AS (
   SELECT
     acq.*,
+    date,
     CASE payment_frequency
       WHEN 'ONE_OFF' THEN amount * exch.reverse_rate
       WHEN 'MONTHLY' THEN (amount * exch.reverse_rate)*12
@@ -79,13 +85,24 @@ acqusitions_with_av AS (
   FROM acquisitions AS acq
   JOIN exchange_rates AS exch ON acq.currency = exch.target
 ),
+acqusitions_with_av_gbp AS(
+  SELECT
+	acq_av.*,
+	CASE acq_av.currency
+		WHEN 'GBP' THEN av_eur
+		ELSE av_eur * (gbp_rate.rate)
+		END
+	AS av_gbp
+	FROM acqusitions_with_av AS acq_av
+	JOIN  gbp_rate  ON acq_av.date = gbp_rate.date
+	),
 acquisitions_agg AS (
   SELECT
     test_name,
     variant_name,
-    SUM(IF( av_eur >= ${ANNUALISED_VALUE_CAP}, ${ANNUALISED_VALUE_CAP},  av_eur)) sum_av_eur,
+    SUM(IF( av_gbp >= ${ANNUALISED_VALUE_CAP}, ${ANNUALISED_VALUE_CAP},  av_gbp)) sum_av_gbp,
     COUNT(*) acquisitions
-  FROM acqusitions_with_av
+  FROM acqusitions_with_av_gbp
   GROUP BY 1,2
 ),
 views AS (
@@ -105,8 +122,8 @@ SELECT
 	views.test_name,
 	views.variant_name,
 	views.views,
-	COALESCE(acquisitions_agg.sum_av_eur, 0) AS sum_av_eur,
-	SAFE_DIVIDE(COALESCE(acquisitions_agg.sum_av_eur, 0), views.views) AS sum_av_eur_per_view ,
+	COALESCE(acquisitions_agg.sum_av_gbp, 0) AS sum_av_gbp,
+	SAFE_DIVIDE(COALESCE(acquisitions_agg.sum_av_gbp, 0), views.views) AS sum_av_gbp_per_view ,
 	COALESCE(acquisitions_agg.acquisitions,0) AS acquisitions
 FROM views
 		 LEFT JOIN acquisitions_agg

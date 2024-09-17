@@ -36,8 +36,8 @@ function buildDynamoRecord(
 ): TestSample {
 	const variants = rows.map((row) => ({
 		variantName: row.variant_name,
-		annualisedValueInGBP: row.sum_av_eur,
-		annualisedValueInGBPPerView: row.sum_av_eur_per_view,
+		annualisedValueInGBP: row.sum_av_gbp,
+		annualisedValueInGBPPerView: row.sum_av_gbp_per_view,
 		views: row.views,
 	}));
 

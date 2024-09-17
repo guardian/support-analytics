@@ -6,8 +6,8 @@ const variantQueryRowSchema = z.object({
 	test_name: z.string(),
 	variant_name: z.string(),
 	views: z.number(),
-	sum_av_eur: z.number(),
-	sum_av_eur_per_view: z.number(),
+	sum_av_gbp: z.number(),
+	sum_av_gbp_per_view: z.number(),
 	acquisitions: z.number(),
 });
 
