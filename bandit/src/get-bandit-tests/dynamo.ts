@@ -10,7 +10,7 @@ export function queryChannelTests(
 				"#status": "status",
 			},
 			ExpressionAttributeValues: {
-				":channel": "Epic",
+				":channel": ["Epic","Banner1"],
 				":draft": "Draft",
 				":isBanditTest": true,
 			},

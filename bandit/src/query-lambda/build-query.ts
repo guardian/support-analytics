@@ -68,7 +68,7 @@ acquisitions AS (
     FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event AS acq
     CROSS JOIN UNNEST(ab_tests) AS ab
     WHERE event_timestamp >= timestamp '${startTimestamp}' AND event_timestamp <  timestamp '${endTimestamp}'
-    AND component_type = "ACQUISITIONS_EPIC"
+    AND component_type = "${test.channel}"
     AND name = '${test.name}'
 ),
 acqusitions_with_av AS (
@@ -114,7 +114,7 @@ views AS (
   CROSS JOIN UNNEST(component_event_array) as ce
   WHERE received_date = '${format(start, "yyyy-MM-dd")}'
   AND ce.event_action = "VIEW"
-  AND ce.component_type = "ACQUISITIONS_EPIC"
+  AND ce.component_type =  "${test.channel}"
   AND ce.ab_test_name = '${test.name}'
   GROUP BY 1,2
 )

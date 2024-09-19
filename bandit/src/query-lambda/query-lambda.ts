@@ -28,13 +28,13 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	const startTimestamp = start.toISOString().replace("T", " ");
 	const client = await getSSMParam(ssmPath).then(buildAuthClient);
 
-	const resultsFromBigQuery: Array<{testName: string; rows: SimpleQueryRowsResponse}> = await Promise.all(
+	const resultsFromBigQuery: Array<{testName: string; channel :string; rows: SimpleQueryRowsResponse}> = await Promise.all(
 		input.tests.map(test => getDataForBanditTest(client, stage, test, input.date))
 	);
 
-	const writeRequests = resultsFromBigQuery.map(({testName, rows}) => {
+	const writeRequests = resultsFromBigQuery.map(({testName,channel, rows}) => {
 		const parsed = parseResultFromBigQuery(rows);
-		return buildWriteRequest(parsed, testName, startTimestamp);
+		return buildWriteRequest(parsed, testName,channel, startTimestamp);
 	});
 	if (writeRequests.length > 0) {
 		await writeBatch(writeRequests, stage, docClient);
