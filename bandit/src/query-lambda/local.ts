@@ -1,4 +1,3 @@
-import { run as runCalculate } from "../calculate-lambda/calculate-lambda";
 import { run as runQuery } from "./query-lambda";
 
 const tests = [
@@ -17,9 +16,6 @@ runQuery({tests})
 	.then(async (result) => {
 		await wait();
 		return result;
-	})
-	.then((result) => {
-		return runCalculate(result);
 	})
 	.then((result) => {
 		console.log(result);

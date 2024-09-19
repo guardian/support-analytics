@@ -78,7 +78,7 @@ jobs:
                     PROD: Bandit-PROD.template.json
                   cloudFormationStackByTags: false
                   prependStackToCloudFormationStackName: true
-                
+
               support-bandit:
                 type: aws-lambda
                 parameters:
@@ -87,7 +87,6 @@ jobs:
                   functionNames:
                     - support-bandit-get-bandit-tests-
                     - support-bandit-query-
-                    - support-bandit-calculate-
 
           contentDirectories: |
             support-bandit:

@@ -1,7 +1,7 @@
 import type { AWSError } from "aws-sdk";
 import type { DocumentClient } from "aws-sdk/clients/dynamodb";
 import type { PromiseResult } from "aws-sdk/lib/request";
-import type { VariantQueryRow } from "./parse";
+import type { VariantQueryRow } from "./parse-result";
 
 interface VariantSample {
 	variantName: string;
@@ -35,9 +35,9 @@ function buildDynamoRecord(
 	startTimestamp: string
 ): TestSample {
 	const variants = rows.map((row) => ({
-		variantName: row.variantName,
-		annualisedValueInGBP: row.avGbp,
-		annualisedValueInGBPPerView: row.avGbpPerView,
+		variantName: row.variant_name,
+		annualisedValueInGBP: row.sum_av_gbp,
+		annualisedValueInGBPPerView: row.sum_av_gbp_per_view,
 		views: row.views,
 	}));
 
