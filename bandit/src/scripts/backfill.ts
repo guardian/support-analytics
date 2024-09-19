@@ -8,6 +8,7 @@ import { run as runQuery } from "../query-lambda/query-lambda";
  */
 
 const testName = process.env['TEST_NAME'] as string;
+const channel = process.env['CHANNEL'] as string;
 const start = process.env['START'] as string;
 if (!testName || !start) {
 	console.error('Required environment variables: TEST_NAME or START');
@@ -22,7 +23,7 @@ while (date < end) {
 	dates.push(date);
 }
 
-const tests = [{ name: testName }];
+const tests = [{ name: testName , channel: channel}];
 
 const result = dates.reduce(
 	(prev, date) => {
