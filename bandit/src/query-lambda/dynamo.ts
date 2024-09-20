@@ -44,7 +44,7 @@ function buildDynamoRecord(
 	}));
 
 	return {
-		testName:testName + " - "+ channel,
+		testName: channel+ " _ "+ testName,
 		variants,
 		timestamp: startTimestamp,
 	};
