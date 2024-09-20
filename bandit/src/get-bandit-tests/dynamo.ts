@@ -19,7 +19,7 @@ export function queryChannelTests(
 		})
 		.promise();
 
-	const bannerTests= docClient
+	const banner1Tests= docClient
 		.query({
 			TableName: `support-admin-console-channel-tests-${stage.toUpperCase()}`,
 			KeyConditionExpression: "channel = :channel",
@@ -35,7 +35,23 @@ export function queryChannelTests(
 				"#status <> :draft AND isBanditTest = :isBanditTest",
 		})
 		.promise();
+	const banner2Tests= docClient
+		.query({
+			TableName: `support-admin-console-channel-tests-${stage.toUpperCase()}`,
+			KeyConditionExpression: "channel = :channel",
+			ExpressionAttributeNames: {
+				"#status": "status",
+			},
+			ExpressionAttributeValues: {
+				":channel": "Banner2",
+				":draft": "Draft",
+				":isBanditTest": true,
+			},
+			FilterExpression:
+				"#status <> :draft AND isBanditTest = :isBanditTest",
+		})
+		.promise();
 
-	return Promise.all([epicTests, bannerTests]);
+	return Promise.all([epicTests, banner1Tests, banner2Tests]);
 
 }
