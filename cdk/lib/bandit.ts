@@ -1,7 +1,7 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
-import { type App, RemovalPolicy } from 'aws-cdk-lib';
+import {type App, Duration, RemovalPolicy} from 'aws-cdk-lib';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
@@ -125,6 +125,7 @@ export class Bandit extends GuStack {
 			runtime: Runtime.NODEJS_20_X,
 			handler: 'query-lambda/query-lambda.run',
 			fileName: `${appName}.zip`,
+			timeout: Duration.seconds(60),
 			environment: {
 				AthenaOutputBucket: 'gu-support-analytics',
 			},
