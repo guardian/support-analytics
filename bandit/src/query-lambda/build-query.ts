@@ -11,7 +11,7 @@ export const buildQuery = (
 	const endTimestamp = end.toISOString().replace("T", " ");
 	const startTimestamp = start.toISOString().replace("T", " ");
 	const dateForCurrencyConversionTable = subDays(start, 1); //This table is updated daily  but has a lag of 1 day
-	const channel = (test.channel === 'EPIC') ? 'ACQUISITIONS_EPIC' : 'ACQUISITIONS_SUBSCRIPTIONS_BANNER';
+	const channel = (test.channel.toLowerCase() === 'epic') ? 'ACQUISITIONS_EPIC' : 'ACQUISITIONS_SUBSCRIPTIONS_BANNER';
 	return `
 WITH exchange_rates AS (
     SELECT target, date, (1/rate) AS reverse_rate FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
