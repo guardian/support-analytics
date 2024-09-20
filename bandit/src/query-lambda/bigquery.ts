@@ -16,12 +16,17 @@ export const buildAuthClient = (clientConfig: string): Promise<BaseExternalAccou
 	}
 });
 
+export interface BigQueryResult{
+	testName: string;
+	channel: string;
+	rows: SimpleQueryRowsResponse;
+}
 export const getDataForBanditTest = async (
 	authClient: BaseExternalAccountClient,
 	stage: 'CODE' | 'PROD',
 	test: Test,
 	date: Date = new Date(Date.now()),
-): Promise<{testName: string;channel: string; rows: SimpleQueryRowsResponse}> => {
+): Promise<BigQueryResult> => {
 	const bigquery = new BigQuery({
 		projectId: `datatech-platform-${stage.toLowerCase()}`,
 		authClient,

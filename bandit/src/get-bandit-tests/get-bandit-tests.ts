@@ -9,7 +9,10 @@ const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
 
 export async function run(): Promise<QueryLambdaInput> {
 	const banditTests = await queryChannelTests(STAGE, docClient);
+	const epicTests = banditTests[0].Items ?? [];
+	const bannerTests = banditTests[1].Items ?? [];
+	const tests = epicTests.concat(bannerTests);
 	return {
-		tests: banditTests.Items as Test[],
+		 tests: tests as Test[],
 	};
 }

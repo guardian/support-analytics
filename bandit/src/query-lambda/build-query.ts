@@ -11,6 +11,7 @@ export const buildQuery = (
 	const endTimestamp = end.toISOString().replace("T", " ");
 	const startTimestamp = start.toISOString().replace("T", " ");
 	const dateForCurrencyConversionTable = subDays(start, 1); //This table is updated daily  but has a lag of 1 day
+	const channel = (test.channel === 'EPIC') ? 'ACQUISITIONS_EPIC' : 'ACQUISITIONS_SUBSCRIPTIONS_BANNER';
 	return `
 WITH exchange_rates AS (
     SELECT target, date, (1/rate) AS reverse_rate FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
@@ -68,7 +69,7 @@ acquisitions AS (
     FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event AS acq
     CROSS JOIN UNNEST(ab_tests) AS ab
     WHERE event_timestamp >= timestamp '${startTimestamp}' AND event_timestamp <  timestamp '${endTimestamp}'
-    AND component_type = "${test.channel}"
+    AND component_type = "${channel}"
     AND name = '${test.name}'
 ),
 acqusitions_with_av AS (
@@ -114,7 +115,7 @@ views AS (
   CROSS JOIN UNNEST(component_event_array) as ce
   WHERE received_date = '${format(start, "yyyy-MM-dd")}'
   AND ce.event_action = "VIEW"
-  AND ce.component_type =  "${test.channel}"
+  AND ce.component_type =  "${channel}"
   AND ce.ab_test_name = '${test.name}'
   GROUP BY 1,2
 )

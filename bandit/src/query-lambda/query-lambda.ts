@@ -1,7 +1,7 @@
-import type {SimpleQueryRowsResponse} from "@google-cloud/bigquery";
 import * as AWS from "aws-sdk";
 import { set, subHours } from "date-fns";
 import type {  Test } from "../lib/models";
+import type {BigQueryResult} from "./bigquery";
 import { buildAuthClient, getDataForBanditTest} from "./bigquery";
 import {buildWriteRequest, writeBatch} from "./dynamo";
 import {parseResultFromBigQuery} from "./parse-result";
@@ -28,7 +28,7 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	const startTimestamp = start.toISOString().replace("T", " ");
 	const client = await getSSMParam(ssmPath).then(buildAuthClient);
 
-	const resultsFromBigQuery: Array<{testName: string; channel :string; rows: SimpleQueryRowsResponse}> = await Promise.all(
+	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
 		input.tests.map(test => getDataForBanditTest(client, stage, test, input.date))
 	);
 
