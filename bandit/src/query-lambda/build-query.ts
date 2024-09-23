@@ -18,7 +18,7 @@ export const buildQuery = (
 		'Banner1': 'ACQUISITIONS_ENGAGEMENT_BANNER',
 		'Banner2': 'ACQUISITIONS_SUBSCRIPTIONS_BANNER',
 	};
-	const componentType = ComponentTypeMapping[test.channel];
+	const componentType = ComponentTypeMapping[test.channel as Channel];
 
 	return `
 WITH exchange_rates AS (

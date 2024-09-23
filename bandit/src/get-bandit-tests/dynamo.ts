@@ -1,8 +1,8 @@
-function runQuery(
+const runQuery =(
 	stage: string,
 	docClient: AWS.DynamoDB.DocumentClient,
 	channel: string,
-	) {
+	) =>
 	 docClient
 		.query({
 			TableName: `support-admin-console-channel-tests-${stage.toUpperCase()}`,
@@ -20,7 +20,6 @@ function runQuery(
 		})
 		.promise();
 
-}
 export function queryChannelTests(
 	stage: string,
 	docClient: AWS.DynamoDB.DocumentClient
