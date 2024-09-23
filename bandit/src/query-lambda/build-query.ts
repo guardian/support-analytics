@@ -11,7 +11,15 @@ export const buildQuery = (
 	const endTimestamp = end.toISOString().replace("T", " ");
 	const startTimestamp = start.toISOString().replace("T", " ");
 	const dateForCurrencyConversionTable = subDays(start, 1); //This table is updated daily  but has a lag of 1 day
-	const channel = (test.channel.toLowerCase() === 'epic') ? 'ACQUISITIONS_EPIC' : (test.channel.toLowerCase()=== 'banner1') ? 'ACQUISITIONS_ENGAGEMENT_BANNER' :'ACQUISITIONS_SUBSCRIPTIONS_BANNER';
+
+	type Channel = 'Epic' | 'Banner1' | 'Banner2';
+	const ComponentTypeMapping: Record<Channel,string> = {
+		'Epic': 'ACQUISITIONS_EPIC',
+		'Banner1': 'ACQUISITIONS_ENGAGEMENT_BANNER',
+		'Banner2': 'ACQUISITIONS_SUBSCRIPTIONS_BANNER',
+	};
+	const componentType = ComponentTypeMapping[test.channel];
+
 	return `
 WITH exchange_rates AS (
     SELECT target, date, (1/rate) AS reverse_rate FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
@@ -69,7 +77,7 @@ acquisitions AS (
     FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event AS acq
     CROSS JOIN UNNEST(ab_tests) AS ab
     WHERE event_timestamp >= timestamp '${startTimestamp}' AND event_timestamp <  timestamp '${endTimestamp}'
-    AND component_type = "${channel}"
+    AND component_type = "${componentType}"
     AND name = '${test.name}'
 ),
 acqusitions_with_av AS (
@@ -115,7 +123,7 @@ views AS (
   CROSS JOIN UNNEST(component_event_array) as ce
   WHERE received_date = '${format(start, "yyyy-MM-dd")}'
   AND ce.event_action = "VIEW"
-  AND ce.component_type =  "${channel}"
+  AND ce.component_type =  "${componentType}"
   AND ce.ab_test_name = '${test.name}'
   GROUP BY 1,2
 )
