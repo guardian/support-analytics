@@ -16,12 +16,17 @@ export const buildAuthClient = (clientConfig: string): Promise<BaseExternalAccou
 	}
 });
 
+export interface BigQueryResult{
+	testName: string;
+	channel: string;
+	rows: SimpleQueryRowsResponse;
+}
 export const getDataForBanditTest = async (
 	authClient: BaseExternalAccountClient,
 	stage: 'CODE' | 'PROD',
 	test: Test,
 	date: Date = new Date(Date.now()),
-): Promise<{testName: string; rows: SimpleQueryRowsResponse}> => {
+): Promise<BigQueryResult> => {
 	const bigquery = new BigQuery({
 		projectId: `datatech-platform-${stage.toLowerCase()}`,
 		authClient,
@@ -30,9 +35,10 @@ export const getDataForBanditTest = async (
 	const end = set(date, { minutes: 0, seconds: 0, milliseconds: 0 });
 	const start = subHours(end, 1);
 	const testName = test.name;
+	const channel = test.channel;
 	const rows = await bigquery.query({query: buildQuery(test, 'PROD', start, end)});
 	//stage is hardcoded to PROD above as we don't have sufficient data for page views in the CODE tables to run the query successfully
-	return { testName, rows };
+	return { testName,channel, rows };
 }
 
 

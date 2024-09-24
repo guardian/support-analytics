@@ -1,8 +1,9 @@
-export function queryChannelTests(
+const runQuery =(
 	stage: string,
-	docClient: AWS.DynamoDB.DocumentClient
-) {
-	return docClient
+	docClient: AWS.DynamoDB.DocumentClient,
+	channel: string,
+	) =>
+	 docClient
 		.query({
 			TableName: `support-admin-console-channel-tests-${stage.toUpperCase()}`,
 			KeyConditionExpression: "channel = :channel",
@@ -10,7 +11,7 @@ export function queryChannelTests(
 				"#status": "status",
 			},
 			ExpressionAttributeValues: {
-				":channel": "Epic",
+				":channel":channel,
 				":draft": "Draft",
 				":isBanditTest": true,
 			},
@@ -18,4 +19,10 @@ export function queryChannelTests(
 				"#status <> :draft AND isBanditTest = :isBanditTest",
 		})
 		.promise();
+
+export function queryChannelTests(
+	stage: string,
+	docClient: AWS.DynamoDB.DocumentClient
+) {
+	return Promise.all([runQuery(stage,docClient,"Epic"),runQuery(stage,docClient,"Banner1"), runQuery(stage,docClient,"Banner2")]);
 }

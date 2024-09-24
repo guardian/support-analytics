@@ -20,11 +20,12 @@ export interface TestSample {
 export function buildWriteRequest(
 	rows: VariantQueryRow[],
 	testName: string,
+	channel: string,
 	startTimestamp: string
 ): DocumentClient.WriteRequest {
 	return {
 		PutRequest: {
-			Item: buildDynamoRecord(rows, testName, startTimestamp),
+			Item: buildDynamoRecord(rows, testName,channel, startTimestamp),
 		},
 	};
 }
@@ -32,6 +33,7 @@ export function buildWriteRequest(
 function buildDynamoRecord(
 	rows: VariantQueryRow[],
 	testName: string,
+	channel: string,
 	startTimestamp: string
 ): TestSample {
 	const variants = rows.map((row) => ({
@@ -42,7 +44,7 @@ function buildDynamoRecord(
 	}));
 
 	return {
-		testName,
+		testName: channel+ " _ "+ testName,
 		variants,
 		timestamp: startTimestamp,
 	};

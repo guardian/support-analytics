@@ -9,7 +9,8 @@ const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
 
 export async function run(): Promise<QueryLambdaInput> {
 	const banditTests = await queryChannelTests(STAGE, docClient);
+	const tests = banditTests.flatMap(test => test.Items ?? []);
 	return {
-		tests: banditTests.Items as Test[],
+		 tests: tests as Test[],
 	};
 }
