@@ -36,7 +36,9 @@ export const getDataForBanditTest = async (
 	const start = subHours(end, 1);
 	const testName = test.name;
 	const channel = test.channel;
-	const rows = await bigquery.query({query: buildQuery(test, 'PROD', start, end)});
+	const query = buildQuery(test, 'PROD', start, end);
+	console.log('Running query: ', query);
+	const rows = await bigquery.query({query});
 	//stage is hardcoded to PROD above as we don't have sufficient data for page views in the CODE tables to run the query successfully
 	return { testName,channel, rows };
 }
