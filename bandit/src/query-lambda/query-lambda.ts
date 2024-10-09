@@ -38,6 +38,7 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 
 	const writeRequests = resultsFromBigQuery.map(({testName,channel, rows}) => {
 		const parsed = parseResultFromBigQuery(rows);
+		console.log(`Writing row for ${testName}: `, parsed);
 		return buildWriteRequest(parsed, testName,channel, startTimestamp);
 	});
 	if (writeRequests.length > 0) {
