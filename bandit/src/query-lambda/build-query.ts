@@ -119,9 +119,11 @@ views AS (
     ce.ab_test_name AS test_name,
     ce.ab_test_variant AS variant_name,
     COUNT(*) views
-  FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view
+  FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
   CROSS JOIN UNNEST(component_event_array) as ce
-  WHERE received_date = '${format(start, "yyyy-MM-dd")}'
+  -- Include previous day, as a pageview's received_date may be before midnight and a component_event after
+  WHERE received_date >= DATE_SUB('${format(start, "yyyy-MM-dd")}', INTERVAL 1 DAY) AND received_date <= '${format(start, "yyyy-MM-dd")}'
+  AND ce.event_timestamp >= '${startTimestamp}' AND ce.event_timestamp < '${endTimestamp}'
   AND ce.event_action = "VIEW"
   AND ce.component_type =  "${componentType}"
   AND ce.ab_test_name = '${test.name}'
