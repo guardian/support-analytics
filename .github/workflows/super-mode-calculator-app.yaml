@@ -1,0 +1,106 @@
+name: Build super-mode-calculator-app and upload to riff raff
+
+on:
+  pull_request:
+    branches:
+      - "**"
+  push:
+    branches:
+      - main
+
+jobs:
+  super-mode-calculator-app-build:
+    if: >-
+      (github.event.pull_request.head.repo.owner.login == 'guardian' ||
+        github.event_name == 'push')
+
+    name:
+      super mode calculator app build
+    # These permissions are required by guardian/actions-riff-raff
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Env
+        run: env
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: 'yarn'
+          cache-dependency-path: ./super-mode-calculator/yarn.lock
+          node-version-file: super-mode-calculator/.nvmrc
+
+      - name: Yarn install, lint, build
+        working-directory: ./super-mode-calculator
+        run: |
+          yarn install
+          yarn lint
+          yarn run build
+
+      - name: Copy files to Riff Raff package
+        working-directory: ./super-mode-calculator
+        run: |
+          cp package.json target
+          pushd target
+          yarn install --production
+          zip -r super-mode-calculator-qpp ./*
+          popd
+
+      - name: Build cdk
+        working-directory: ./cdk
+        run: |
+          yarn install
+          yarn lint
+          yarn test
+          yarn synth
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          aws-region: eu-west-1
+
+      - name: super-mode-calculator-app riff-raff
+        uses: guardian/actions-riff-raff@v2
+        with:
+          app: super-mode-calculator-app
+          config: |
+            stacks:
+              - support
+            regions:
+              - eu-west-1
+            allowedStages:
+              - CODE
+              - PROD
+            deployments:
+              super-mode-calculator-app-cloudformation:
+                type: cloud-formation
+                app: super-mode-calculator-app
+                parameters:
+                  cloudFormationStackName: super-mode-calculator-app
+                  templateStagePaths:
+                    CODE: SuperModeCalculator-CODE.template.json
+                    PROD: SuperModeCalculator-PROD.template.json
+                  cloudFormationStackByTags: false
+                  prependStackToCloudFormationStackName: true
+
+              super-mode-calculator-app:
+                type: aws-lambda
+                parameters:
+                  prefixStack: false
+                  fileName: super-mode-calculator-app.zip
+                  functionNames:
+                    - super-mode-calculator-app-
+          contentDirectories: |
+            super-mode-calculator-app-cloudformation:
+              - ./cdk/cdk.out/SuperModeCalculator-CODE.template.json
+              - ./cdk/cdk.out/SuperModeCalculator-PROD.template.json
+            super-mode-calculator-app:
+              - ./super-mode-calculator/target/super-mode-calculator-app.zip
