@@ -37,16 +37,16 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/TEST/super-mode-calculator-app/super-mode-calculator-app.zip",
+          "S3Key": "support/TEST/super-mode/super-mode.zip",
         },
         "Environment": {
           "Variables": {
-            "APP": "super-mode-calculator-app",
+            "APP": "super-mode",
             "STACK": "support",
             "STAGE": "TEST",
           },
         },
-        "FunctionName": "super-mode-calculator-app-TEST",
+        "FunctionName": "super-mode-TEST",
         "Handler": "super-mode-calculator/src/lambdas/lambda.handler",
         "MemorySize": 512,
         "Role": {
@@ -59,7 +59,7 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "super-mode-calculator-app",
+            "Value": "super-mode",
           },
           {
             "Key": "gu:cdk:version",
@@ -96,7 +96,7 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "RoleName": "super-mode-calculator-app-TEST",
+        "RoleName": "super-mode-TEST",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -196,7 +196,7 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/TEST/super-mode-calculator-app/super-mode-calculator-app.zip",
+                      "/support/TEST/super-mode/super-mode.zip",
                     ],
                   ],
                 },
@@ -217,7 +217,7 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/TEST/support/super-mode-calculator-app",
+                    ":parameter/TEST/support/super-mode",
                   ],
                 ],
               },
@@ -240,7 +240,7 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/TEST/support/super-mode-calculator-app/*",
+                    ":parameter/TEST/support/super-mode/*",
                   ],
                 ],
               },
@@ -287,7 +287,7 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
           "ReadCapacityUnits": 5,
           "WriteCapacityUnits": 5,
         },
-        "TableName": "super-mode-TEST",
+        "TableName": "super-mode-calculator-TEST",
         "Tags": [
           {
             "Key": "gu:cdk:version",

@@ -7,7 +7,7 @@ import { Schedule } from 'aws-cdk-lib/aws-events';
 import { PolicyStatement, Role, ServicePrincipal} from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
-const appName = 'super-mode-calculator-app';
+const appName = 'super-mode';
 export class SuperModeCalculator extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
 		super(scope, id, props);
@@ -28,7 +28,7 @@ export class SuperModeCalculator extends GuStack {
 				: [];
 
 		const superModeCalculatorTable = new Table(this, 'super-mode-calculator-table', {
-			tableName: `super-mode-${this.stage}`,
+			tableName: `super-mode-calculator-${this.stage}`,
 			removalPolicy: RemovalPolicy.RETAIN,
 			billingMode: BillingMode.PROVISIONED,
 			partitionKey: {
