@@ -66,7 +66,7 @@ export class SuperModeCalculator extends GuStack {
 			new PolicyStatement({
 				actions: ['ssm:GetParameter'],
 				resources: [
-					`arn:aws:ssm:${this.region}:${this.account}:parameter/super-mode-calculator/${this.stage}/gcp-wif-credentials-config`,
+					`arn:aws:ssm:${this.region}:${this.account}:parameter/super-mode/${this.stage}/gcp-wif-credentials-config`,
 				],
 			}),
 		);
@@ -81,7 +81,7 @@ export class SuperModeCalculator extends GuStack {
 			app: appName,
 			functionName: `${appName}-${this.stage}`,
 			runtime: Runtime.NODEJS_20_X,
-			handler: 'super-mode-calculator/src/lambdas/lambda.handler',
+			handler: 'lambdas/lambda.handler',
 			fileName: `${appName}.zip`,
 			rules: scheduleRules,
 			role,

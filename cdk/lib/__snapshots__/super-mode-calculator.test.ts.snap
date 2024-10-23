@@ -47,7 +47,7 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "super-mode-TEST",
-        "Handler": "super-mode-calculator/src/lambdas/lambda.handler",
+        "Handler": "lambdas/lambda.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -146,7 +146,7 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/super-mode-calculator/TEST/gcp-wif-credentials-config",
+                    ":parameter/super-mode/TEST/gcp-wif-credentials-config",
                   ],
                 ],
               },
