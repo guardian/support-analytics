@@ -1,5 +1,5 @@
 import { format, subDays, subHours } from 'date-fns';
-import { REGION_SQL } from '../lambdas/query/regionSql';
+import { REGION_SQL_v2, REGION_SQL_v3 } from '../lambdas/query/regionSql';
 import {
 	SUPER_MODE_MINIMUM_AV,
 	SUPER_MODE_MINIMUM_VIEWS,
@@ -27,24 +27,22 @@ export const buildQueryForSuperMode = (
 
 	return `
 WITH
-acquisitions_with_regions AS (SELECT *,${REGION_SQL}
+acquisitions_with_regions AS (SELECT *,${REGION_SQL_v2}
 		FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event
 		WHERE
 			DATE (event_timestamp) >= '${dateString}'
 		  AND
-			event_timestamp >= TIMESTAMP '${dateHourString}' )
-			,
+			event_timestamp >= TIMESTAMP '${dateHourString}'),
 exchange_rates AS (
 		SELECT target, date, (1/rate) AS reverse_rate
 		FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
-		WHERE date = '${format(dateForCurrencyConversionTable, 'yyyy-MM-dd')}'))
-			,
+		WHERE date = '${format(dateForCurrencyConversionTable, 'yyyy-MM-dd')}'),
 gbp_rate AS (
 		SELECT
 			rate, date
 		FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
 		WHERE target = 'GBP'
-		  AND date = '${format(dateForCurrencyConversionTable, 'yyyy-MM-dd')}'),),
+		  AND date = '${format(dateForCurrencyConversionTable, 'yyyy-MM-dd')}'),
 acquisitions AS (
 		SELECT
 			CASE product
@@ -125,7 +123,7 @@ av AS (
 		ON acq_region.region =acq_agg.country_code
 		GROUP BY 1, 2),
 views_with_regions AS (
-		SELECT *,  ${REGION_SQL}
+		SELECT *,  ${REGION_SQL_v3}
 		FROM
 			datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
 			CROSS JOIN UNNEST(component_event_array) as ce
