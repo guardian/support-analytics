@@ -33,6 +33,7 @@ export const getDataForSuperModeCalculator = async (
 		authClient,
 	});
 	const query = buildQueryForSuperMode('PROD'); //stage is hardcoded to PROD above as we don't have sufficient data for page views in the CODE tables to run the query successfully
+	console.log('Query: ', query);
 	const rows = await bigquery.query({ query });
 	return rows;
 };

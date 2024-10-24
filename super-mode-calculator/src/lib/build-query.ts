@@ -1,5 +1,9 @@
 import { format, subDays, subHours } from 'date-fns';
-import { SUPER_MODE_WINDOW_IN_HOURS } from './constants';
+import {
+	SUPER_MODE_MINIMUM_AV,
+	SUPER_MODE_MINIMUM_VIEWS,
+	SUPER_MODE_WINDOW_IN_HOURS,
+} from './constants';
 import { toDateHourString, toDateString } from './date';
 
 export interface BigQueryResult {
@@ -18,6 +22,9 @@ export const buildQueryForSuperMode = (
 
 	const dateString = toDateString(windowStartDate);
 	const dateHourString = toDateHourString(windowStartDate);
+	const dateForCurrencyConversionTable = toDateString(
+		subDays(windowStartDate, 1),
+	); //This table is updated daily  but has a lag of 1 day
 
 	return `
 		WITH acquisitions_with_regions AS (SELECT *,
@@ -42,21 +49,21 @@ export const buildQueryForSuperMode = (
 														  'ROW'
 													  END
 													  AS region
-										   FROM datatech-platform-prod.datalake.fact_acquisition_event
+										   FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event
 		WHERE
-			DATE (event_timestamp) >= '2024-10-23'
+			DATE (event_timestamp) >= '${dateString}'
 		  AND
-			event_timestamp >= TIMESTAMP '2024-10-23 11:00:00.000' )
+			event_timestamp >= TIMESTAMP '${dateHourString}' )
 			, exchange_rates AS (
 		SELECT target, date, (1/rate) AS reverse_rate
-		FROM datatech-platform-prod.datalake.fixer_exchange_rates
-		WHERE date = '2024-10-22')
+		FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
+		WHERE date = '${dateForCurrencyConversionTable}')
 			, gbp_rate AS (
 		SELECT
 			rate, date
-		FROM datatech-platform-prod.datalake.fixer_exchange_rates
+		FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
 		WHERE target = 'GBP'
-		  AND date = '2024-10-22')
+		  AND date = '${dateForCurrencyConversionTable}')
 			, acquisitions AS (
 		SELECT
 			CASE product
@@ -97,10 +104,10 @@ export const buildQueryForSuperMode = (
 			WHEN 'RECURRING_CONTRIBUTION' THEN amount
 			END
 			AS amount, product, currency, country_code, referrer_url, payment_frequency,
-		FROM datatech-platform-prod.datalake.fact_acquisition_event AS acq
-		WHERE event_timestamp >= timestamp '2024-10-23 11:00:00.000'
+		FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event AS acq
+		WHERE event_timestamp >= timestamp '${dateHourString}'
 		  AND event_timestamp
-			< timestamp '2024-10-23 12:00:00.000'
+			< timestamp '${dateHourString}'
 			)
 			, acquisitions_with_av AS (
 		SELECT
@@ -155,13 +162,13 @@ export const buildQueryForSuperMode = (
 			END
 			AS region
 		FROM
-			datatech-platform-prod.online_traffic.fact_page_view_anonymised
+			datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
 			CROSS JOIN UNNEST(component_event_array) as ce
-		WHERE received_date >= DATE_SUB('2024-10-23'
+		WHERE received_date >= DATE_SUB('${dateString}'
 			, INTERVAL 1 DAY)
-		  AND received_date <= '2024-10-23'
+		  AND received_date <= '${dateString}'
 		  AND
-			ce.event_timestamp >= TIMESTAMP '2024-10-23 11:00:00.000' )
+			ce.event_timestamp >= TIMESTAMP '${dateHourString}' )
 			, views AS (
 		SELECT
 			referrer_url_raw AS url, region, COUNT (*) AS total_views
@@ -180,8 +187,8 @@ export const buildQueryForSuperMode = (
 			 ON
 						 av.url = views.url
 					 AND av.region = views.region
-		WHERE views.total_views > 100
-		  AND av.total_av > 40
+		WHERE views.total_views > ${SUPER_MODE_MINIMUM_VIEWS}
+		  AND av.total_av > ${SUPER_MODE_MINIMUM_AV}
 
 
 	`;
