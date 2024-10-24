@@ -1,8 +1,4 @@
-import type {
-	QueryRowsResponse,
-	SimpleQueryRowsResponse,
-} from '@google-cloud/bigquery';
-import { RowMetadata } from '@google-cloud/bigquery/build/src/table';
+import type { SimpleQueryRowsResponse } from '@google-cloud/bigquery';
 import type { GetQueryResultsOutput } from 'aws-sdk/clients/athena';
 import { z } from 'zod';
 import { QueryReturnedInvalidDataError } from '../../lib/errors';

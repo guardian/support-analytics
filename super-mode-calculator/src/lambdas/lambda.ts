@@ -9,7 +9,6 @@ import {
 	writeRowsForSuperMode,
 } from '../lib/dynamoV2';
 import { getSSMParam } from '../lib/ssm';
-import { queryActiveArticles, writeRows } from './calculate/dynamo';
 import type { QueryRow } from './calculate/parse';
 import { parseResultFromBigQuery } from './calculate/parse';
 import {

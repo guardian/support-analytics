@@ -1,13 +1,11 @@
-import { BigQuery, SimpleQueryRowsResponse } from '@google-cloud/bigquery';
-import { subHours } from 'date-fns';
+import type { SimpleQueryRowsResponse } from '@google-cloud/bigquery';
+import { BigQuery } from '@google-cloud/bigquery';
 import type {
 	BaseExternalAccountClient,
 	ExternalAccountClientOptions,
 } from 'google-auth-library';
 import { ExternalAccountClient } from 'google-auth-library';
-import { BigQueryResult, buildQueryForSuperMode } from './build-query';
-import { SUPER_MODE_WINDOW_IN_HOURS } from './constants';
-import { toDateHourString, toDateString } from './date';
+import { buildQueryForSuperMode } from './build-query';
 
 export const buildAuthClient = (
 	clientConfig: string,
@@ -27,7 +25,7 @@ export const buildAuthClient = (
 export const getDataForSuperModeCalculator = async (
 	authClient: BaseExternalAccountClient,
 	stage: 'CODE' | 'PROD',
-) => {
+): Promise<SimpleQueryRowsResponse> => {
 	const bigquery = new BigQuery({
 		projectId: `datatech-platform-${stage.toLowerCase()}`,
 		authClient,
