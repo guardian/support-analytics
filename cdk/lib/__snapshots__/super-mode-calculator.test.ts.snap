@@ -47,7 +47,7 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "super-mode-TEST",
-        "Handler": "super-mode-calculator/src/lambdas/lambda.handler",
+        "Handler": "lambdas/lambda.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -146,10 +146,40 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/super-mode-calculator/TEST/gcp-wif-credentials-config",
+                    ":parameter/super-mode/TEST/gcp-wif-credentials-config",
                   ],
                 ],
               },
+            },
+            {
+              "Action": "dynamodb:Query",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/super-mode-calculator-TEST",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/super-mode-calculator-TEST/index/*",
+                    ],
+                  ],
+                },
+              ],
             },
             {
               "Action": "dynamodb:BatchWriteItem",
@@ -268,6 +298,36 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
           {
             "AttributeName": "startTimestamp",
             "AttributeType": "S",
+          },
+          {
+            "AttributeName": "endDate",
+            "AttributeType": "S",
+          },
+          {
+            "AttributeName": "endTimestamp",
+            "AttributeType": "S",
+          },
+        ],
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "end",
+            "KeySchema": [
+              {
+                "AttributeName": "endDate",
+                "KeyType": "HASH",
+              },
+              {
+                "AttributeName": "endTimestamp",
+                "KeyType": "RANGE",
+              },
+            ],
+            "Projection": {
+              "ProjectionType": "ALL",
+            },
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": 5,
+              "WriteCapacityUnits": 5,
+            },
           },
         ],
         "KeySchema": [

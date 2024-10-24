@@ -30,6 +30,7 @@
   "dependencies": {
     "aws-sdk": "^2.1620.0",
     "date-fns": "^2.30.0",
+		"@google-cloud/bigquery": "^7.0.0",
     "zod": "^3.22.4"
   }
 }
