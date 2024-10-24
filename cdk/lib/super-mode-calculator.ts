@@ -2,7 +2,7 @@ import {GuScheduledLambda} from "@guardian/cdk";
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import {GuStack, GuStringParameter} from '@guardian/cdk/lib/constructs/core';
 import {type App, Duration, RemovalPolicy} from 'aws-cdk-lib';
-import {AttributeType, BillingMode, Table} from "aws-cdk-lib/aws-dynamodb";
+import {AttributeType, BillingMode, ProjectionType, Table} from "aws-cdk-lib/aws-dynamodb";
 import { Schedule } from 'aws-cdk-lib/aws-events';
 import { PolicyStatement, Role, ServicePrincipal} from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -39,9 +39,19 @@ export class SuperModeCalculator extends GuStack {
 				name: 'startTimestamp',
 				type: AttributeType.STRING,
 			},
+			readCapacity: 5,
+			writeCapacity: 5,
 			pointInTimeRecovery: this.stage === 'PROD',
 		});
 
+		superModeCalculatorTable.addGlobalSecondaryIndex({
+			indexName: 'end',
+			partitionKey: { name: "endDate", type: AttributeType.STRING},
+			sortKey: { name: "endTimestamp", type: AttributeType.STRING},
+			projectionType: ProjectionType.ALL,
+			readCapacity: 5,
+			writeCapacity: 5,
+		});
 
 
 		const role = new Role(this, 'query-lambda-role', {
@@ -67,6 +77,15 @@ export class SuperModeCalculator extends GuStack {
 				actions: ['ssm:GetParameter'],
 				resources: [
 					`arn:aws:ssm:${this.region}:${this.account}:parameter/super-mode/${this.stage}/gcp-wif-credentials-config`,
+				],
+			}),
+		);
+		role.addToPolicy(
+			new PolicyStatement({
+				actions: ['dynamodb:Query'],
+				resources: [
+					`arn:aws:dynamodb:eu-west-1:${this.account}:table/super-mode-calculator-${this.stage}`,
+					`arn:aws:dynamodb:eu-west-1:${this.account}:table/super-mode-calculator-${this.stage}/index/*`
 				],
 			}),
 		);

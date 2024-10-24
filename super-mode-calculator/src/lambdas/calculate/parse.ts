@@ -71,8 +71,6 @@ export function parseResult(result: GetQueryResultsOutput): QueryRow[] {
 export function parseResultFromBigQuery(
 	result: SimpleQueryRowsResponse,
 ): QueryRow[] {
-	console.log('Parsing result from BigQuery RowMetadata[]: ', result[0]);
-
 	const parse = queryRowsSchema.safeParse(result[0]);
 
 	if (!parse.success) {
