@@ -1,4 +1,5 @@
 import { format, subDays, subHours } from 'date-fns';
+import { REGION_SQL } from '../lambdas/query/regionSql';
 import {
 	SUPER_MODE_MINIMUM_AV,
 	SUPER_MODE_MINIMUM_VIEWS,
@@ -22,49 +23,29 @@ export const buildQueryForSuperMode = (
 
 	const dateString = toDateString(windowStartDate);
 	const dateHourString = toDateHourString(windowStartDate);
-	const dateForCurrencyConversionTable = toDateString(
-		subDays(windowStartDate, 1),
-	); //This table is updated daily  but has a lag of 1 day
+	const dateForCurrencyConversionTable = subDays(windowStartDate, 1); //This table is updated daily  but has a lag of 1 day
 
 	return `
-		WITH acquisitions_with_regions AS (SELECT *,
-
-												  CASE
-													  WHEN country_Code = 'GB' THEN 'GB'
-													  WHEN country_Code = 'US' THEN 'US'
-													  WHEN country_Code = 'AU' THEN 'AU'
-													  WHEN country_Code = 'NZ' THEN 'NZ'
-													  WHEN country_Code = 'CA' THEN 'CA'
-													  WHEN country_Code IN (
-																			'AD', 'AL', 'AT', 'BA', 'BE', 'BG', 'BL',
-																			'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES',
-																			'FI', 'FO', 'FR', 'GF', 'GL', 'GP', 'GR',
-																			'HR', 'HU', 'IE', 'IT', 'LI', 'LT', 'LU',
-																			'LV', 'MC', 'ME', 'MF', 'IS', 'MQ', 'MT',
-																			'NL', 'NO', 'PF', 'PL', 'PM', 'PT', 'RE',
-																			'RO', 'RS', 'SE', 'SI', 'SJ', 'SK', 'SM',
-																			'TF', 'TR', 'WF', 'YT', 'VA', 'AX'
-														  ) THEN 'EU'
-													  ELSE
-														  'ROW'
-													  END
-													  AS region
-										   FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event
+WITH
+acquisitions_with_regions AS (SELECT *,${REGION_SQL}
+		FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event
 		WHERE
 			DATE (event_timestamp) >= '${dateString}'
 		  AND
 			event_timestamp >= TIMESTAMP '${dateHourString}' )
-			, exchange_rates AS (
+			,
+exchange_rates AS (
 		SELECT target, date, (1/rate) AS reverse_rate
 		FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
-		WHERE date = '${dateForCurrencyConversionTable}')
-			, gbp_rate AS (
+		WHERE date = '${format(dateForCurrencyConversionTable, 'yyyy-MM-dd')}'))
+			,
+gbp_rate AS (
 		SELECT
 			rate, date
 		FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
 		WHERE target = 'GBP'
-		  AND date = '${dateForCurrencyConversionTable}')
-			, acquisitions AS (
+		  AND date = '${format(dateForCurrencyConversionTable, 'yyyy-MM-dd')}'),),
+acquisitions AS (
 		SELECT
 			CASE product
 			WHEN 'SUPPORTER_PLUS' THEN
@@ -105,11 +86,8 @@ export const buildQueryForSuperMode = (
 			END
 			AS amount, product, currency, country_code, referrer_url, payment_frequency,
 		FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event AS acq
-		WHERE event_timestamp >= timestamp '${dateHourString}'
-		  AND event_timestamp
-			< timestamp '${dateHourString}'
-			)
-			, acquisitions_with_av AS (
+		WHERE event_timestamp >= timestamp '${dateHourString}'),
+acquisitions_with_av AS (
 		SELECT
 			acq.*, date, CASE payment_frequency
 			WHEN 'ONE_OFF' THEN amount * exch.reverse_rate
@@ -121,7 +99,7 @@ export const buildQueryForSuperMode = (
 			JOIN exchange_rates AS exch
 		ON acq.currency = exch.target
 			),
-			acquisitions_with_av_gbp AS (
+acquisitions_with_av_gbp AS (
 		SELECT
 			acq_av.*, CASE acq_av.currency
 			WHEN 'GBP' THEN av_eur
@@ -132,13 +110,13 @@ export const buildQueryForSuperMode = (
 			JOIN gbp_rate
 		ON acq_av.date = gbp_rate.date
 			),
-			acquisitions_agg AS (
+acquisitions_agg AS (
 		SELECT
 			country_code, referrer_url, SUM (av_gbp) sum_av_gbp, COUNT (*) acquisitions
 		FROM acquisitions_with_av_gbp
 		GROUP BY 1, 2
 			),
-			av AS (
+av AS (
 		SELECT
 			acq_agg.referrer_url AS url, acq_region.region AS region, SUM ( acq_agg.sum_av_gbp) AS total_av,
 		FROM
@@ -146,21 +124,8 @@ export const buildQueryForSuperMode = (
 			JOIN acquisitions_agg AS acq_agg
 		ON acq_region.region =acq_agg.country_code
 		GROUP BY 1, 2),
-			views_with_regions AS (
-		SELECT
-			*, CASE
-			WHEN country_key = 'GB' THEN 'GB'
-			WHEN country_key = 'US' THEN 'US'
-			WHEN country_key = 'AU' THEN 'AU'
-			WHEN country_key = 'NZ' THEN 'NZ'
-			WHEN country_key = 'CA' THEN 'CA'
-			WHEN country_key IN (
-			'AD', 'AL', 'AT', 'BA', 'BE', 'BG', 'BL', 'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FO', 'FR', 'GF', 'GL', 'GP', 'GR', 'HR', 'HU', 'IE', 'IT', 'LI', 'LT', 'LU', 'LV', 'MC', 'ME', 'MF', 'IS', 'MQ', 'MT', 'NL', 'NO', 'PF', 'PL', 'PM', 'PT', 'RE', 'RO', 'RS', 'SE', 'SI', 'SJ', 'SK', 'SM', 'TF', 'TR', 'WF', 'YT', 'VA', 'AX'
-			) THEN 'EU'
-			ELSE
-			'ROW'
-			END
-			AS region
+views_with_regions AS (
+		SELECT *,  ${REGION_SQL}
 		FROM
 			datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
 			CROSS JOIN UNNEST(component_event_array) as ce
@@ -169,27 +134,22 @@ export const buildQueryForSuperMode = (
 		  AND received_date <= '${dateString}'
 		  AND
 			ce.event_timestamp >= TIMESTAMP '${dateHourString}' )
-			, views AS (
+			,
+views AS (
 		SELECT
 			referrer_url_raw AS url, region, COUNT (*) AS total_views
 		FROM
 			views_with_regions
 		GROUP BY 1, 2
 			)
-		SELECT av.url,
-			   av.region,
-			   av.total_av AS totalAv,
-			   views.total_views AS totalViews,
-			   av.total_av / views.total_views AS avPerView
-		FROM av
-				 INNER JOIN
-			 views
-			 ON
-						 av.url = views.url
-					 AND av.region = views.region
-		WHERE views.total_views > ${SUPER_MODE_MINIMUM_VIEWS}
-		  AND av.total_av > ${SUPER_MODE_MINIMUM_AV}
-
-
+SELECT av.url,
+	   av.region,
+	   av.total_av AS totalAv,
+	   views.total_views AS totalViews,
+	   av.total_av / views.total_views AS avPerView
+	FROM av
+	INNER JOIN views ON av.url = views.url AND av.region = views.region
+	WHERE views.total_views > ${SUPER_MODE_MINIMUM_VIEWS}
+	AND av.total_av > ${SUPER_MODE_MINIMUM_AV}
 	`;
 };
