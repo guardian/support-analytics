@@ -13,10 +13,9 @@ const runQuery =(
 			ExpressionAttributeValues: {
 				":channel":channel,
 				":draft": "Draft",
-				":isBanditTest": true,
 			},
 			FilterExpression:
-				"#status <> :draft AND isBanditTest = :isBanditTest",
+				"#status <> :draft",
 		})
 		.promise();
 
