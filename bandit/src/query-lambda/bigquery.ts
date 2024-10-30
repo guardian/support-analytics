@@ -1,6 +1,6 @@
 import type { SimpleQueryRowsResponse} from "@google-cloud/bigquery";
 import {BigQuery} from "@google-cloud/bigquery";
-import {set, addHours} from "date-fns";
+import {addHours} from "date-fns";
 import type { BaseExternalAccountClient, ExternalAccountClientOptions } from 'google-auth-library';
 import { ExternalAccountClient } from 'google-auth-library';
 import type {Test} from "../lib/models";
