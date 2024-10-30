@@ -33,7 +33,7 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	const client = await getSSMParam(ssmPath).then(buildAuthClient);
 
 	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
-		input.tests.map(test => getDataForBanditTest(client, stage, test, input.date))
+		input.tests.map(test => getDataForBanditTest(client, stage, test, start))
 	);
 
 	const writeRequests = resultsFromBigQuery.map(({testName,channel, rows}) => {
