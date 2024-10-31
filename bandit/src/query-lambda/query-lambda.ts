@@ -23,17 +23,17 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 
 	const ssmPath = `/bandit-testing/${stage}/gcp-wif-credentials-config`;
 	const date = input.date ?? new Date(Date.now());
-	const end = set(date, { minutes: 0, seconds: 0, milliseconds: 0 });
+	const currentHour = set(date, { minutes: 0, seconds: 0, milliseconds: 0 });
 	/**
 	 * Look back at the hour before last, to get a more complete set of events per hour.
 	 * This is because component_events can arrive in the pageview table late.
 	 */
-	const start = subHours(end, 2);
+	const start = subHours(currentHour, 2);
 	const startTimestamp = start.toISOString().replace("T", " ");
 	const client = await getSSMParam(ssmPath).then(buildAuthClient);
 
 	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
-		input.tests.map(test => getDataForBanditTest(client, stage, test, input.date))
+		input.tests.map(test => getDataForBanditTest(client, stage, test, start))
 	);
 
 	const writeRequests = resultsFromBigQuery.map(({testName,channel, rows}) => {
