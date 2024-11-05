@@ -1,5 +1,5 @@
 import { format, subDays, subHours } from 'date-fns';
-import { REGION_SQL_v2, REGION_SQL_v3 } from '../lambdas/query/regionSql';
+import { regionSql } from '../lambdas/query/regionSql';
 import {
 	SUPER_MODE_MINIMUM_AV,
 	SUPER_MODE_MINIMUM_VIEWS,
@@ -27,7 +27,7 @@ export const buildQueryForSuperMode = (
 
 	return `
 WITH
-acquisitions_with_regions AS (SELECT *,${REGION_SQL_v2}
+acquisitions_with_regions AS (SELECT *,${regionSql('country_Code')}
 		FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event
 		WHERE
 			DATE (event_timestamp) >= '${dateString}'
@@ -123,7 +123,7 @@ av AS (
 		ON acq_region.region =acq_agg.country_code
 		GROUP BY 1, 2),
 views_with_regions AS (
-		SELECT *,  ${REGION_SQL_v3}
+		SELECT *,  ${regionSql('country_key')}
 		FROM
 			datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
 			CROSS JOIN UNNEST(component_event_array) as ce
