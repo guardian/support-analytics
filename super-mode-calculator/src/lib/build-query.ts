@@ -19,7 +19,8 @@ export const buildQueryForSuperMode = (
 	stage: 'CODE' | 'PROD',
 	now: Date = new Date(),
 ) => {
-	const windowStartDate = subHours(now, SUPER_MODE_WINDOW_IN_HOURS);
+	const start = subHours(now, 1);
+	const windowStartDate = subHours(start, SUPER_MODE_WINDOW_IN_HOURS);
 
 	const dateString = toDateString(windowStartDate);
 	const dateHourString = toDateHourString(windowStartDate);
