@@ -19,12 +19,13 @@ export const buildQueryForSuperMode = (
 	stage: 'CODE' | 'PROD',
 	now: Date = new Date(),
 ) => {
-	const start = subHours(now, 1);
-	const windowStartDate = subHours(start, SUPER_MODE_WINDOW_IN_HOURS);
+	const end = subHours(now, 1);
+	const windowStartDate = subHours(end, SUPER_MODE_WINDOW_IN_HOURS);
 
 	const dateString = toDateString(windowStartDate);
 	const dateHourString = toDateHourString(windowStartDate);
 	const dateForCurrencyConversionTable = subDays(windowStartDate, 1); //This table is updated daily  but has a lag of 1 day
+	const endDateHourString = toDateHourString(end);
 
 	return `
 WITH
@@ -33,7 +34,7 @@ acquisitions_with_regions AS (SELECT *,${regionSql('country_Code')}
 		WHERE
 			DATE (event_timestamp) >= '${dateString}'
 		  AND
-			event_timestamp >= TIMESTAMP '${dateHourString}'),
+			event_timestamp >= TIMESTAMP '${dateHourString}' AND event_timestamp < TIMESTAMP '${endDateHourString}'),
 exchange_rates AS (
 		SELECT target, date, (1/rate) AS reverse_rate
 		FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
@@ -85,7 +86,7 @@ acquisitions AS (
 			END
 			AS amount, product, currency, country_code, referrer_url, payment_frequency,
 		FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event AS acq
-		WHERE event_timestamp >= timestamp '${dateHourString}'),
+		WHERE event_timestamp >= TIMESTAMP '${dateHourString}' AND event_timestamp < TIMESTAMP '${endDateHourString}'),
 acquisitions_with_av AS (
 		SELECT
 			acq.*, date, CASE payment_frequency
@@ -132,7 +133,7 @@ views_with_regions AS (
 			, INTERVAL 1 DAY)
 		  AND received_date <= '${dateString}'
 		  AND
-			ce.event_timestamp >= TIMESTAMP '${dateHourString}' )
+			ce.event_timestamp >= TIMESTAMP '${dateHourString}'  AND ce.event_timestamp < TIMESTAMP '${endDateHourString}')
 			,
 views AS (
 		SELECT
