@@ -1,3 +1,4 @@
+import type { SimpleQueryRowsResponse } from '@google-cloud/bigquery';
 import type { GetQueryResultsOutput } from 'aws-sdk/clients/athena';
 import { z } from 'zod';
 import { QueryReturnedInvalidDataError } from '../../lib/errors';
@@ -57,6 +58,19 @@ export function parseResult(result: GetQueryResultsOutput): QueryRow[] {
 	const parse = queryRowsSchema.safeParse(data);
 
 	if (!parse.success) {
+		throw new QueryReturnedInvalidDataError();
+	}
+
+	return parse.data;
+}
+
+export function parseResultFromBigQuery(
+	result: SimpleQueryRowsResponse,
+): QueryRow[] {
+	const parse = queryRowsSchema.safeParse(result[0]);
+
+	if (!parse.success) {
+		console.log(parse.error);
 		throw new QueryReturnedInvalidDataError();
 	}
 

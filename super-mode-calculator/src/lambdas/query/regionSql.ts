@@ -1,11 +1,12 @@
-export const REGION_SQL = `
+export const regionSql = (columnName: string): string => {
+	return `
 CASE
-WHEN countryCode = 'GB' THEN 'GB'
-WHEN countryCode = 'US' THEN 'US'
-WHEN countryCode = 'AU' THEN 'AU'
-WHEN countryCode = 'NZ' THEN 'NZ'
-WHEN countryCode = 'CA' THEN 'CA'
-WHEN countryCode IN (
+WHEN ${columnName} = 'GB' THEN 'GB'
+WHEN ${columnName}= 'US' THEN 'US'
+WHEN ${columnName} = 'AU' THEN 'AU'
+WHEN ${columnName} = 'NZ' THEN 'NZ'
+WHEN ${columnName} = 'CA' THEN 'CA'
+WHEN ${columnName} IN (
 	'AD', 'AL', 'AT', 'BA', 'BE', 'BG', 'BL',
 	'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES',
 	'FI', 'FO', 'FR', 'GF', 'GL', 'GP', 'GR',
@@ -20,3 +21,4 @@ ELSE
 END
 AS region
 `;
+};

@@ -6,7 +6,7 @@ import {
 } from '../../lib/constants';
 import { toDateHourString, toDateString } from '../../lib/date';
 import { Query } from '../../lib/query';
-import { REGION_SQL } from './regionSql';
+import { regionSql } from './regionSql';
 
 export function getQuery(stage: string, now: Date = new Date()): Query {
 	const windowStartDate = subHours(now, SUPER_MODE_WINDOW_IN_HOURS);
@@ -20,7 +20,7 @@ WITH
   acquisitions_with_regions AS (
   SELECT
     *,
-	${REGION_SQL}
+	${regionSql('countryCode')}
   FROM
     acquisition_events_${stage.toLowerCase()}
   WHERE
@@ -39,7 +39,7 @@ WITH
   views_with_regions AS (
 	SELECT
 	  *,
-	  ${REGION_SQL}
+	  ${regionSql('countryCode')}
 	FROM
 	  epic_views_${stage.toLowerCase()}
     WHERE
