@@ -4,7 +4,6 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
-      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuScheduledLambda",
     ],
@@ -15,15 +14,6 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-    "ScheduleState": {
-      "AllowedValues": [
-        "ENABLED",
-        "DISABLED",
-      ],
-      "Default": "ENABLED",
-      "Description": "The state of the schedule",
-      "Type": "String",
     },
   },
   "Resources": {
@@ -81,6 +71,43 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
         "Timeout": 30,
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "SuperModeCalculatorSuperModeCalculatorrate1hour07DE85BC7": {
+      "Properties": {
+        "ScheduleExpression": "rate(1 hour)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "SuperModeCalculatorC30EED85",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "SuperModeCalculatorSuperModeCalculatorrate1hour0AllowEventRuleSuperModeCalculatorED95104E7D359CFF": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SuperModeCalculatorC30EED85",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "SuperModeCalculatorSuperModeCalculatorrate1hour07DE85BC7",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
     },
     "querylambdaroleC6C8A94B": {
       "Properties": {
