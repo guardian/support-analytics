@@ -1,6 +1,6 @@
 import {GuScheduledLambda} from "@guardian/cdk";
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import {GuStack, GuStringParameter} from '@guardian/cdk/lib/constructs/core';
+import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import {type App, Duration, RemovalPolicy} from 'aws-cdk-lib';
 import {AttributeType, BillingMode, ProjectionType, Table} from "aws-cdk-lib/aws-dynamodb";
 import { Schedule } from 'aws-cdk-lib/aws-events';
@@ -12,20 +12,11 @@ export class SuperModeCalculator extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
 		super(scope, id, props);
 
-		const scheduleState = new GuStringParameter(this, 'ScheduleState', {
-			description: 'The state of the schedule',
-			default: 'ENABLED',
-			allowedValues: ['ENABLED', 'DISABLED'],
-		});
-
-		const scheduleRules =
-			scheduleState.valueAsString === 'ENABLED'
-				? [
+		const scheduleRules = [
 					{
 						schedule: Schedule.rate(Duration.minutes(60)),
 					},
 				]
-				: [];
 
 		const superModeCalculatorTable = new Table(this, 'super-mode-calculator-table', {
 			tableName: `super-mode-calculator-${this.stage}`,
