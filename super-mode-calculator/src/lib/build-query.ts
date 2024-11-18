@@ -31,117 +31,90 @@ export const buildQueryForSuperMode = (
 WITH
 acquisitions_with_regions AS (SELECT *,${regionSql('country_Code')}
 		FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event
-		WHERE
-			DATE (event_timestamp) >= '${dateString}'
-		  AND
-			event_timestamp >= TIMESTAMP '${dateHourString}' AND event_timestamp < TIMESTAMP '${endDateHourString}'),
+		WHERE DATE (event_timestamp) >= '${dateString}' AND
+		event_timestamp >= TIMESTAMP '${dateHourString}' AND event_timestamp < TIMESTAMP '${endDateHourString}'),
 exchange_rates AS (
 		SELECT target, date, (1/rate) AS reverse_rate
 		FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
 		WHERE date = '${format(dateForCurrencyConversionTable, 'yyyy-MM-dd')}'),
 gbp_rate AS (
-		SELECT
-			rate, date
+		SELECT rate, date
 		FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
-		WHERE target = 'GBP'
-		  AND date = '${format(dateForCurrencyConversionTable, 'yyyy-MM-dd')}'),
+		WHERE target = 'GBP' AND date = '${format(
+			dateForCurrencyConversionTable,
+			'yyyy-MM-dd',
+		)}'),
 acquisitions AS (
 		SELECT
 			CASE product
-			WHEN 'SUPPORTER_PLUS' THEN
-			CASE currency
-			WHEN 'GBP' THEN
-			CASE payment_frequency
-			WHEN 'MONTHLY' THEN 12
-			WHEN 'ANNUAL' THEN 120
-			END
-			WHEN 'USD' THEN
-			CASE payment_frequency
-			WHEN 'MONTHLY' THEN 15
-			WHEN 'ANNUAL' THEN 150
-			END
-			WHEN 'AUD' THEN
-			CASE payment_frequency
-			WHEN 'MONTHLY' THEN 20
-			WHEN 'ANNUAL' THEN 200
-			END
-			WHEN 'EUR' THEN
-			CASE payment_frequency
-			WHEN 'MONTHLY' THEN 12
-			WHEN 'ANNUAL' THEN 120
-			END
-			WHEN 'NZD' THEN
-			CASE payment_frequency
-			WHEN 'MONTHLY' THEN 20
-			WHEN 'ANNUAL' THEN 200
-			END
-			WHEN 'CAD' THEN
-			CASE payment_frequency
-			WHEN 'MONTHLY' THEN 15
-			WHEN 'ANNUAL' THEN 150
-			END
-			END
-			WHEN 'CONTRIBUTION' THEN amount
-			WHEN 'RECURRING_CONTRIBUTION' THEN amount
-			END
+				WHEN 'SUPPORTER_PLUS' THEN
+					CASE currency
+						WHEN 'GBP' THEN
+							CASE payment_frequency
+								WHEN 'MONTHLY' THEN 12
+								WHEN 'ANNUAL' THEN 120
+								END
+						WHEN 'USD' THEN
+							CASE payment_frequency
+								WHEN 'MONTHLY' THEN 15
+								WHEN 'ANNUAL' THEN 150
+								END
+						WHEN 'AUD' THEN
+							CASE payment_frequency
+								WHEN 'MONTHLY' THEN 20
+								WHEN 'ANNUAL' THEN 200
+								END
+						WHEN 'EUR' THEN
+							CASE payment_frequency
+								WHEN 'MONTHLY' THEN 12
+								WHEN 'ANNUAL' THEN 120
+								END
+						WHEN 'NZD' THEN
+							CASE payment_frequency
+								WHEN 'MONTHLY' THEN 20
+								WHEN 'ANNUAL' THEN 200
+								END
+						WHEN 'CAD' THEN
+							CASE payment_frequency
+								WHEN 'MONTHLY' THEN 15
+								WHEN 'ANNUAL' THEN 150
+								END
+						END
+				WHEN 'CONTRIBUTION' THEN amount
+				WHEN 'RECURRING_CONTRIBUTION' THEN amount
+				END
 			AS amount, product, currency, country_code, referrer_url, payment_frequency,
-		FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event AS acq
-		WHERE event_timestamp >= TIMESTAMP '${dateHourString}' AND event_timestamp < TIMESTAMP '${endDateHourString}'),
+			FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event AS acq
+			WHERE event_timestamp >= TIMESTAMP '${dateHourString}' AND event_timestamp < TIMESTAMP '${endDateHourString}'),
 acquisitions_with_av AS (
-		SELECT
-			acq.*, date, CASE payment_frequency
+		SELECT acq.*, date, CASE payment_frequency
 			WHEN 'ONE_OFF' THEN amount * exch.reverse_rate
 			WHEN 'MONTHLY' THEN (amount * exch.reverse_rate)*12
 			WHEN 'ANNUAL' THEN amount * exch.reverse_rate
 			END
-			AS av_eur, exch.reverse_rate
-		FROM acquisitions AS acq
-			JOIN exchange_rates AS exch
-		ON acq.currency = exch.target
-			),
+			AS av_eur, exch.reverse_rate FROM acquisitions AS acq JOIN exchange_rates AS exch ON acq.currency = exch.target),
 acquisitions_with_av_gbp AS (
-		SELECT
-			acq_av.*, CASE acq_av.currency
-			WHEN 'GBP' THEN av_eur
-			ELSE av_eur * (gbp_rate.rate)
+		SELECT acq_av.*, CASE acq_av.currency
+			WHEN 'GBP' THEN av_eur ELSE av_eur * (gbp_rate.rate)
 			END
-			AS av_gbp
-		FROM acquisitions_with_av AS acq_av
-			JOIN gbp_rate
-		ON acq_av.date = gbp_rate.date
-			),
+			AS av_gbp FROM acquisitions_with_av AS acq_av JOIN gbp_rate	ON acq_av.date = gbp_rate.date),
 acquisitions_agg AS (
-		SELECT
-			country_code, referrer_url, SUM (av_gbp) sum_av_gbp, COUNT (*) acquisitions
+		SELECT country_code, referrer_url, SUM (av_gbp) sum_av_gbp, COUNT (*) acquisitions
 		FROM acquisitions_with_av_gbp
-		GROUP BY 1, 2
-			),
+		GROUP BY 1, 2),
 av AS (
-		SELECT
-			acq_agg.referrer_url AS url, acq_region.region AS region, SUM ( acq_agg.sum_av_gbp) AS total_av,
-		FROM
-			acquisitions_with_regions as acq_region
-			JOIN acquisitions_agg AS acq_agg
-		ON acq_region.region =acq_agg.country_code
+		SELECT acq_agg.referrer_url AS url, acq_region.region AS region, SUM ( acq_agg.sum_av_gbp) AS total_av,
+		FROM acquisitions_with_regions as acq_region JOIN acquisitions_agg AS acq_agg ON acq_region.region =acq_agg.country_code
 		GROUP BY 1, 2),
 views_with_regions AS (
 		SELECT *,  ${regionSql('country_key')}
-		FROM
-			datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
-			CROSS JOIN UNNEST(component_event_array) as ce
-		WHERE received_date >= DATE_SUB('${dateString}'
-			, INTERVAL 1 DAY)
-		  AND received_date <= '${dateString}'
-		  AND
-			ce.event_timestamp >= TIMESTAMP '${dateHourString}'  AND ce.event_timestamp < TIMESTAMP '${endDateHourString}')
-			,
+		FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised CROSS JOIN UNNEST(component_event_array) as ce
+		WHERE received_date >= DATE_SUB('${dateString}', INTERVAL 1 DAY) AND received_date <= '${dateString}' AND  ce.component_type = 'ACQUISITIONS_EPIC' AND ce.event_action = 'VIEW' AND
+		ce.event_timestamp >= TIMESTAMP '${dateHourString}'  AND ce.event_timestamp < TIMESTAMP '${endDateHourString}')	,
 views AS (
-		SELECT
-			referrer_url_raw AS url, region, COUNT (*) AS total_views
-		FROM
-			views_with_regions
-		GROUP BY 1, 2
-			)
+		SELECT referrer_url_raw AS url, region, COUNT (*) AS total_views
+		FROM views_with_regions
+		GROUP BY 1, 2)
 SELECT av.url,
 	   av.region,
 	   av.total_av AS totalAv,
