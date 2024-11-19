@@ -112,7 +112,7 @@ views_with_regions AS (
 		WHERE received_date >= DATE_SUB('${dateString}', INTERVAL 1 DAY) AND received_date <= '${dateString}' AND  ce.component_type = 'ACQUISITIONS_EPIC' AND ce.event_action = 'VIEW' AND
 		ce.event_timestamp >= TIMESTAMP '${dateHourString}'  AND ce.event_timestamp < TIMESTAMP '${endDateHourString}')	,
 views AS (
-		SELECT referrer_url_raw AS url, region, COUNT (*) AS total_views
+		SELECT CONCAT(host,path) AS url, region, COUNT (*) AS total_views
 		FROM views_with_regions
 		GROUP BY 1, 2)
 SELECT av.url,
