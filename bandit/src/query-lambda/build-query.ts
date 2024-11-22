@@ -39,32 +39,32 @@ acquisitions AS (
             WHEN 'GBP' THEN
               CASE payment_frequency
                 WHEN 'MONTHLY' THEN 12
-                WHEN 'ANNUAL' THEN 120
+                WHEN 'ANNUALLY' THEN 120
                 END
             WHEN 'USD' THEN
               CASE payment_frequency
                 WHEN 'MONTHLY' THEN 15
-                WHEN 'ANNUAL' THEN 150
+                WHEN 'ANNUALLY' THEN 150
                 END
             WHEN 'AUD' THEN
               CASE payment_frequency
                 WHEN 'MONTHLY' THEN 20
-                WHEN 'ANNUAL' THEN 200
+                WHEN 'ANNUALLY' THEN 200
                 END
             WHEN 'EUR' THEN
               CASE payment_frequency
                 WHEN 'MONTHLY' THEN 12
-                WHEN 'ANNUAL' THEN 120
+                WHEN 'ANNUALLY' THEN 120
                 END
             WHEN 'NZD' THEN
               CASE payment_frequency
                 WHEN 'MONTHLY' THEN 20
-                WHEN 'ANNUAL' THEN 200
+                WHEN 'ANNUALLY' THEN 200
                 END
             WHEN 'CAD' THEN
               CASE payment_frequency
                 WHEN 'MONTHLY' THEN 15
-                WHEN 'ANNUAL' THEN 150
+                WHEN 'ANNUALLY' THEN 150
                 END
             END
         WHEN 'CONTRIBUTION' THEN amount
@@ -87,7 +87,7 @@ acqusitions_with_av AS (
     CASE payment_frequency
       WHEN 'ONE_OFF' THEN amount * exch.reverse_rate
       WHEN 'MONTHLY' THEN (amount * exch.reverse_rate)*12
-      WHEN 'ANNUAL' THEN amount * exch.reverse_rate
+      WHEN 'ANNUALLY' THEN amount * exch.reverse_rate
       END
     AS av_eur,
     exch.reverse_rate
