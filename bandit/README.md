@@ -4,7 +4,7 @@ Defines two lambdas, `get-bandit-tests` and `query-lambda`, that form a state ma
 
 ![Overall architecture](docs/overall-architecture.png)
 Diagram showing how this state machine (shown here as "bandit sampling") fits into the existing architecture.
-The multi-armed bandit decision-making happens in SDC.
+The multi-armed bandit decision-making happens in SDC. (Original [here](https://docs.google.com/drawings/d/18FQDS9bT2ciTur-OHoaWfw6vMFxP3Zf-pz8_GCwM8FE))
 
 ### get-bandit-tests
 
