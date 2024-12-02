@@ -3,7 +3,7 @@ import {BigQuery} from "@google-cloud/bigquery";
 import {addHours} from "date-fns";
 import type { BaseExternalAccountClient, ExternalAccountClientOptions } from 'google-auth-library';
 import { ExternalAccountClient } from 'google-auth-library';
-import type {Test} from "../lib/models";
+import type {BanditTestConfig} from "../lib/models";
 import {buildQuery} from "./build-query";
 
 export const buildAuthClient = (clientConfig: string): Promise<BaseExternalAccountClient> => new Promise((resolve, reject) => {
@@ -16,15 +16,16 @@ export const buildAuthClient = (clientConfig: string): Promise<BaseExternalAccou
 	}
 });
 
-export interface BigQueryResult{
+export interface BigQueryResult {
 	testName: string;
 	channel: string;
 	rows: SimpleQueryRowsResponse;
 }
+
 export const getDataForBanditTest = async (
 	authClient: BaseExternalAccountClient,
 	stage: 'CODE' | 'PROD',
-	test: Test,
+	test: BanditTestConfig,
 	start: Date,
 ): Promise<BigQueryResult> => {
 	const bigquery = new BigQuery({

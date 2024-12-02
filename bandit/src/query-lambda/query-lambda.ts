@@ -1,6 +1,6 @@
 import * as AWS from "aws-sdk";
 import { set, subHours } from "date-fns";
-import type {  Test } from "../lib/models";
+import type {BanditTestConfig, Methodology, Test} from "../lib/models";
 import type {BigQueryResult} from "./bigquery";
 import { buildAuthClient, getDataForBanditTest} from "./bigquery";
 import {buildWriteRequest, writeBatch} from "./dynamo";
@@ -14,6 +14,17 @@ const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
 export interface QueryLambdaInput {
 	tests: Test[];
 	date?: Date;
+}
+
+// Each test may contain 1 or more bandit methodologies
+const getTestConfigs = (test: Test): BanditTestConfig[] => {
+	const bandits: Methodology[] = (test.methodologies ?? []).filter(
+		(method) => method.name === 'EpsilonGreedyBandit',
+	);
+	return bandits.map((method) => ({
+		name: method.testName ?? test.name, // if the methodology should be tracked with a different name then use that
+		channel: test.channel,
+	}));
 }
 
 export async function run(input: QueryLambdaInput): Promise<void> {
@@ -32,8 +43,11 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	const startTimestamp = start.toISOString().replace("T", " ");
 	const client = await getSSMParam(ssmPath).then(buildAuthClient);
 
+	const banditTestConfigs: BanditTestConfig[] = input.tests.flatMap(test => getTestConfigs(test));
+
 	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
-		input.tests.map(test => getDataForBanditTest(client, stage, test, start))
+		// input.tests.map(test => getDataForBanditTest(client, stage, test, start))
+		banditTestConfigs.map(test => getDataForBanditTest(client, stage, test, start))
 	);
 
 	const writeRequests = resultsFromBigQuery.map(({testName,channel, rows}) => {
