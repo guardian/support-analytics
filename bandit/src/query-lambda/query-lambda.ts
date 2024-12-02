@@ -46,7 +46,6 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	const banditTestConfigs: BanditTestConfig[] = input.tests.flatMap(test => getTestConfigs(test));
 
 	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
-		// input.tests.map(test => getDataForBanditTest(client, stage, test, start))
 		banditTestConfigs.map(test => getDataForBanditTest(client, stage, test, start))
 	);
 
