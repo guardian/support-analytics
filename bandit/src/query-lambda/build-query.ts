@@ -1,9 +1,9 @@
 import {format, subDays} from "date-fns";
-import type {Test} from "../lib/models";
+import type {BanditTestConfig} from "../lib/models";
 
 const ANNUALISED_VALUE_CAP = 250;
 export const buildQuery = (
-	test: Test,
+	test: BanditTestConfig,
 	stage: "CODE" | "PROD",
 	start: Date,
 	end: Date,
