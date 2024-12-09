@@ -8,7 +8,7 @@ const STAGE: string = process.env.STAGE ?? "PROD";
 const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
 
 const filterBanditTests = (tests: Test[]): Test[] =>
-	tests.filter(test => !!test.methodologies?.find((method) => method.name === 'EpsilonGreedyBandit'));
+	tests.filter(test => !!test.methodologies?.find((method) => method.name === 'EpsilonGreedyBandit'|| method.name === 'Roulette'));
 
 export async function run(): Promise<QueryLambdaInput> {
 	const tests = (await queryChannelTests(STAGE, docClient)).flatMap(test => test.Items ?? []) as Test[];
