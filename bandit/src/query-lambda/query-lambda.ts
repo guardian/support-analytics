@@ -19,7 +19,7 @@ export interface QueryLambdaInput {
 // Each test may contain 1 or more bandit methodologies
 const getTestConfigs = (test: Test): BanditTestConfig[] => {
 	const bandits: Methodology[] = (test.methodologies ?? []).filter(
-		(method) => method.name === 'EpsilonGreedyBandit',
+		(method) => method.name === 'EpsilonGreedyBandit'|| method.name === 'Roulette',
 	);
 	return bandits.map((method) => ({
 		name: method.testName ?? test.name, // if the methodology should be tracked with a different name then use that
