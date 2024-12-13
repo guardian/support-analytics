@@ -1,5 +1,5 @@
 import { format, subDays, subHours } from 'date-fns';
-import { regionSql } from '../lambdas/regionSql';
+import { regionSql } from '../regionSql';
 import {
 	SUPER_MODE_MINIMUM_AV,
 	SUPER_MODE_MINIMUM_VIEWS,

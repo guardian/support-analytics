@@ -3,12 +3,12 @@ import * as AWS from 'aws-sdk';
 import {
 	buildAuthClient,
 	getDataForSuperModeCalculator,
-} from '../lib/bigquery';
+} from './lib/bigquery';
 import {
 	queryActiveArticlesForSuperMode,
 	writeRowsForSuperMode,
-} from '../lib/dynamoV2';
-import { getSSMParam } from '../lib/ssm';
+} from './lib/dynamoV2';
+import { getSSMParam } from './lib/ssm';
 import type { QueryRow } from './parse';
 import { parseResultFromBigQuery } from './parse';
 import { isCurrentlyInSuperMode, shouldEnterSuperMode } from './superMode';

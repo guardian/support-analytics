@@ -1,6 +1,6 @@
 import type { SimpleQueryRowsResponse } from '@google-cloud/bigquery';
 import { z } from 'zod';
-import { QueryReturnedInvalidDataError } from '../lib/errors';
+import { QueryReturnedInvalidDataError } from './lib/errors';
 
 export type Region = 'GB' | 'US' | 'AU' | 'NZ' | 'CA' | 'EU' | 'ROW';
 
