@@ -9,12 +9,9 @@ import {
 	writeRowsForSuperMode,
 } from '../lib/dynamoV2';
 import { getSSMParam } from '../lib/ssm';
-import type { QueryRow } from './calculate/parse';
-import { parseResultFromBigQuery } from './calculate/parse';
-import {
-	isCurrentlyInSuperMode,
-	shouldEnterSuperMode,
-} from './calculate/superMode';
+import type { QueryRow } from './parse';
+import { parseResultFromBigQuery } from './parse';
+import { isCurrentlyInSuperMode, shouldEnterSuperMode } from './superMode';
 
 const stage = process.env.STAGE;
 const docClient = new AWS.DynamoDB.DocumentClient({ region: 'eu-west-1' });

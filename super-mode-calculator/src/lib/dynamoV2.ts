@@ -2,7 +2,7 @@ import type { AWSError } from 'aws-sdk';
 import type { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import type { PromiseResult } from 'aws-sdk/lib/request';
 import { addDays, addHours } from 'date-fns';
-import type { QueryRow } from '../lambdas/calculate/parse';
+import type { QueryRow } from '../lambdas/parse';
 import { SUPER_MODE_DURATION_IN_HOURS } from './constants';
 import { toDateHourString, toDateString } from './date';
 
