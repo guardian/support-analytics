@@ -1,9 +1,6 @@
 import type { SimpleQueryRowsResponse } from '@google-cloud/bigquery';
 import * as AWS from 'aws-sdk';
-import {
-	buildAuthClient,
-	getDataForSuperModeCalculator,
-} from './lib/bigquery';
+import { buildAuthClient, getDataForSuperModeCalculator } from './lib/bigquery';
 import {
 	queryActiveArticlesForSuperMode,
 	writeRowsForSuperMode,
