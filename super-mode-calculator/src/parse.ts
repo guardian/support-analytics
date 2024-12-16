@@ -1,13 +1,6 @@
 import type { SimpleQueryRowsResponse } from '@google-cloud/bigquery';
-import type { GetQueryResultsOutput } from 'aws-sdk/clients/athena';
 import { z } from 'zod';
-import { QueryReturnedInvalidDataError } from '../../lib/errors';
-
-const URL_COL = 0;
-const REGION_COL = 1;
-const TOTAL_AV_COL = 2;
-const TOTAL_VIEWS_COL = 3;
-const AV_PER_VIEW_COL = 4;
+import { QueryReturnedInvalidDataError } from './lib/errors';
 
 export type Region = 'GB' | 'US' | 'AU' | 'NZ' | 'CA' | 'EU' | 'ROW';
 
@@ -38,31 +31,6 @@ const queryRowSchema = z.object({
 });
 
 const queryRowsSchema = z.array(queryRowSchema);
-
-export function parseResult(result: GetQueryResultsOutput): QueryRow[] {
-	const rows = (result.ResultSet?.Rows ?? []).slice(1);
-	const data = rows.map(({ Data: data }) => {
-		if (!data) {
-			return;
-		}
-
-		return {
-			url: data[URL_COL].VarCharValue,
-			region: data[REGION_COL].VarCharValue,
-			totalAv: parseFloat(data[TOTAL_AV_COL].VarCharValue ?? ''),
-			totalViews: parseFloat(data[TOTAL_VIEWS_COL].VarCharValue ?? ''),
-			avPerView: parseFloat(data[AV_PER_VIEW_COL].VarCharValue ?? ''),
-		};
-	});
-
-	const parse = queryRowsSchema.safeParse(data);
-
-	if (!parse.success) {
-		throw new QueryReturnedInvalidDataError();
-	}
-
-	return parse.data;
-}
 
 export function parseResultFromBigQuery(
 	result: SimpleQueryRowsResponse,

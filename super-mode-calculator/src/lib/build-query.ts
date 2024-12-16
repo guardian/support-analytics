@@ -1,19 +1,11 @@
 import { format, subDays, subHours } from 'date-fns';
-import { regionSql } from '../lambdas/query/regionSql';
+import { regionSql } from '../regionSql';
 import {
 	SUPER_MODE_MINIMUM_AV,
 	SUPER_MODE_MINIMUM_VIEWS,
 	SUPER_MODE_WINDOW_IN_HOURS,
 } from './constants';
 import { toDateHourString, toDateString } from './date';
-
-export interface BigQueryResult {
-	url: string;
-	region: string;
-	total_av: number;
-	total_views: number;
-	av_per_view: number;
-}
 
 export const buildQueryForSuperMode = (
 	stage: 'CODE' | 'PROD',

@@ -1,5 +1,5 @@
-import { SUPER_MODE_AV_PER_VIEWS_THRESHOLDS } from '../../lib/constants';
-import type { DynamoRecord } from './dynamo';
+import { SUPER_MODE_AV_PER_VIEWS_THRESHOLDS } from './lib/constants';
+import type { DynamoRecord } from './lib/dynamo';
 import type { QueryRow } from './parse';
 
 export function isCurrentlyInSuperMode(

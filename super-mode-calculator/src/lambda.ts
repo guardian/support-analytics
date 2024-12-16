@@ -1,20 +1,14 @@
 import type { SimpleQueryRowsResponse } from '@google-cloud/bigquery';
 import * as AWS from 'aws-sdk';
-import {
-	buildAuthClient,
-	getDataForSuperModeCalculator,
-} from '../lib/bigquery';
+import { buildAuthClient, getDataForSuperModeCalculator } from './lib/bigquery';
 import {
 	queryActiveArticlesForSuperMode,
 	writeRowsForSuperMode,
-} from '../lib/dynamoV2';
-import { getSSMParam } from '../lib/ssm';
-import type { QueryRow } from './calculate/parse';
-import { parseResultFromBigQuery } from './calculate/parse';
-import {
-	isCurrentlyInSuperMode,
-	shouldEnterSuperMode,
-} from './calculate/superMode';
+} from './lib/dynamo';
+import { getSSMParam } from './lib/ssm';
+import type { QueryRow } from './parse';
+import { parseResultFromBigQuery } from './parse';
+import { isCurrentlyInSuperMode, shouldEnterSuperMode } from './superMode';
 
 const stage = process.env.STAGE;
 const docClient = new AWS.DynamoDB.DocumentClient({ region: 'eu-west-1' });
