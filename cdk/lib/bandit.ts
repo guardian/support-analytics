@@ -1,7 +1,9 @@
+import {GuAlarm} from "@guardian/cdk/lib/constructs/cloudwatch";
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import {type App, Duration, RemovalPolicy} from 'aws-cdk-lib';
+import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
@@ -158,5 +160,49 @@ export class Bandit extends GuStack {
 			schedule: Schedule.cron({ minute: '15' }),
 			ruleName: `${appName}-startup-${this.stage}`,
 		});
+		// Alarms
+		const isProd = this.stage === "PROD";
+
+		new GuAlarm(this, "TimeoutAlarm", {
+			app: appName,
+			actionsEnabled: isProd,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			alarmName: `Support Bandit Timeout in ${this.stage}.`,
+			alarmDescription: `There was a timeout whilst setting up bandit data. Check https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A865473395570%3AstateMachine%3Asupport-bandit-${this.stage}?statusFilter=TIMED_OUT`,
+			metric: new Metric({
+				metricName: "ExecutionsTimedOut",
+				namespace: "AWS/States",
+				dimensionsMap: {
+					StateMachineArn: stateMachine.stateMachineArn,
+				},
+				statistic: "Sum",
+				period: Duration.seconds(60),
+			}),
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			evaluationPeriods: 1,
+			threshold: 1,
+		}).node.addDependency(stateMachine);
+
+		new GuAlarm(this, "ExecutionFailureAlarm", {
+			app: appName,
+			actionsEnabled: isProd,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			alarmName: ` Execution Failure in Support Bandit ${this.stage}.`,
+			alarmDescription: `There was a failure whilst setting up support bandit data . Check https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A865473395570%3AstateMachine%3Asupport-bandit-${this.stage}?statusFilter=FAILED`,
+			metric: new Metric({
+				metricName: "ExecutionsFailed",
+				namespace: "AWS/States",
+				dimensionsMap: {
+					StateMachineArn: stateMachine.stateMachineArn,
+				},
+				statistic: "Sum",
+				period: Duration.seconds(60),
+			}),
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			evaluationPeriods: 1,
+			threshold: 1,
+		}).node.addDependency(stateMachine);
+
+
 	}
 }
