@@ -187,7 +187,7 @@ export class Bandit extends GuStack {
 			app: appName,
 			actionsEnabled: isProd,
 			snsTopicName: `alarms-handler-topic-${this.stage}`,
-			alarmName: ` Execution Failure in Support Bandit ${this.stage}.`,
+			alarmName: `Execution Failure in Support Bandit ${this.stage}.`,
 			alarmDescription: `There was a failure whilst setting up support bandit data . Check https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A865473395570%3AstateMachine%3Asupport-bandit-${this.stage}?statusFilter=FAILED`,
 			metric: new Metric({
 				metricName: "ExecutionsFailed",
