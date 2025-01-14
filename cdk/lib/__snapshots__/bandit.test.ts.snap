@@ -158,7 +158,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
           },
         ],
         "AlarmDescription": "There was a failure whilst setting up support bandit data . Check https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A865473395570%3AstateMachine%3Asupport-bandit-TEST?statusFilter=FAILED",
-        "AlarmName": " Execution Failure in Support Bandit TEST.",
+        "AlarmName": "Execution Failure in Support Bandit TEST.",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
