@@ -10,6 +10,7 @@ export interface QueryRow {
 	totalAv: number;
 	totalViews: number;
 	avPerView: number;
+	totalAcquisitions: number;
 }
 
 const regionSchema = z.union([
@@ -28,6 +29,7 @@ const queryRowSchema = z.object({
 	totalAv: z.number(),
 	totalViews: z.number(),
 	avPerView: z.number(),
+	totalAcquisitions: z.number(),
 });
 
 const queryRowsSchema = z.array(queryRowSchema);
