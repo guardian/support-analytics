@@ -116,6 +116,7 @@ views AS (
 SELECT acquisitions_agg.referrer_url AS url,
 	   acquisitions_agg.region,
 	   acquisitions_agg.sum_av_gbp AS totalAv,
+	   acquisitions_agg.acquisitions AS totalAcquisitions,
 	   views.total_views AS totalViews,
 	   acquisitions_agg.sum_av_gbp / views.total_views AS avPerView
 	FROM acquisitions_agg
