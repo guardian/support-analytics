@@ -68,7 +68,7 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
             "Value": "TEST",
           },
         ],
-        "Timeout": 30,
+        "Timeout": 120,
       },
       "Type": "AWS::Lambda::Function",
     },

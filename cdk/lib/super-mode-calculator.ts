@@ -95,6 +95,7 @@ export class SuperModeCalculator extends GuStack {
 			fileName: `${appName}.zip`,
 			rules: scheduleRules,
 			role,
+			timeout: Duration.minutes(2),
 			monitoringConfiguration:
 				this.stage === 'PROD'
 					? {
