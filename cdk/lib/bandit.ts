@@ -7,12 +7,7 @@ import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
-import {
-	ManagedPolicy,
-	PolicyStatement,
-	Role,
-	ServicePrincipal,
-} from 'aws-cdk-lib/aws-iam';
+import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
 	DefinitionBody,
@@ -96,34 +91,12 @@ export class Bandit extends GuStack {
 				],
 			}),
 		);
-		queryLambdaRole.addToPolicy(
-			new PolicyStatement({
-				actions: ['s3:*'],
-				resources: [
-					`arn:aws:s3:::gu-support-analytics/*`,
-					`arn:aws:s3:::gu-support-analytics`,
-				],
-			}),
-		);
-		queryLambdaRole.addToPolicy(
-			new PolicyStatement({
-				actions: ['s3:*'],
-				resources: [
-					`arn:aws:s3:::acquisition-events/*`,
-					`arn:aws:s3:::acquisition-events`,
-				],
-			}),
-		);
 
 		queryLambdaRole.addToPolicy(
 			new PolicyStatement({
 				actions: ['dynamodb:BatchWriteItem'],
 				resources: [banditsTable.tableArn],
 			}),
-		);
-
-		queryLambdaRole.addManagedPolicy(
-			ManagedPolicy.fromAwsManagedPolicyName('AmazonAthenaFullAccess'),
 		);
 
 		const queryLambda = new GuLambdaFunction(this, 'query-lambda', {
@@ -133,9 +106,6 @@ export class Bandit extends GuStack {
 			handler: 'query-lambda/query-lambda.run',
 			fileName: `${appName}.zip`,
 			timeout: Duration.seconds(60),
-			environment: {
-				AthenaOutputBucket: 'gu-support-analytics',
-			},
 			role: queryLambdaRole,
 		});
 
