@@ -518,7 +518,6 @@ exports[`The Bandit stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "support-bandit",
-            "AthenaOutputBucket": "gu-support-analytics",
             "STACK": "deploy",
             "STAGE": "TEST",
           },
@@ -573,20 +572,6 @@ exports[`The Bandit stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/AmazonAthenaFullAccess",
-              ],
-            ],
-          },
-        ],
         "RoleName": "bandit-query-TEST",
         "Tags": [
           {
@@ -641,22 +626,6 @@ exports[`The Bandit stack matches the snapshot 1`] = `
                   ],
                 ],
               },
-            },
-            {
-              "Action": "s3:*",
-              "Effect": "Allow",
-              "Resource": [
-                "arn:aws:s3:::gu-support-analytics/*",
-                "arn:aws:s3:::gu-support-analytics",
-              ],
-            },
-            {
-              "Action": "s3:*",
-              "Effect": "Allow",
-              "Resource": [
-                "arn:aws:s3:::acquisition-events/*",
-                "arn:aws:s3:::acquisition-events",
-              ],
             },
             {
               "Action": "dynamodb:BatchWriteItem",
