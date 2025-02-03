@@ -15,7 +15,7 @@ import {
 } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
-	DefinitionBody,
+	DefinitionBody, Errors,
 	StateMachine,
 	Succeed,
 } from 'aws-cdk-lib/aws-stepfunctions';
@@ -147,7 +147,13 @@ export class Bandit extends GuStack {
 			stateMachineName: `${appName}-${this.stage}`,
 			definitionBody: DefinitionBody.fromChainable(
 				getBanditTestsTask
-					.next(queryTask)
+					.next(
+						queryTask.addRetry({
+							errors: [Errors.ALL],
+							interval: Duration.minutes(2),
+							maxAttempts: 5,
+						}),
+					)
 					.next(new Succeed(this, 'state-machine-success')),
 			),
 		});
