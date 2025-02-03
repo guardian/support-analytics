@@ -153,6 +153,7 @@ export class Bandit extends GuStack {
 							errors: [Errors.ALL],
 							interval: Duration.minutes(2),
 							maxAttempts: 5,
+							backoffRate: 2,
 						}),
 					)
 					.next(new Succeed(this, 'state-machine-success')),

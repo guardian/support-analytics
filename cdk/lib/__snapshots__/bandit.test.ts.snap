@@ -786,7 +786,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"query-task":{"Next":"state-machine-success","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":120,"MaxAttempts":5}],"Type":"Task","InputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"query-task":{"Next":"state-machine-success","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":120,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","InputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
