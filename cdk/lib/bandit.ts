@@ -15,7 +15,8 @@ import {
 } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
-	DefinitionBody, Errors,
+	DefinitionBody,
+	Errors,
 	StateMachine,
 	Succeed,
 } from 'aws-cdk-lib/aws-stepfunctions';
