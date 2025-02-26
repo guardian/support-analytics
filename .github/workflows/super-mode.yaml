@@ -1,4 +1,4 @@
-name: Build support bandit testing
+name: Build super-mode and upload to riff raff
 
 on:
   pull_request:
@@ -9,14 +9,14 @@ on:
       - main
 
 jobs:
-  bandit-build:
+  super-mode-build:
     if: >-
       (github.event.pull_request.head.repo.owner.login == 'guardian' ||
         github.event_name == 'push')
 
     name:
-      support bandit build
-      # These permissions are required by guardian/actions-riff-raff
+      super mode build
+    # These permissions are required by guardian/actions-riff-raff
     permissions:
       id-token: write
       contents: read
@@ -24,25 +24,33 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+      - name: Env
+        run: env
+
       - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: "bandit/.nvmrc"
+          cache: 'yarn'
+          cache-dependency-path: ./super-mode-calculator/yarn.lock
+          node-version-file: "super-mode-calculator/.nvmrc"
 
-      - name: bandit test + build
-        working-directory: ./bandit
+      - name: Yarn install, lint, build
+        working-directory: ./super-mode-calculator
         run: |
           yarn install
           yarn lint
           yarn run build
 
+      - name: Copy files to Riff Raff package
+        working-directory: ./super-mode-calculator
+        run: |
           cp package.json target
           pushd target
           yarn install --production
-          zip -r support-bandit ./*
+          zip -r super-mode ./*
           popd
 
       - name: Build cdk
@@ -53,10 +61,10 @@ jobs:
           yarn test
           yarn synth
 
-      - name: bandit riff-raff
+      - name: super-mode riff-raff
         uses: guardian/actions-riff-raff@v4
         with:
-          app: bandit
+          app: super-mode
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           config: |
@@ -68,29 +76,27 @@ jobs:
               - CODE
               - PROD
             deployments:
-              support-bandit-cloudformation:
+              super-mode-cloudformation:
                 type: cloud-formation
-                app: bandit
+                app: super-mode
                 parameters:
-                  cloudFormationStackName: bandit
+                  cloudFormationStackName: super-mode
                   templateStagePaths:
-                    CODE: Bandit-CODE.template.json
-                    PROD: Bandit-PROD.template.json
+                    CODE: SuperModeCalculator-CODE.template.json
+                    PROD: SuperModeCalculator-PROD.template.json
                   cloudFormationStackByTags: false
                   prependStackToCloudFormationStackName: true
 
-              support-bandit:
+              super-mode:
                 type: aws-lambda
                 parameters:
                   prefixStack: false
-                  fileName: support-bandit.zip
+                  fileName: super-mode.zip
                   functionNames:
-                    - support-bandit-get-bandit-tests-
-                    - support-bandit-query-
-
+                    - super-mode-
           contentDirectories: |
-            support-bandit:
-              - bandit/target/support-bandit.zip
-            support-bandit-cloudformation:
-              - cdk/cdk.out/Bandit-CODE.template.json
-              - cdk/cdk.out/Bandit-PROD.template.json
+            super-mode-cloudformation:
+              - cdk/cdk.out/SuperModeCalculator-CODE.template.json
+              - cdk/cdk.out/SuperModeCalculator-PROD.template.json
+            super-mode:
+              - super-mode-calculator/target/super-mode.zip

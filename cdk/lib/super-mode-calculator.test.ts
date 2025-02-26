@@ -1,12 +1,12 @@
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { Bandit } from './bandit';
+import { SuperModeCalculator } from './super-mode-calculator';
 
-describe('The Bandit stack', () => {
+describe('The SuperModeCalculator stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
-		const stack = new Bandit(app, 'Bandit', {
-			stack: 'deploy',
+		const stack = new SuperModeCalculator(app, 'SuperModeCalculator', {
+			stack: 'support',
 			stage: 'TEST',
 		});
 		const template = Template.fromStack(stack);

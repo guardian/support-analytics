@@ -1,7 +1,7 @@
 import type { AWSError } from "aws-sdk";
 import type { DocumentClient } from "aws-sdk/clients/dynamodb";
 import type { PromiseResult } from "aws-sdk/lib/request";
-import type { VariantQueryRow } from "./parse";
+import type { VariantQueryRow } from "./parse-result";
 
 interface VariantSample {
 	variantName: string;
@@ -20,11 +20,12 @@ export interface TestSample {
 export function buildWriteRequest(
 	rows: VariantQueryRow[],
 	testName: string,
+	channel: string,
 	startTimestamp: string
 ): DocumentClient.WriteRequest {
 	return {
 		PutRequest: {
-			Item: buildDynamoRecord(rows, testName, startTimestamp),
+			Item: buildDynamoRecord(rows, testName,channel, startTimestamp),
 		},
 	};
 }
@@ -32,17 +33,18 @@ export function buildWriteRequest(
 function buildDynamoRecord(
 	rows: VariantQueryRow[],
 	testName: string,
+	channel: string,
 	startTimestamp: string
 ): TestSample {
 	const variants = rows.map((row) => ({
-		variantName: row.variantName,
-		annualisedValueInGBP: row.avGbp,
-		annualisedValueInGBPPerView: row.avGbpPerView,
+		variantName: row.variant_name,
+		annualisedValueInGBP: row.sum_av_gbp,
+		annualisedValueInGBPPerView: row.sum_av_gbp_per_view,
 		views: row.views,
 	}));
 
 	return {
-		testName,
+		testName: channel + "_" + testName,
 		variants,
 		timestamp: startTimestamp,
 	};

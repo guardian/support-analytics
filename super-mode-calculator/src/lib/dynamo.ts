@@ -2,9 +2,9 @@ import type { AWSError } from 'aws-sdk';
 import type { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import type { PromiseResult } from 'aws-sdk/lib/request';
 import { addDays, addHours } from 'date-fns';
-import { SUPER_MODE_DURATION_IN_HOURS } from '../../lib/constants';
-import { toDateHourString, toDateString } from '../../lib/date';
-import type { QueryRow } from './parse';
+import type { QueryRow } from '../parse';
+import { SUPER_MODE_DURATION_IN_HOURS } from './constants';
+import { toDateHourString, toDateString } from './date';
 
 export interface DynamoRecord extends QueryRow {
 	id: string;
@@ -13,21 +13,23 @@ export interface DynamoRecord extends QueryRow {
 	endTimestamp: string;
 }
 
-export function writeRows(
+export function writeRowsForSuperMode(
 	rows: QueryRow[],
 	stage: string,
 	docClient: DocumentClient,
 ): Promise<
 	Array<PromiseResult<DocumentClient.BatchWriteItemOutput, AWSError>>
 > {
-	const batches = buildBatches(rows.map(buildWriteRequest));
+	const batches = buildBatches(rows.map(buildWriteRequestForSuperMode));
 
 	return Promise.all(
-		batches.map((batch) => writeBatch(batch, stage, docClient)),
+		batches.map((batch) => writeBatchForSuperMode(batch, stage, docClient)),
 	);
 }
 
-function buildWriteRequest(row: QueryRow): DocumentClient.WriteRequest {
+function buildWriteRequestForSuperMode(
+	row: QueryRow,
+): DocumentClient.WriteRequest {
 	return {
 		PutRequest: {
 			Item: buildDynamoRecord(row),
@@ -50,12 +52,12 @@ function buildDynamoRecord(
 	};
 }
 
-function writeBatch(
+function writeBatchForSuperMode(
 	batch: DocumentClient.WriteRequest[],
 	stage: string,
 	docClient: DocumentClient,
 ): Promise<PromiseResult<DocumentClient.BatchWriteItemOutput, AWSError>> {
-	const table = `super-mode-${stage.toUpperCase()}`;
+	const table = `super-mode-calculator-${stage.toUpperCase()}`;
 
 	return docClient
 		.batchWrite({
@@ -82,7 +84,7 @@ function buildBatches<T>(
 	return batches;
 }
 
-export async function queryActiveArticles(
+export async function queryActiveArticlesForSuperMode(
 	stage: string,
 	docClient: AWS.DynamoDB.DocumentClient,
 	now: Date = new Date(),
@@ -94,8 +96,8 @@ export async function queryActiveArticles(
 	const endTimestamp = toDateHourString(now);
 
 	const [todayResult, tomorrowResult] = await Promise.all([
-		queryDate(todayEndDate, endTimestamp, stage, docClient),
-		queryDate(tomorrowEndDate, endTimestamp, stage, docClient),
+		queryDateForSuperMode(todayEndDate, endTimestamp, stage, docClient),
+		queryDateForSuperMode(tomorrowEndDate, endTimestamp, stage, docClient),
 	]);
 
 	return [
@@ -104,7 +106,7 @@ export async function queryActiveArticles(
 	] as DynamoRecord[];
 }
 
-function queryDate(
+function queryDateForSuperMode(
 	endDate: string,
 	endTimestamp: string,
 	stage: string,
@@ -112,7 +114,7 @@ function queryDate(
 ) {
 	return docClient
 		.query({
-			TableName: `super-mode-${stage.toUpperCase()}`,
+			TableName: `super-mode-calculator-${stage.toUpperCase()}`,
 			IndexName: 'end',
 			KeyConditionExpression: 'endDate = :ed AND endTimestamp > :et ',
 			ExpressionAttributeValues: {
