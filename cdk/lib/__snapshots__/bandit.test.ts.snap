@@ -228,7 +228,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
         "FunctionName": "support-bandit-get-bandit-tests-TEST",
         "Handler": "get-bandit-tests/get-bandit-tests.run",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -455,7 +455,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
         "FunctionName": "support-bandit-query-TEST",
         "Handler": "query-lambda/query-lambda.run",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {

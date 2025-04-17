@@ -39,7 +39,7 @@ exports[`The SuperModeCalculator stack matches the snapshot 1`] = `
         "FunctionName": "super-mode-TEST",
         "Handler": "lambdas/lambda.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {

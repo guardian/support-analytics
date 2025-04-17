@@ -10,7 +10,7 @@ import {
 } from 'aws-cdk-lib/aws-dynamodb';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
 
 const appName = 'super-mode';
 export class SuperModeCalculator extends GuStack {
@@ -104,6 +104,7 @@ export class SuperModeCalculator extends GuStack {
 			rules: scheduleRules,
 			role,
 			timeout: Duration.minutes(2),
+			loggingFormat: LoggingFormat.TEXT,
 			monitoringConfiguration:
 				this.stage === 'PROD'
 					? {

@@ -8,7 +8,7 @@ import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
 	DefinitionBody,
 	Errors,
@@ -23,6 +23,8 @@ export class Bandit extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
 		super(scope, id, props);
 
+		const loggingFormat = LoggingFormat.TEXT;
+
 		const getBanditTestsLambda = new GuLambdaFunction(
 			this,
 			'get-bandit-tests',
@@ -32,6 +34,7 @@ export class Bandit extends GuStack {
 				runtime: Runtime.NODEJS_20_X,
 				handler: 'get-bandit-tests/get-bandit-tests.run',
 				fileName: `${appName}.zip`,
+				loggingFormat,
 				initialPolicy: [
 					new PolicyStatement({
 						actions: ['dynamodb:Query'],
@@ -105,6 +108,7 @@ export class Bandit extends GuStack {
 			runtime: Runtime.NODEJS_20_X,
 			handler: 'query-lambda/query-lambda.run',
 			fileName: `${appName}.zip`,
+			loggingFormat,
 			timeout: Duration.seconds(60),
 			role: queryLambdaRole,
 		});
