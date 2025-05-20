@@ -31,6 +31,6 @@
     "aws-sdk": "^2.1620.0",
     "date-fns": "^4.1.0",
 		"@google-cloud/bigquery": "^7.0.0",
-    "zod": "^3.22.4"
+    "zod": "^3.25.7"
   }
 }
