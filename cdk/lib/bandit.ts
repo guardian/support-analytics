@@ -141,7 +141,7 @@ export class Bandit extends GuStack {
 					input: RuleTargetInput.fromObject({}),
 				}),
 			],
-			schedule: Schedule.cron({ minute: '15' }),
+			schedule: Schedule.cron({ minute: '45' }),
 			ruleName: `${appName}-startup-${this.stage}`,
 		});
 		// Alarms
