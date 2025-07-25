@@ -1,7 +1,7 @@
 import * as AWS from "aws-sdk";
 import type { WriteRequest } from "aws-sdk/clients/dynamodb";
 import { set, subHours } from "date-fns";
-import { putMetric } from "../lib/cloudwatch";
+import { putMetric } from "../lib/aws/cloudwatch";
 import type { BanditTestConfig, Methodology, Test } from "../lib/models";
 import type { BigQueryResult } from "./bigquery";
 import { buildAuthClient, getDataForBanditTest } from "./bigquery";
@@ -29,14 +29,20 @@ const getTestConfigs = (test: Test): BanditTestConfig[] => {
 	}));
 };
 
-const putBanditTestMetrics = async (
+export const putBanditTestMetrics = async (
 	banditTestConfigs: BanditTestConfig[],
 	writeRequests: WriteRequest[]
 ) => {
 	const totalTests = banditTestConfigs.length;
 	const testsWithData = writeRequests.filter((req) => {
 		const item = req.PutRequest?.Item;
-		return Array.isArray(item?.variants) && item.variants.length > 0;
+		if (!item?.variants) {
+			return false;
+		}
+		return (
+			(Array.isArray(item.variants) && item.variants.length > 0) ||
+			(item.variants.L && item.variants.L.length > 0)
+		);
 	}).length;
 	const testsWithoutData = totalTests - testsWithData;
 

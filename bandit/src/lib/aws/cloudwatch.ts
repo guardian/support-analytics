@@ -1,8 +1,8 @@
 import * as AWS from "aws-sdk";
+import { config } from "./config";
 
-const cloudwatch = new AWS.CloudWatch({ region: "eu-west-1" });
-const stage = process.env.STAGE ?? "PROD";
-const namespace = `support-bandit-${stage}`;
+const { region, namespace, credentials } = config;
+const cloudwatch = new AWS.CloudWatch({ region, credentials });
 
 export const putMetric = async (
 	metricName: string,
