@@ -9,8 +9,6 @@ const credentials =
 		  })
 		: new AWS.ChainableTemporaryCredentials();
 
-AWS.config.region = "eu-west-1";
-
 export const config = {
 	region: "eu-west-1",
 	namespace: `support-bandit-${stage}`,
