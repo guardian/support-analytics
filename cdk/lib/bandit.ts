@@ -242,7 +242,7 @@ export class Bandit extends GuStack {
 			comparisonOperator: ComparisonOperator.LESS_THAN_THRESHOLD,
 			evaluationPeriods: 1,
 			threshold: 1, // Alert if no tests have data
-			treatMissingData: TreatMissingData.BREACHING,
+			treatMissingData: TreatMissingData.NOT_BREACHING,
 		});
 	}
 }
