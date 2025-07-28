@@ -1,8 +1,8 @@
 import * as AWS from "aws-sdk";
 import { config } from "./config";
 
-const { region, namespace, credentials } = config;
-const cloudwatch = new AWS.CloudWatch({ region, credentials });
+const { region, namespace } = config;
+const cloudwatch = new AWS.CloudWatch({ region });
 
 export const putMetric = async (
 	metricName: string,
