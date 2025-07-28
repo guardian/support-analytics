@@ -3,7 +3,11 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration, RemovalPolicy } from 'aws-cdk-lib';
-import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
+import {
+	ComparisonOperator,
+	Metric,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
@@ -102,6 +106,20 @@ export class Bandit extends GuStack {
 			}),
 		);
 
+		queryLambdaRole.addToPolicy(
+			new PolicyStatement({
+				actions: ['dynamodb:BatchWriteItem'],
+				resources: [banditsTable.tableArn],
+			}),
+		);
+
+		queryLambdaRole.addToPolicy(
+			new PolicyStatement({
+				actions: ['cloudwatch:PutMetricData'],
+				resources: ['*'],
+			}),
+		);
+
 		const queryLambda = new GuLambdaFunction(this, 'query-lambda', {
 			app: appName,
 			functionName: `${appName}-query-${this.stage}`,
@@ -188,5 +206,43 @@ export class Bandit extends GuStack {
 			evaluationPeriods: 1,
 			threshold: 1,
 		}).node.addDependency(stateMachine);
+
+		const namespace = `support-bandit-${this.stage}`;
+
+		new GuAlarm(this, 'NoDataAlarm', {
+			app: appName,
+			actionsEnabled: isProd,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			alarmName: `Support Bandit No Data in ${this.stage}`,
+			alarmDescription: `A high percentage of bandit tests returned no data from BigQuery. This may indicate an upstream issue. Check https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A865473395570%3AstateMachine%3Asupport-bandit-${this.stage}`,
+			metric: new Metric({
+				metricName: 'PercentageTestsWithoutData',
+				namespace,
+				statistic: 'Average',
+				period: Duration.minutes(60),
+			}),
+			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+			evaluationPeriods: 2, // Trigger only if 2 consecutive hours have high percentage
+			threshold: 80, // Alert if more than 80% of tests have no data
+			treatMissingData: TreatMissingData.NOT_BREACHING,
+		});
+
+		new GuAlarm(this, 'CompleteOutageAlarm', {
+			app: appName,
+			actionsEnabled: isProd,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			alarmName: `Support Bandit Complete Outage in ${this.stage}`,
+			alarmDescription: `All bandit tests returned no data from BigQuery. This indicates a complete upstream outage. Check https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A865473395570%3AstateMachine%3Asupport-bandit-${this.stage}`,
+			metric: new Metric({
+				metricName: 'TestsWithData',
+				namespace,
+				statistic: 'Sum',
+				period: Duration.minutes(60),
+			}),
+			comparisonOperator: ComparisonOperator.LESS_THAN_THRESHOLD,
+			evaluationPeriods: 1,
+			threshold: 1, // Alert if no tests have data
+			treatMissingData: TreatMissingData.BREACHING,
+		});
 	}
 }

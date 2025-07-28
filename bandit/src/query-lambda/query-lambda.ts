@@ -1,15 +1,16 @@
 import * as AWS from "aws-sdk";
+import type { WriteRequest } from "aws-sdk/clients/dynamodb";
 import { set, subHours } from "date-fns";
-import type {BanditTestConfig, Methodology, Test} from "../lib/models";
-import type {BigQueryResult} from "./bigquery";
-import { buildAuthClient, getDataForBanditTest} from "./bigquery";
-import {buildWriteRequest, writeBatch} from "./dynamo";
-import {parseResultFromBigQuery} from "./parse-result";
-import {getSSMParam} from "./ssm";
+import { putMetric } from "../lib/aws/cloudwatch";
+import type { BanditTestConfig, Methodology, Test } from "../lib/models";
+import type { BigQueryResult } from "./bigquery";
+import { buildAuthClient, getDataForBanditTest } from "./bigquery";
+import { buildWriteRequest, writeBatch } from "./dynamo";
+import { parseResultFromBigQuery } from "./parse-result";
+import { getSSMParam } from "./ssm";
 
 const stage = process.env.STAGE;
 const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
-
 
 export interface QueryLambdaInput {
 	tests: Test[];
@@ -19,13 +20,54 @@ export interface QueryLambdaInput {
 // Each test may contain 1 or more bandit methodologies
 const getTestConfigs = (test: Test): BanditTestConfig[] => {
 	const bandits: Methodology[] = (test.methodologies ?? []).filter(
-		(method) => method.name === 'EpsilonGreedyBandit'|| method.name === 'Roulette',
+		(method) =>
+			method.name === "EpsilonGreedyBandit" || method.name === "Roulette"
 	);
 	return bandits.map((method) => ({
-		name: method.testName ?? test.name, // if the methodology should be tracked with a different name then use that
+		name: method.testName ?? test.name,
 		channel: test.channel,
 	}));
-}
+};
+
+export const putBanditTestMetrics = async (
+	banditTestConfigs: BanditTestConfig[],
+	writeRequests: WriteRequest[]
+) => {
+	const totalTests = banditTestConfigs.length;
+	const testsWithData = writeRequests.filter((req) => {
+		const item = req.PutRequest?.Item;
+		if (!item?.variants) {
+			return false;
+		}
+		return (
+			(Array.isArray(item.variants) && item.variants.length > 0) ||
+			(item.variants.L && item.variants.L.length > 0)
+		);
+	}).length;
+	const testsWithoutData = totalTests - testsWithData;
+
+	await Promise.all([
+		putMetric("TotalBanditTests", totalTests),
+		putMetric("TestsWithData", testsWithData),
+		putMetric("TestsWithoutData", testsWithoutData),
+	]).catch((error) => {
+		console.error("Failed to send CloudWatch metrics:", error);
+	});
+
+	if (totalTests > 0) {
+		const percentageWithoutData = (testsWithoutData / totalTests) * 100;
+		await putMetric(
+			"PercentageTestsWithoutData",
+			percentageWithoutData,
+			"Percent"
+		).catch((error) => {
+			console.error(
+				"Failed to send percentage CloudWatch metric:",
+				error
+			);
+		});
+	}
+};
 
 export async function run(input: QueryLambdaInput): Promise<void> {
 	if (stage !== "CODE" && stage !== "PROD") {
@@ -43,17 +85,26 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	const startTimestamp = start.toISOString().replace("T", " ");
 	const client = await getSSMParam(ssmPath).then(buildAuthClient);
 
-	const banditTestConfigs: BanditTestConfig[] = input.tests.flatMap(test => getTestConfigs(test));
-
-	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
-		banditTestConfigs.map(test => getDataForBanditTest(client, stage, test, start))
+	const banditTestConfigs: BanditTestConfig[] = input.tests.flatMap((test) =>
+		getTestConfigs(test)
 	);
 
-	const writeRequests = resultsFromBigQuery.map(({testName,channel, rows}) => {
-		const parsed = parseResultFromBigQuery(rows);
-		console.log(`Writing row for ${testName}: `, parsed);
-		return buildWriteRequest(parsed, testName,channel, startTimestamp);
-	});
+	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
+		banditTestConfigs.map((test) =>
+			getDataForBanditTest(client, stage, test, start)
+		)
+	);
+
+	const writeRequests = resultsFromBigQuery.map(
+		({ testName, channel, rows }) => {
+			const parsed = parseResultFromBigQuery(rows);
+			console.log(`Writing row for ${testName}: `, parsed);
+			return buildWriteRequest(parsed, testName, channel, startTimestamp);
+		}
+	);
+
+	await putBanditTestMetrics(banditTestConfigs, writeRequests);
+
 	if (writeRequests.length > 0) {
 		await writeBatch(writeRequests, stage, docClient);
 	} else {
@@ -62,5 +113,3 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 
 	return;
 }
-
-

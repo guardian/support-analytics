@@ -9,6 +9,8 @@ exports[`The Bandit stack matches the snapshot 1`] = `
       "GuLambdaFunction",
       "GuAlarm",
       "GuAlarm",
+      "GuAlarm",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -20,6 +22,58 @@ exports[`The Bandit stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "CompleteOutageAlarmE21D2E56": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-TEST",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "All bandit tests returned no data from BigQuery. This indicates a complete upstream outage. Check https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A865473395570%3AstateMachine%3Asupport-bandit-TEST",
+        "AlarmName": "Support Bandit Complete Outage in TEST",
+        "ComparisonOperator": "LessThanThreshold",
+        "EvaluationPeriods": 1,
+        "MetricName": "TestsWithData",
+        "Namespace": "support-bandit-TEST",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-analytics",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "breaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "ExecutionFailureAlarm65D8EF83": {
       "DependsOn": [
         "statemachineEventsRoleDefaultPolicy317047D5",
@@ -83,6 +137,58 @@ exports[`The Bandit stack matches the snapshot 1`] = `
           },
         ],
         "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "NoDataAlarmA0350F9C": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-TEST",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "A high percentage of bandit tests returned no data from BigQuery. This may indicate an upstream issue. Check https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A865473395570%3AstateMachine%3Asupport-bandit-TEST",
+        "AlarmName": "Support Bandit No Data in TEST",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "EvaluationPeriods": 2,
+        "MetricName": "PercentageTestsWithoutData",
+        "Namespace": "support-bandit-TEST",
+        "Period": 3600,
+        "Statistic": "Average",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-analytics",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+        "Threshold": 80,
+        "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
@@ -569,6 +675,11 @@ exports[`The Bandit stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
+            },
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Effect": "Allow",
+              "Resource": "*",
             },
             {
               "Action": [
