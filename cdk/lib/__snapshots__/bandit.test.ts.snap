@@ -70,7 +70,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
           },
         ],
         "Threshold": 1,
-        "TreatMissingData": "breaching",
+        "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
