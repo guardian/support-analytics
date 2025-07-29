@@ -5,6 +5,7 @@ import { putMetric } from "../lib/aws/cloudwatch";
 import type { BanditTestConfig, Methodology, Test } from "../lib/models";
 import type { BigQueryResult } from "./bigquery";
 import { buildAuthClient, getDataForBanditTest } from "./bigquery";
+import type { TestSample } from "./dynamo";
 import { buildWriteRequest, writeBatch } from "./dynamo";
 import { parseResultFromBigQuery } from "./parse-result";
 import { getSSMParam } from "./ssm";
@@ -35,16 +36,21 @@ export const putBanditTestMetrics = async (
 ) => {
 	const totalTests = banditTestConfigs.length;
 	const testsWithData = writeRequests.filter((req) => {
-		const item = req.PutRequest?.Item;
+		const item = req.PutRequest?.Item as TestSample | undefined;
 		if (!item?.variants) {
 			return false;
 		}
-		return (
-			(Array.isArray(item.variants) && item.variants.length > 0) ||
-			(item.variants.L && item.variants.L.length > 0)
-		);
+		return Array.isArray(item.variants) && item.variants.length > 0;
 	}).length;
 	const testsWithoutData = totalTests - testsWithData;
+
+	console.log(
+		JSON.stringify({
+			message: "Calculating metrics for",
+			banditTestConfigs,
+			writeRequests,
+		})
+	);
 
 	await Promise.all([
 		putMetric("TotalBanditTests", totalTests),
@@ -98,7 +104,12 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	const writeRequests = resultsFromBigQuery.map(
 		({ testName, channel, rows }) => {
 			const parsed = parseResultFromBigQuery(rows);
-			console.log(`Writing row for ${testName}: `, parsed);
+			console.log(
+				JSON.stringify({
+					message: `Writing row for ${testName}: `,
+					parsed,
+				})
+			);
 			return buildWriteRequest(parsed, testName, channel, startTimestamp);
 		}
 	);
