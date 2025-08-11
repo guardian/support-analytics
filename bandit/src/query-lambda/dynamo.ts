@@ -8,6 +8,7 @@ interface VariantSample {
 	annualisedValueInGBP: number;
 	annualisedValueInGBPPerView: number;
 	views: number;
+	total_views_for_component_type?: number;
 }
 
 export interface TestSample {
@@ -25,7 +26,7 @@ export function buildWriteRequest(
 ): DocumentClient.WriteRequest {
 	return {
 		PutRequest: {
-			Item: buildDynamoRecord(rows, testName,channel, startTimestamp),
+			Item: buildDynamoRecord(rows, testName, channel, startTimestamp),
 		},
 	};
 }
@@ -41,6 +42,7 @@ function buildDynamoRecord(
 		annualisedValueInGBP: row.sum_av_gbp,
 		annualisedValueInGBPPerView: row.sum_av_gbp_per_view,
 		views: row.views,
+		total_views_for_component_type: row.total_views_for_component_type,
 	}));
 
 	return {

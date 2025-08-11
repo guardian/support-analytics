@@ -40,8 +40,18 @@ export const putBanditTestMetrics = async (
 		if (!item?.variants) {
 			return false;
 		}
-		return Array.isArray(item.variants) && item.variants.length > 0;
+
+		if (!Array.isArray(item.variants) || item.variants.length === 0) {
+			return false;
+		}
+
+		return item.variants.some(
+			(variant) =>
+				variant.total_views_for_component_type &&
+				variant.total_views_for_component_type > 0
+		);
 	}).length;
+
 	const testsWithoutData = totalTests - testsWithData;
 
 	console.log(

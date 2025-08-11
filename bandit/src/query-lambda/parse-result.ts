@@ -9,6 +9,7 @@ const variantQueryRowSchema = z.object({
 	sum_av_gbp: z.number(),
 	sum_av_gbp_per_view: z.number(),
 	acquisitions: z.number(),
+	total_views_for_component_type: z.number().optional(),
 });
 
 export type VariantQueryRow = z.infer<typeof variantQueryRowSchema>;

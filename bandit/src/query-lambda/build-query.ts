@@ -114,6 +114,19 @@ acquisitions_agg AS (
   FROM acqusitions_with_av_gbp
   GROUP BY 1,2
 ),
+-- Check if there are page views for any test of the same component type
+total_component_views AS (
+  SELECT
+    COUNT(*) as total_views_for_component_type
+  FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
+  CROSS JOIN UNNEST(component_event_array) as ce
+  WHERE received_date >= DATE_SUB('${format(start, "yyyy-MM-dd")}', INTERVAL 1 DAY)
+  AND received_date <= '${format(start, "yyyy-MM-dd")}'
+  AND ce.event_timestamp >= '${startTimestamp}'
+  AND ce.event_timestamp < '${endTimestamp}'
+  AND ce.event_action = "VIEW"
+  AND ce.component_type = "${componentType}"
+),
 views AS (
   SELECT
     ce.ab_test_name AS test_name,
@@ -132,13 +145,27 @@ views AS (
 SELECT
 	views.test_name,
 	views.variant_name,
-	views.views,
+	COALESCE(views.views, 0) as views,
 	COALESCE(acquisitions_agg.sum_av_gbp, 0) AS sum_av_gbp,
-	SAFE_DIVIDE(COALESCE(acquisitions_agg.sum_av_gbp, 0), views.views) AS sum_av_gbp_per_view ,
-	COALESCE(acquisitions_agg.acquisitions,0) AS acquisitions
-FROM views
-		 LEFT JOIN acquisitions_agg
-				   USING (test_name, variant_name)
+	SAFE_DIVIDE(COALESCE(acquisitions_agg.sum_av_gbp, 0), COALESCE(views.views, 0)) AS sum_av_gbp_per_view ,
+	COALESCE(acquisitions_agg.acquisitions,0) AS acquisitions,
+    total_component_views.total_views_for_component_type
+FROM total_component_views
+LEFT JOIN views ON 1=1
+LEFT JOIN acquisitions_agg USING (test_name, variant_name)
+-- If there are no views for this specific test but there are views for the component type, still return one row
+UNION ALL
+SELECT
+    '${test.name}' as test_name,
+    'NO_VARIANT' as variant_name,
+    0 as views,
+    0 AS sum_av_gbp,
+    0 AS sum_av_gbp_per_view,
+    0 AS acquisitions,
+    total_component_views.total_views_for_component_type
+FROM total_component_views
+WHERE total_component_views.total_views_for_component_type > 0
+AND NOT EXISTS (SELECT 1 FROM views)
 	`;
 
 }

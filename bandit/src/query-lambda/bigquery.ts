@@ -40,7 +40,7 @@ export const getDataForBanditTest = async (
 	console.log('Running query: ', query);
 	const rows = await bigquery.query({query});
 	//stage is hardcoded to PROD above as we don't have sufficient data for page views in the CODE tables to run the query successfully
-	return { testName,channel, rows };
+	return { testName, channel, rows };
 }
 
 
