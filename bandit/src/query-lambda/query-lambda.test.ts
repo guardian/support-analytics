@@ -23,7 +23,7 @@ describe("putBanditTestMetrics", () => {
 								annualisedValueInGBP: 10,
 								annualisedValueInGBPPerView: 0.1,
 								views: 100,
-								total_views_for_component_type: 1000,
+								totalViewsForComponentType: 1000,
 							},
 						],
 						timestamp: "2023-01-01 00:00:00.000",

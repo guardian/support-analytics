@@ -47,8 +47,8 @@ export const putBanditTestMetrics = async (
 
 		return item.variants.some(
 			(variant) =>
-				variant.total_views_for_component_type &&
-				variant.total_views_for_component_type > 0
+				variant.totalViewsForComponentType &&
+				variant.totalViewsForComponentType > 0
 		);
 	}).length;
 
@@ -67,7 +67,7 @@ export const putBanditTestMetrics = async (
 		putMetric("TestsWithData", testsWithData),
 		putMetric("TestsWithoutData", testsWithoutData),
 	]).catch((error) => {
-		console.error("Failed to send CloudWatch metrics:", error);
+		console.error("Failed to send CloudWatch metrics:", String(error));
 	});
 
 	if (totalTests > 0) {
@@ -79,7 +79,7 @@ export const putBanditTestMetrics = async (
 		).catch((error) => {
 			console.error(
 				"Failed to send percentage CloudWatch metric:",
-				error
+				String(error)
 			);
 		});
 	}
