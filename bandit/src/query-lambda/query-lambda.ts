@@ -126,11 +126,10 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 
 	await putBanditTestMetrics(banditTestConfigs, writeRequests);
 
-	if (writeRequests.length > 0) {
-		await writeBatch(writeRequests, stage, docClient);
-	} else {
+	if (writeRequests.length <= 0) {
 		console.log("No data to write");
+		return;
 	}
 
-	return;
+	await writeBatch(writeRequests, stage, docClient);
 }
