@@ -56,7 +56,7 @@ export function parseTotalComponentViewsResult(
 	if (!parse.success) {
 		console.log(
 			"Failed to parse total component views result:",
-			parse.error
+			String(parse.error)
 		);
 		throw new QueryReturnedInvalidDataError();
 	}
@@ -70,7 +70,10 @@ export function parseTestSpecificResult(
 	const parse = testSpecificResultsSchema.safeParse(result[0]);
 
 	if (!parse.success) {
-		console.log("Failed to parse test specific result:", parse.error);
+		console.log(
+			"Failed to parse test specific result:",
+			String(parse.error)
+		);
 		throw new QueryReturnedInvalidDataError();
 	}
 

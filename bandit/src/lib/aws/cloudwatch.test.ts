@@ -53,7 +53,7 @@ describe("putMetric", () => {
 
 		expect(consoleErrorSpy).toHaveBeenCalledWith(
 			"Failed to send CloudWatch metric:",
-			expect.any(Error)
+			expect.any(String)
 		);
 
 		consoleErrorSpy.mockRestore();
