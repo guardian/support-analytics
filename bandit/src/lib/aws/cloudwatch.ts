@@ -25,6 +25,6 @@ export const putMetric = async (
 			.promise();
 		console.log(`CloudWatch metric sent: ${metricName} = ${value}`);
 	} catch (error) {
-		console.error("Failed to send CloudWatch metric:", error);
+		console.error("Failed to send CloudWatch metric:", String(error));
 	}
 };

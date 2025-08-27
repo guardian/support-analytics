@@ -1,24 +1,59 @@
-import {format, subDays} from "date-fns";
-import type {BanditTestConfig} from "../lib/models";
+import { format, subDays } from "date-fns";
+import type { BanditTestConfig } from "../lib/models";
 
 const ANNUALISED_VALUE_CAP = 250;
-export const buildQuery = (
+
+type Channel = "Epic" | "Banner1" | "Banner2";
+const ComponentTypeMapping: Record<Channel, string> = {
+	Epic: "ACQUISITIONS_EPIC",
+	Banner1: "ACQUISITIONS_ENGAGEMENT_BANNER",
+	Banner2: "ACQUISITIONS_SUBSCRIPTIONS_BANNER",
+};
+
+const getComponentType = (channel: string): string => {
+	return ComponentTypeMapping[channel as Channel];
+};
+
+const formatTimestamps = (start: Date, end: Date) => ({
+	startTimestamp: start.toISOString().replace("T", " "),
+	endTimestamp: end.toISOString().replace("T", " "),
+});
+
+export const buildTotalComponentViewsQuery = (
+	channel: string,
+	stage: "CODE" | "PROD",
+	start: Date,
+	end: Date
+): string => {
+	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
+	const componentType = getComponentType(channel);
+
+	return `
+SELECT
+	COUNT(*) as total_views_for_component_type
+FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
+CROSS JOIN UNNEST(component_event_array) as ce
+WHERE received_date >= DATE_SUB('${format(
+		start,
+		"yyyy-MM-dd"
+	)}', INTERVAL 1 DAY)
+AND received_date <= '${format(start, "yyyy-MM-dd")}'
+AND ce.event_timestamp >= '${startTimestamp}'
+AND ce.event_timestamp < '${endTimestamp}'
+AND ce.event_action = "VIEW"
+AND ce.component_type = "${componentType}"
+	`;
+};
+
+export const buildTestSpecificQuery = (
 	test: BanditTestConfig,
 	stage: "CODE" | "PROD",
 	start: Date,
-	end: Date,
-)=> {
-	const endTimestamp = end.toISOString().replace("T", " ");
-	const startTimestamp = start.toISOString().replace("T", " ");
+	end: Date
+): string => {
+	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
 	const dateForCurrencyConversionTable = subDays(start, 1); //This table is updated daily  but has a lag of 1 day
-
-	type Channel = 'Epic' | 'Banner1' | 'Banner2';
-	const ComponentTypeMapping: Record<Channel,string> = {
-		'Epic': 'ACQUISITIONS_EPIC',
-		'Banner1': 'ACQUISITIONS_ENGAGEMENT_BANNER',
-		'Banner2': 'ACQUISITIONS_SUBSCRIPTIONS_BANNER',
-	};
-	const componentType = ComponentTypeMapping[test.channel as Channel];
+	const componentType = getComponentType(test.channel);
 
 	return `
 WITH exchange_rates AS (
@@ -28,7 +63,10 @@ gbp_rate AS (
 	SELECT
 	 rate, date
 	FROM  datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
-	WHERE target = 'GBP' AND  date = '${format(dateForCurrencyConversionTable, "yyyy-MM-dd")}'),
+	WHERE target = 'GBP' AND  date = '${format(
+		dateForCurrencyConversionTable,
+		"yyyy-MM-dd"
+	)}'),
 acquisitions AS (
     SELECT
       ab.name AS  test_name,
@@ -122,7 +160,10 @@ views AS (
   FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
   CROSS JOIN UNNEST(component_event_array) as ce
   -- Include previous day, as a pageview's received_date may be before midnight and a component_event after
-  WHERE received_date >= DATE_SUB('${format(start, "yyyy-MM-dd")}', INTERVAL 1 DAY) AND received_date <= '${format(start, "yyyy-MM-dd")}'
+  WHERE received_date >= DATE_SUB('${format(
+		start,
+		"yyyy-MM-dd"
+  )}', INTERVAL 1 DAY) AND received_date <= '${format(start, "yyyy-MM-dd")}'
   AND ce.event_timestamp >= '${startTimestamp}' AND ce.event_timestamp < '${endTimestamp}'
   AND ce.event_action = "VIEW"
   AND ce.component_type =  "${componentType}"
@@ -130,15 +171,28 @@ views AS (
   GROUP BY 1,2
 )
 SELECT
-	views.test_name,
-	views.variant_name,
-	views.views,
+	COALESCE(views.test_name, '${test.name}') as test_name,
+	COALESCE(views.variant_name, 'NO_VARIANT') as variant_name,
+	COALESCE(views.views, 0) as views,
 	COALESCE(acquisitions_agg.sum_av_gbp, 0) AS sum_av_gbp,
-	SAFE_DIVIDE(COALESCE(acquisitions_agg.sum_av_gbp, 0), views.views) AS sum_av_gbp_per_view ,
+	SAFE_DIVIDE(COALESCE(acquisitions_agg.sum_av_gbp, 0), COALESCE(views.views, 0)) AS sum_av_gbp_per_view,
 	COALESCE(acquisitions_agg.acquisitions,0) AS acquisitions
 FROM views
-		 LEFT JOIN acquisitions_agg
-				   USING (test_name, variant_name)
-	`;
+FULL OUTER JOIN acquisitions_agg USING (test_name, variant_name)
+-- Ensure at least one row is returned even if no views or acquisitions
+WHERE views.test_name IS NOT NULL OR acquisitions_agg.test_name IS NOT NULL
 
-}
+UNION ALL
+
+-- If there are no views for this specific test, return a default row
+SELECT
+    '${test.name}' as test_name,
+    'NO_VARIANT' as variant_name,
+    0 as views,
+    0 AS sum_av_gbp,
+    0 AS sum_av_gbp_per_view,
+    0 AS acquisitions
+WHERE NOT EXISTS (SELECT 1 FROM views)
+AND NOT EXISTS (SELECT 1 FROM acquisitions_agg)
+	`;
+};

@@ -40,8 +40,18 @@ export const putBanditTestMetrics = async (
 		if (!item?.variants) {
 			return false;
 		}
-		return Array.isArray(item.variants) && item.variants.length > 0;
+
+		if (!Array.isArray(item.variants) || item.variants.length === 0) {
+			return false;
+		}
+
+		return item.variants.some(
+			(variant) =>
+				variant.totalViewsForComponentType &&
+				variant.totalViewsForComponentType > 0
+		);
 	}).length;
+
 	const testsWithoutData = totalTests - testsWithData;
 
 	console.log(
@@ -57,7 +67,7 @@ export const putBanditTestMetrics = async (
 		putMetric("TestsWithData", testsWithData),
 		putMetric("TestsWithoutData", testsWithoutData),
 	]).catch((error) => {
-		console.error("Failed to send CloudWatch metrics:", error);
+		console.error("Failed to send CloudWatch metrics:", String(error));
 	});
 
 	if (totalTests > 0) {
@@ -69,7 +79,7 @@ export const putBanditTestMetrics = async (
 		).catch((error) => {
 			console.error(
 				"Failed to send percentage CloudWatch metric:",
-				error
+				String(error)
 			);
 		});
 	}
@@ -116,11 +126,10 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 
 	await putBanditTestMetrics(banditTestConfigs, writeRequests);
 
-	if (writeRequests.length > 0) {
-		await writeBatch(writeRequests, stage, docClient);
-	} else {
+	if (writeRequests.length <= 0) {
 		console.log("No data to write");
+		return;
 	}
 
-	return;
+	await writeBatch(writeRequests, stage, docClient);
 }
