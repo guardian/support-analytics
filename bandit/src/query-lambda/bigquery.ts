@@ -70,7 +70,7 @@ const getTotalComponentViews = async (
 	}
 
 	const query = buildTotalComponentViewsQuery(channel, stage, start, end);
-	console.log("Running total component views query: ", query);
+	// console.log("Running total component views query: ", query);
 	const rows = await bigquery.query({ query });
 	const result = parseTotalComponentViewsResult(rows);
 
@@ -98,7 +98,7 @@ export const getDataForBanditTest = async (
 		buildTestSpecificQuery(test, "PROD", start, end),
 	]);
 
-	console.log("Running test specific query: ", testSpecificQuery);
+	// console.log("Running test specific query: ", testSpecificQuery);
 	const testSpecificRows = await bigquery.query({ query: testSpecificQuery });
 	const testSpecificResults = parseTestSpecificResult(testSpecificRows);
 
