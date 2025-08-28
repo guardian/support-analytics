@@ -171,29 +171,12 @@ views AS (
   GROUP BY 1,2
 )
 SELECT
-	COALESCE(views.test_name, '${test.name}') as test_name,
-	COALESCE(views.variant_name, 'NO_VARIANT') as variant_name,
-	COALESCE(views.views, 0) as views,
+	views.test_name,
+	views.variant_name,
+	views.views,
 	COALESCE(acquisitions_agg.sum_av_gbp, 0) AS sum_av_gbp,
-	SAFE_DIVIDE(COALESCE(acquisitions_agg.sum_av_gbp, 0), COALESCE(views.views, 0)) AS sum_av_gbp_per_view,
+	SAFE_DIVIDE(COALESCE(acquisitions_agg.sum_av_gbp, 0), views.views) AS sum_av_gbp_per_view,
 	COALESCE(acquisitions_agg.acquisitions,0) AS acquisitions
 FROM views
-FULL OUTER JOIN acquisitions_agg USING (test_name, variant_name)
--- Ensure at least one row is returned even if no views or acquisitions
-WHERE views.test_name IS NOT NULL OR acquisitions_agg.test_name IS NOT NULL
-
-UNION ALL
-
--- If there are no views for this specific test, return a default row
-SELECT
-    '${test.name}' as test_name,
-    'NO_VARIANT' as variant_name,
-    0 as views,
-    0 AS sum_av_gbp,
-    0 AS sum_av_gbp_per_view,
-    0 AS acquisitions
-FROM (SELECT 1) AS _
-WHERE NOT EXISTS (SELECT 1 FROM views)
-AND NOT EXISTS (SELECT 1 FROM acquisitions_agg)
-	`;
+LEFT JOIN acquisitions_agg USING (test_name, variant_name)`;
 };
