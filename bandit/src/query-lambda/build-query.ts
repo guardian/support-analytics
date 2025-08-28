@@ -192,6 +192,7 @@ SELECT
     0 AS sum_av_gbp,
     0 AS sum_av_gbp_per_view,
     0 AS acquisitions
+FROM (SELECT 1) AS _
 WHERE NOT EXISTS (SELECT 1 FROM views)
 AND NOT EXISTS (SELECT 1 FROM acquisitions_agg)
 	`;
