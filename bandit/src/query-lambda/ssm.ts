@@ -1,18 +1,25 @@
-import * as AWS from 'aws-sdk';
+import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
+import { credentials, region } from "../lib/aws/config";
 
 export const getSSMParam = (path: string): Promise<string> => {
-	const ssm = new AWS.SSM({ region: 'eu-west-1' });
+	const ssm = new SSMClient({
+		region,
+		credentials: credentials(),
+	});
 	return ssm
-		.getParameter({
-			Name: path,
-			WithDecryption: true,
-		})
-		.promise()
-		.then(response => {
+		.send(
+			new GetParameterCommand({
+				Name: path,
+				WithDecryption: true,
+			})
+		)
+		.then((response) => {
 			if (response.Parameter?.Value) {
 				return response.Parameter.Value;
 			} else {
-				return Promise.reject(Error(`No parameter found for path ${path}`));
+				return Promise.reject(
+					Error(`No parameter found for path ${path}`)
+				);
 			}
 		});
-}
+};

@@ -1,5 +1,6 @@
-import * as AWS from "aws-sdk";
-import type { WriteRequest } from "aws-sdk/clients/dynamodb";
+import type { WriteRequest } from "@aws-sdk/client-dynamodb";
+import { DynamoDB } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
 import { set, subHours } from "date-fns";
 import { putMetric } from "../lib/aws/cloudwatch";
 import type { BanditTestConfig, Methodology, Test } from "../lib/models";
@@ -11,7 +12,7 @@ import { parseResultFromBigQuery } from "./parse-result";
 import { getSSMParam } from "./ssm";
 
 const stage = process.env.STAGE;
-const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
+const docClient = DynamoDBDocument.from(new DynamoDB({ region: "eu-west-1" }));
 
 export interface QueryLambdaInput {
 	tests: Test[];

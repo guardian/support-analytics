@@ -1,16 +1,20 @@
-import * as AWS from "aws-sdk";
+import { fromIni, fromNodeProviderChain } from "@aws-sdk/credential-providers";
+import type { RuntimeConfigAwsCredentialIdentityProvider } from "@aws-sdk/types";
 
 const stage = process.env.STAGE ?? "PROD";
+const isDev = stage === "DEV";
 
-const credentials =
-	stage === "DEV"
-		? new AWS.SharedIniFileCredentials({
+export const region = "eu-west-1";
+export const credentials = (): RuntimeConfigAwsCredentialIdentityProvider => {
+	return isDev
+		? fromIni({
 				profile: process.env.AWS_PROFILE ?? "membership",
 		  })
-		: new AWS.ChainableTemporaryCredentials();
+		: fromNodeProviderChain();
+};
 
 export const config = {
-	region: "eu-west-1",
+	region,
 	namespace: `support-bandit-${stage}`,
 	stage,
 	credentials,
