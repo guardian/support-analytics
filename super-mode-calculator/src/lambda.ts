@@ -1,5 +1,7 @@
+import { DynamoDB } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import type { SimpleQueryRowsResponse } from '@google-cloud/bigquery';
-import * as AWS from 'aws-sdk';
+import { credentials, region } from './lib/aws/config';
 import { buildAuthClient, getDataForSuperModeCalculator } from './lib/bigquery';
 import {
 	queryActiveArticlesForSuperMode,
@@ -11,7 +13,12 @@ import { parseResultFromBigQuery } from './parse';
 import { isCurrentlyInSuperMode, shouldEnterSuperMode } from './superMode';
 
 const stage = process.env.STAGE;
-const docClient = new AWS.DynamoDB.DocumentClient({ region: 'eu-west-1' });
+const docClient = DynamoDBDocumentClient.from(
+	new DynamoDB({
+		credentials: credentials(),
+		region,
+	}),
+);
 
 export async function handler(): Promise<void> {
 	if (stage !== 'CODE' && stage !== 'PROD') {

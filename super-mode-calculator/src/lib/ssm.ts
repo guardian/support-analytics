@@ -1,16 +1,22 @@
-import * as AWS from 'aws-sdk';
+import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
+import { credentials, region } from './aws/config';
 
 export const getSSMParam = (
 	key: string,
 	stage: 'CODE' | 'PROD',
 ): Promise<string> => {
-	const ssm = new AWS.SSM({ region: 'eu-west-1' });
+	const ssm = new SSMClient({
+		region,
+		credentials: credentials(),
+	});
+
 	return ssm
-		.getParameter({
-			Name: `/super-mode/${stage}/${key}`,
-			WithDecryption: true,
-		})
-		.promise()
+		.send(
+			new GetParameterCommand({
+				Name: `/super-mode/${stage}/${key}`,
+				WithDecryption: true,
+			}),
+		)
 		.then((result) => {
 			const value = result.Parameter?.Value;
 
