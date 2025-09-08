@@ -98,7 +98,7 @@ export class SuperModeCalculator extends GuStack {
 		new GuScheduledLambda(this, 'SuperModeCalculator', {
 			app: appName,
 			functionName: `${appName}-${this.stage}`,
-			runtime: Runtime.NODEJS_20_X,
+			runtime: Runtime.NODEJS_22_X,
 			handler: 'lambdas/lambda.handler',
 			fileName: `${appName}.zip`,
 			rules: scheduleRules,
