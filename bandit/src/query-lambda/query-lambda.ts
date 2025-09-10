@@ -102,15 +102,19 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	const clientConfig = await getSSMParam(ssmPath);
 	const client = await buildAuthClient(clientConfig);
 
+	console.log("Flat mapping bandit test configs");
 	const banditTestConfigs: BanditTestConfig[] = input.tests.flatMap((test) =>
 		getTestConfigs(test)
 	);
 
+	console.log("Getting data from big query");
 	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
 		banditTestConfigs.map((test) =>
 			getDataForBanditTest(client, stage, test, start)
 		)
 	);
+
+	console.log("Creating write requests");
 
 	const writeRequests = resultsFromBigQuery.map(
 		({ testName, channel, rows }) => {
@@ -125,6 +129,8 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 		}
 	);
 
+	console.log("Put bandit test metrics");
+
 	await putBanditTestMetrics(banditTestConfigs, writeRequests);
 
 	if (writeRequests.length <= 0) {
@@ -132,5 +138,9 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 		return;
 	}
 
+	console.log("Write batch");
+
 	await writeBatch(writeRequests, stage, docClient);
+
+	console.log("Query lambda finished");
 }
