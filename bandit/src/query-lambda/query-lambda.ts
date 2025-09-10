@@ -99,7 +99,8 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	 */
 	const start = subHours(currentHour, 2);
 	const startTimestamp = start.toISOString().replace("T", " ");
-	const client = await getSSMParam(ssmPath).then(buildAuthClient);
+	const clientConfig = await getSSMParam(ssmPath);
+	const client = await buildAuthClient(clientConfig);
 
 	const banditTestConfigs: BanditTestConfig[] = input.tests.flatMap((test) =>
 		getTestConfigs(test)

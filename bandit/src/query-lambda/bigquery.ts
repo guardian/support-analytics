@@ -29,14 +29,20 @@ export const buildAuthClient = (
 	clientConfig: string
 ): Promise<BaseExternalAccountClient> =>
 	new Promise((resolve, reject) => {
+		console.log("buildAuthClient", { clientConfig });
 		const parsedConfig = JSON.parse(
 			clientConfig
 		) as ExternalAccountClientOptions;
 		const authClient = ExternalAccountClient.fromJSON(parsedConfig);
 		if (!authClient) {
+			console.log("Failed to create Google Auth Client", {
+				clientConfig,
+			});
 			reject("Failed to create Google Auth Client");
 			return;
 		}
+
+		console.log("Google Auth Client created", { authClient });
 		resolve(authClient);
 	});
 
