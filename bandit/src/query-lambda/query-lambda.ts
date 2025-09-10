@@ -100,7 +100,31 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	const start = subHours(currentHour, 2);
 	const startTimestamp = start.toISOString().replace("T", " ");
 	const clientConfig = await getSSMParam(ssmPath);
+	console.log("buildAuthClient start", { clientConfig: clientConfig?.slice?.(0, 200) });
 	const client = await buildAuthClient(clientConfig);
+	console.log("buildAuthClient returned");
+
+	// Try to eagerly fetch an access token (if supported) with a short timeout so
+	// we can detect stalls during token exchange early in the lambda invocation.
+	try {
+		// Some auth clients expose getAccessToken(); call if present.
+		// Use a Promise.race to timeout diagnostics quickly.
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const getAccessToken = (client as any).getAccessToken;
+		if (typeof getAccessToken === "function") {
+			const access = await Promise.race([
+				getAccessToken.call(client),
+				new Promise((_, reject) =>
+					setTimeout(() => reject(new Error("getAccessToken diagnostic timeout")), 10000)
+				),
+			]);
+			console.log("getAccessToken diagnostic result", { hasToken: !!access });
+		} else {
+			console.log("getAccessToken not available on auth client; skipping eager token check");
+		}
+	} catch (err) {
+		console.error("getAccessToken diagnostic failed:", String(err));
+	}
 
 	console.log("Flat mapping bandit test configs");
 	const banditTestConfigs: BanditTestConfig[] = input.tests.flatMap((test) =>
@@ -110,7 +134,24 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	console.log("Getting data from big query");
 	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
 		banditTestConfigs.map((test) =>
-			getDataForBanditTest(client, stage, test, start)
+			// Wrap each BigQuery call with a diagnostic timeout so that slow or
+			// hanging queries fail fast and produce a clear log entry.
+			(async () => {
+				console.log("getDataForBanditTest start", { testName: test.name, channel: test.channel });
+				try {
+					const res = await Promise.race([
+						getDataForBanditTest(client, stage, test, start),
+						new Promise((_, reject) =>
+							setTimeout(() => reject(new Error(`getDataForBanditTest timeout for ${test.name}`)), 20000)
+						),
+					]);
+					console.log("getDataForBanditTest returned", { testName: test.name });
+					return res as BigQueryResult;
+				} catch (err) {
+					console.error("getDataForBanditTest failed", { testName: test.name, err: String(err) });
+					throw err;
+				}
+			})()
 		)
 	);
 
