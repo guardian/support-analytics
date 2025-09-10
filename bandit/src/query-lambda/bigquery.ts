@@ -76,8 +76,18 @@ const getTotalComponentViews = async (
 	}
 
 	const query = buildTotalComponentViewsQuery(channel, stage, start, end);
-	// console.log("Running total component views query: ", query);
+	console.log("Running total component views query", {
+		channel,
+		stage,
+		start: start.toISOString(),
+		end: end.toISOString(),
+	});
+	const t0 = Date.now();
 	const rows = await bigquery.query({ query });
+	const t1 = Date.now();
+	console.log("total component views query finished", {
+		durationMs: t1 - t0,
+	});
 	const result = parseTotalComponentViewsResult(rows);
 
 	totalComponentViewsCache.set(cacheKey, result);
@@ -104,8 +114,19 @@ export const getDataForBanditTest = async (
 		buildTestSpecificQuery(test, "PROD", start, end),
 	]);
 
-	// console.log("Running test specific query: ", testSpecificQuery);
+	console.log("Running test specific query", {
+		testName,
+		channel,
+		testSpecificQuery,
+	});
+
+	const t2 = Date.now();
 	const testSpecificRows = await bigquery.query({ query: testSpecificQuery });
+	const t3 = Date.now();
+	console.log("test specific query finished", {
+		testName,
+		durationMs: t3 - t2,
+	});
 	const testSpecificResults = parseTestSpecificResult(testSpecificRows);
 
 	const mergedResults = mergeQueryResults(
