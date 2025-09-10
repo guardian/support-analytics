@@ -155,24 +155,16 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 					channel: test.channel,
 				});
 				try {
-					const res = await Promise.race([
-						getDataForBanditTest(client, stage, test, start),
-						new Promise((_, reject) =>
-							setTimeout(
-								() =>
-									reject(
-										new Error(
-											`getDataForBanditTest timeout for ${test.name}`
-										)
-									),
-								20000
-							)
-						),
-					]);
+					const res = await getDataForBanditTest(
+						client,
+						stage,
+						test,
+						start
+					);
 					console.log("getDataForBanditTest returned", {
 						testName: test.name,
 					});
-					return res as BigQueryResult;
+					return res;
 				} catch (err) {
 					console.error("getDataForBanditTest failed", {
 						testName: test.name,
