@@ -6,11 +6,12 @@ const isDev = stage === "DEV";
 
 export const region = "eu-west-1";
 export const credentials = (): RuntimeConfigAwsCredentialIdentityProvider => {
-	return isDev
+	const credentials = isDev
 		? fromIni({
 				profile: process.env.AWS_PROFILE ?? "membership",
 		  })
 		: fromNodeProviderChain();
+	return credentials;
 };
 
 export const config = {

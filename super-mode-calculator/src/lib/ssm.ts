@@ -5,10 +5,12 @@ export const getSSMParam = (
 	key: string,
 	stage: 'CODE' | 'PROD',
 ): Promise<string> => {
+	console.log('Creating SSMClient');
 	const ssm = new SSMClient({
 		region,
 		credentials: credentials(),
 	});
+	console.log('SSMClient created');
 
 	return ssm
 		.send(

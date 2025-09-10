@@ -5,10 +5,12 @@ import {
 } from "@aws-sdk/client-cloudwatch";
 import { config, credentials, region } from "./config";
 
+console.log("Creating CloudWatchClient");
 const cloudwatch = new CloudWatchClient({
 	region,
 	credentials: credentials(),
 });
+console.log("CloudWatchClient created");
 
 export const putMetric = async (
 	metricName: string,

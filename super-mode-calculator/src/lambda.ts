@@ -13,12 +13,14 @@ import { parseResultFromBigQuery } from './parse';
 import { isCurrentlyInSuperMode, shouldEnterSuperMode } from './superMode';
 
 const stage = process.env.STAGE;
+console.log('Creating DynamoDBDocumentClient');
 const docClient = DynamoDBDocumentClient.from(
 	new DynamoDB({
 		credentials: credentials(),
 		region,
 	}),
 );
+console.log('DynamoDBDocumentClient created');
 
 export async function handler(): Promise<void> {
 	if (stage !== 'CODE' && stage !== 'PROD') {

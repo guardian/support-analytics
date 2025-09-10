@@ -2,10 +2,12 @@ import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
 import { credentials, region } from "../lib/aws/config";
 
 export const getSSMParam = (path: string): Promise<string> => {
+	console.log("Creating SSMClient");
 	const ssm = new SSMClient({
 		region,
 		credentials: credentials(),
 	});
+	console.log("SSMClient created");
 	return ssm
 		.send(
 			new GetParameterCommand({

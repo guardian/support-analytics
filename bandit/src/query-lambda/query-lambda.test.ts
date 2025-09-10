@@ -1,10 +1,12 @@
+/* eslint-disable import/order, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-call -- jest.mock needs to run before importing modules that depend on the mocked module */
 import type { DocumentClient } from "aws-sdk/clients/dynamodb";
-import { putMetric } from "../lib/aws/cloudwatch";
-import { putBanditTestMetrics } from "./query-lambda";
 
 jest.mock("../lib/aws/cloudwatch", () => ({
 	putMetric: jest.fn().mockResolvedValue(undefined),
 }));
+
+const { putMetric } = require("../lib/aws/cloudwatch");
+const { putBanditTestMetrics } = require("./query-lambda");
 
 describe("putBanditTestMetrics", () => {
 	it("should send metrics for bandit tests", async () => {
