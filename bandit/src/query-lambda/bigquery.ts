@@ -61,7 +61,7 @@ const createCacheKey = (
 	return `${channel}-${stage}-${start.toISOString()}-${end.toISOString()}`;
 };
 
-const getTotalComponentViews = async (
+export const getTotalComponentViews = async (
 	bigquery: BigQuery,
 	channel: string,
 	stage: "CODE" | "PROD",
@@ -94,11 +94,44 @@ const getTotalComponentViews = async (
 	return result;
 };
 
+export const prefetchTotalsForChannels = async (
+	authClient: BaseExternalAccountClient,
+	channels: string[],
+	start: Date,
+	end: Date
+): Promise<Record<string, TotalComponentViewsResult>> => {
+	const totals: Record<string, TotalComponentViewsResult> = {};
+
+	const promises = channels.map((channel) => {
+		const bq = new BigQuery({
+			projectId: `datatech-platform-prod`,
+			authClient,
+		});
+		return getTotalComponentViews(bq, channel, "PROD", start, end);
+	});
+
+	const results = await Promise.allSettled(promises);
+	results.forEach((res, idx) => {
+		const channel = channels[idx];
+		if (res.status !== "fulfilled") {
+			console.error("prefetchTotalsForChannels: failed for channel", {
+				channel,
+				err: String(res.reason),
+			});
+			return;
+		}
+		totals[channel] = res.value;
+	});
+
+	return totals;
+};
+
 export const getDataForBanditTest = async (
 	authClient: BaseExternalAccountClient,
 	stage: "CODE" | "PROD",
 	test: BanditTestConfig,
-	start: Date
+	start: Date,
+	totalsByChannel?: Record<string, TotalComponentViewsResult>
 ): Promise<BigQueryResult> => {
 	const bigquery = new BigQuery({
 		projectId: `datatech-platform-${stage.toLowerCase()}`,
@@ -109,10 +142,20 @@ export const getDataForBanditTest = async (
 	const testName = test.name;
 	const channel = test.channel;
 
-	const [totalComponentViews, testSpecificQuery] = await Promise.all([
-		getTotalComponentViews(bigquery, channel, "PROD", start, end),
-		buildTestSpecificQuery(test, "PROD", start, end),
-	]);
+	const testSpecificQuery = buildTestSpecificQuery(test, "PROD", start, end);
+
+	let totalComponentViews: TotalComponentViewsResult | undefined =
+		totalsByChannel?.[channel];
+
+	if (!totalComponentViews) {
+		totalComponentViews = await getTotalComponentViews(
+			bigquery,
+			channel,
+			"PROD",
+			start,
+			end
+		);
+	}
 
 	console.log("Running test specific query", {
 		testName,

@@ -5,7 +5,11 @@ import { putMetric } from "../lib/aws/cloudwatch";
 import { getDynamoDbClient } from "../lib/aws/dynamodb";
 import type { BanditTestConfig, Methodology, Test } from "../lib/models";
 import type { BigQueryResult } from "./bigquery";
-import { buildAuthClient, getDataForBanditTest } from "./bigquery";
+import {
+	buildAuthClient,
+	getDataForBanditTest,
+	prefetchTotalsForChannels,
+} from "./bigquery";
 import type { TestSample } from "./dynamo";
 import { buildWriteRequest, writeBatch } from "./dynamo";
 import { parseResultFromBigQuery } from "./parse-result";
@@ -145,10 +149,29 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	);
 
 	console.log("Getting data from big query");
+	// To avoid issuing the same total component views query multiple times
+	// in parallel for the same channel (which can slow BigQuery), prefetch
+	// totals for each unique channel and pass them to getDataForBanditTest.
+	const uniqueChannels = Array.from(
+		new Set(banditTestConfigs.map((c) => c.channel))
+	);
+	console.log("Prefetching total component views for channels", {
+		uniqueChannels,
+	});
+
+	const end = new Date(start);
+	end.setHours(end.getHours() + 1);
+	const totalsByChannel = await prefetchTotalsForChannels(
+		client,
+		uniqueChannels,
+		start,
+		end
+	);
+
+	// Now fetch per-test data, passing the precomputed totals map so duplicate
+	// total queries are avoided.
 	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
 		banditTestConfigs.map((test) =>
-			// Wrap each BigQuery call with a diagnostic timeout so that slow or
-			// hanging queries fail fast and produce a clear log entry.
 			(async () => {
 				console.log("getDataForBanditTest start", {
 					testName: test.name,
@@ -159,7 +182,8 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 						client,
 						stage,
 						test,
-						start
+						start,
+						totalsByChannel
 					);
 					console.log("getDataForBanditTest returned", {
 						testName: test.name,
