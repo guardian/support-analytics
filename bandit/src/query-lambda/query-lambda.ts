@@ -33,11 +33,9 @@ export const putBanditTestMetrics = async (
 ): Promise<void> => {
 	const totalTests = testsData.length;
 
-	const testsWithData = testsData.filter(test => {
-		return test.rows.length > 0 && totalViewsForChannels[test.channel] > 0;
-	}).length;
-
-	const testsWithoutData = totalTests - testsWithData
+	const testsWithVariantData = testsData.filter(test =>
+		test.rows.length > 0
+	).length;
 
 	console.log(
 		JSON.stringify({
@@ -49,24 +47,18 @@ export const putBanditTestMetrics = async (
 
 	await Promise.all([
 		putMetric("TotalBanditTests", totalTests),
-		putMetric("TestsWithData", testsWithData),
-		putMetric("TestsWithoutData", testsWithoutData),
+		putMetric("TestsWithVariantData", testsWithVariantData),
 	]).catch((error) => {
 		console.error("Failed to send CloudWatch metrics:", String(error));
 	});
 
 	if (totalTests > 0) {
-		const percentageWithoutData = (testsWithoutData / totalTests) * 100;
-		await putMetric(
-			"PercentageTestsWithoutData",
-			percentageWithoutData,
-			"Percent"
-		).catch((error) => {
-			console.error(
-				"Failed to send percentage CloudWatch metric:",
-				String(error)
-			);
-		});
+
+		for (const channel in totalViewsForChannels) {
+			if (totalViewsForChannels[channel] < 1) {
+				// why not do this check before running this lambda?
+			}
+		}
 	}
 }
 
