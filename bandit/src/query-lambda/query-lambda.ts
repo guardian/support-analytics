@@ -101,9 +101,11 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 		 * This can happen if other tests have been given higher priority.
 		 * But it could also be because of an upstream data issue. Here we query for total views across all channels, to check if there's a data issue
 		 */
+		console.log('Total variant views was 0, checking for upstream data issue...')
 		const channels = new Set(banditTestConfigs.map(config => config.channel));
 		const totalViewsForChannels = await getTotalComponentViewsForChannels(client, Array.from(channels), stage, start, end);
 
+		console.log(`Total views across all tests is ${totalViewsForChannels}`);
 		if (totalViewsForChannels === 0) {
 			await putMetric('NoViewsData', 1);
 		}
