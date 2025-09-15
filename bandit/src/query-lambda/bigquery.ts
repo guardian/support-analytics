@@ -90,11 +90,10 @@ export const getDataForBanditTest = async (
 	const testName = test.name;
 	const channel = test.channel;
 
-	const query = buildTestSpecificQuery(test, 'PROD', start, end);
+	const query = buildTestSpecificQuery(test, stage, start, end);
 	console.log("Running test specific query: ", query);
 	const bigQueryRows = await bigquery.query({ query });
 	const rows = parseVariantQueryRows(bigQueryRows);
 
-	//stage is hardcoded to PROD above as we don't have sufficient data for page views in the CODE tables to run the query successfully
 	return { testName, channel, rows };
 };

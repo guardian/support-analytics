@@ -86,6 +86,8 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	const startTimestamp = start.toISOString().replace("T", " ");
 	const end = addHours(start, 1);
 	const client = await getSSMParam(ssmPath).then(buildAuthClient);
+	// stage is hardcoded to PROD as we don't have sufficient data for page views in the CODE tables to run the query successfully
+	const bigqueryStage = 'PROD';
 
 	const banditTestConfigs: BanditTestConfig[] = input.tests.flatMap((test) =>
 		getTestConfigs(test)
@@ -93,7 +95,7 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 
 	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
 		banditTestConfigs.map((test) =>
-			getDataForBanditTest(client, stage, test, start, end)
+			getDataForBanditTest(client, bigqueryStage, test, start, end)
 		)
 	);
 
@@ -111,7 +113,7 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 
 	// Get total views for each channel. We use this for detecting data issues
 	const channels = new Set(banditTestConfigs.map(config => config.channel));
-	const totalViewsForChannels = await getTotalComponentViewsForChannels(client, Array.from(channels), stage, start, end);
+	const totalViewsForChannels = await getTotalComponentViewsForChannels(client, Array.from(channels), bigqueryStage, start, end);
 
 	await putBanditTestMetrics(totalViewsForChannels, resultsFromBigQuery);
 
