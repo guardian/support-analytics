@@ -27,7 +27,7 @@ describe("putBanditTestMetrics", () => {
 
 		await putBanditTestMetrics(testsData);
 
-		expect(mockPutMetric).toHaveBeenCalledTimes(4);
+		expect(mockPutMetric).toHaveBeenCalledTimes(2);
 		expect(mockPutMetric).toHaveBeenCalledWith("TotalBanditTests", 1);
 		expect(mockPutMetric).toHaveBeenCalledWith("TestsWithVariantData", 1);
 	});

@@ -17,14 +17,14 @@ describe("build-query functions", () => {
 	describe("buildTotalComponentViewsQuery", () => {
 		it("should build a query for total component views", () => {
 			const query = buildTotalComponentViewsQuery(
-				"Epic",
+				["Epic"],
 				stage,
 				start,
 				end
 			);
 
 			expect(query).toContain(
-				"COUNT(*) as total_views_for_component_type"
+				"COUNT(*) as total_views"
 			);
 			expect(query).toContain("ACQUISITIONS_EPIC");
 			expect(query).toContain("datatech-platform-prod");
@@ -51,13 +51,13 @@ describe("parse-result functions", () => {
 	describe("parseTotalComponentViewsResult", () => {
 		it("should parse total component views result", () => {
 			const mockResult: SimpleQueryRowsResponse = [
-				[{ total_views_for_component_type: 1000 }],
+				[{ total_views: 1000 }],
 				{},
 			];
 
 			const result = parseTotalComponentViewsResult(mockResult);
 
-			expect(result).toEqual({ total_views_for_component_type: 1000 });
+			expect(result).toEqual({ total_views: 1000 });
 		});
 
 		it("should throw error for invalid result", () => {
