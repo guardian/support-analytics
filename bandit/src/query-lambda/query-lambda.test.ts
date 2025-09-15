@@ -10,7 +10,6 @@ describe("putBanditTestMetrics", () => {
 		const mockPutMetric = putMetric as jest.Mock;
 		mockPutMetric.mockClear();
 
-		const totalViewsForChannels = { 'Epic': 1000 };
 		const testsData = [{
 			testName: 'Test1',
 			channel: 'Epic',
@@ -26,16 +25,10 @@ describe("putBanditTestMetrics", () => {
 			]
 		}];
 
-		await putBanditTestMetrics(totalViewsForChannels, testsData);
+		await putBanditTestMetrics(testsData);
 
 		expect(mockPutMetric).toHaveBeenCalledTimes(4);
 		expect(mockPutMetric).toHaveBeenCalledWith("TotalBanditTests", 1);
-		expect(mockPutMetric).toHaveBeenCalledWith("TestsWithData", 1);
-		expect(mockPutMetric).toHaveBeenCalledWith("TestsWithoutData", 0);
-		expect(mockPutMetric).toHaveBeenCalledWith(
-			"PercentageTestsWithoutData",
-			0,
-			"Percent"
-		);
+		expect(mockPutMetric).toHaveBeenCalledWith("TestsWithVariantData", 1);
 	});
 });
