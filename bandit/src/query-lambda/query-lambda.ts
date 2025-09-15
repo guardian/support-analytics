@@ -28,7 +28,6 @@ const getTestConfigs = (test: Test): BanditTestConfig[] => {
 };
 
 export const putBanditTestMetrics = async (
-	totalViewsForChannels: Record<string,number>,
 	testsData: BigQueryResult[],
 ): Promise<void> => {
 	const totalTests = testsData.length;
@@ -37,29 +36,22 @@ export const putBanditTestMetrics = async (
 		test.rows.length > 0
 	).length;
 
-	console.log(
-		JSON.stringify({
-			message: "Calculating metrics for",
-			testsData,
-			channelTotalImpressions: totalViewsForChannels,
-		})
-	);
-
 	await Promise.all([
 		putMetric("TotalBanditTests", totalTests),
 		putMetric("TestsWithVariantData", testsWithVariantData),
 	]).catch((error) => {
 		console.error("Failed to send CloudWatch metrics:", String(error));
 	});
+}
 
-	if (totalTests > 0) {
-
-		for (const channel in totalViewsForChannels) {
-			if (totalViewsForChannels[channel] < 1) {
-				// why not do this check before running this lambda?
-			}
-		}
-	}
+const getTotalVariantViews = (testsData: BigQueryResult[]): number => {
+	return testsData.reduce((sum, test) =>
+		sum + test.rows.reduce(
+			(testSum, variant) => testSum + variant.views,
+				0
+			),
+		0
+	);
 }
 
 export async function run(input: QueryLambdaInput): Promise<void> {
@@ -103,11 +95,23 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 		}
 	);
 
-	// Get total views for each channel. We use this for detecting data issues
-	const channels = new Set(banditTestConfigs.map(config => config.channel));
-	const totalViewsForChannels = await getTotalComponentViewsForChannels(client, Array.from(channels), bigqueryStage, start, end);
+	const totalVariantViews = getTotalVariantViews(resultsFromBigQuery);
 
-	await putBanditTestMetrics(totalViewsForChannels, resultsFromBigQuery);
+	if (banditTestConfigs.length > 0 && totalVariantViews === 0) {
+		/**
+		 * None of the bandit tests have any impressions for the queried window.
+		 * This can happen if other tests have been given higher priority.
+		 * But it could also be because of an upstream data issue. Here we query for total views across all channels, to check if there's a data issue
+		 */
+		const channels = new Set(banditTestConfigs.map(config => config.channel));
+		const totalViewsForChannels = await getTotalComponentViewsForChannels(client, Array.from(channels), bigqueryStage, start, end);
+
+		if (totalViewsForChannels === 0) {
+			await putMetric('NoViewsData', 1);
+		}
+	}
+
+	await putBanditTestMetrics(resultsFromBigQuery);
 
 	if (writeRequests.length <= 0) {
 		console.log("No data to write");

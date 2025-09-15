@@ -37,42 +37,23 @@ export interface BigQueryResult {
 	rows: VariantQueryRow[];
 }
 
-export const getTotalComponentViewsForChannel = async (
-	bigquery: BigQuery,
-	channel: string,
-	stage: "CODE" | "PROD",
-	start: Date,
-	end: Date
-): Promise<number> => {
-	const query = buildTotalComponentViewsQuery(channel, stage, start, end);
-	const rows = await bigquery.query({ query });
-	const result = parseTotalComponentViewsResult(rows);
-
-	return result.total_views_for_component_type;
-};
-
 export const getTotalComponentViewsForChannels = async (
 	authClient: BaseExternalAccountClient,
 	channels: string[],
 	stage: "CODE" | "PROD",
 	start: Date,
 	end: Date
-): Promise<Record<string, number>> => {
+): Promise<number> => {
 	const bigquery = new BigQuery({
 		projectId: `datatech-platform-${stage.toLowerCase()}`,
 		authClient,
 	});
 
-	const totals = await Promise.all(
-		channels.map(channel =>
-			getTotalComponentViewsForChannel(bigquery, channel, stage, start, end)
-		)
-	);
+	const query = buildTotalComponentViewsQuery(channels, stage, start, end);
+	const rows = await bigquery.query({ query });
+	const result = parseTotalComponentViewsResult(rows);
 
-	return channels.reduce<Record<string, number>>((acc, channel, idx) => {
-		acc[channel] = totals[idx];
-		return acc;
-	}, {});
+	return result.total_views;
 };
 
 export const getDataForBanditTest = async (

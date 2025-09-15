@@ -16,7 +16,7 @@ export type VariantQueryRow = z.infer<typeof variantQueryRowSchema>;
 const variantQueryRowsSchema = z.array(variantQueryRowSchema);
 
 const totalComponentViewsSchema = z.object({
-	total_views_for_component_type: z.number(),
+	total_views: z.number(),
 });
 
 type TotalComponentViews = z.infer<typeof totalComponentViewsSchema>;
