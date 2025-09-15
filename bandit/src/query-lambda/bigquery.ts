@@ -16,6 +16,9 @@ import {
 	parseVariantQueryRows
 } from "./parse-result";
 
+// stage is hardcoded to PROD as we don't have sufficient data for page views in the CODE tables to run the query successfully
+const bigqueryStage = 'PROD';
+
 export const buildAuthClient = (
 	clientConfig: string
 ): Promise<BaseExternalAccountClient> =>
@@ -49,7 +52,7 @@ export const getTotalComponentViewsForChannels = async (
 		authClient,
 	});
 
-	const query = buildTotalComponentViewsQuery(channels, stage, start, end);
+	const query = buildTotalComponentViewsQuery(channels, bigqueryStage, start, end);
 	const rows = await bigquery.query({ query });
 	const result = parseTotalComponentViewsResult(rows);
 
@@ -71,7 +74,7 @@ export const getDataForBanditTest = async (
 	const testName = test.name;
 	const channel = test.channel;
 
-	const query = buildTestSpecificQuery(test, stage, start, end);
+	const query = buildTestSpecificQuery(test, bigqueryStage, start, end);
 	console.log("Running test specific query: ", query);
 	const bigQueryRows = await bigquery.query({ query });
 	const rows = parseVariantQueryRows(bigQueryRows);

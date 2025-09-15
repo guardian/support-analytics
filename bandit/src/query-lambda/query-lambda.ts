@@ -70,8 +70,6 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	const startTimestamp = start.toISOString().replace("T", " ");
 	const end = addHours(start, 1);
 	const client = await getSSMParam(ssmPath).then(buildAuthClient);
-	// stage is hardcoded to PROD as we don't have sufficient data for page views in the CODE tables to run the query successfully
-	const bigqueryStage = 'PROD';
 
 	const banditTestConfigs: BanditTestConfig[] = input.tests.flatMap((test) =>
 		getTestConfigs(test)
@@ -79,7 +77,7 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 
 	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
 		banditTestConfigs.map((test) =>
-			getDataForBanditTest(client, bigqueryStage, test, start, end)
+			getDataForBanditTest(client, stage, test, start, end)
 		)
 	);
 
@@ -104,7 +102,7 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 		 * But it could also be because of an upstream data issue. Here we query for total views across all channels, to check if there's a data issue
 		 */
 		const channels = new Set(banditTestConfigs.map(config => config.channel));
-		const totalViewsForChannels = await getTotalComponentViewsForChannels(client, Array.from(channels), bigqueryStage, start, end);
+		const totalViewsForChannels = await getTotalComponentViewsForChannels(client, Array.from(channels), stage, start, end);
 
 		if (totalViewsForChannels === 0) {
 			await putMetric('NoViewsData', 1);
