@@ -213,7 +213,7 @@ export class Bandit extends GuStack {
 			app: appName,
 			actionsEnabled: isProd,
 			snsTopicName: `alarms-handler-topic-${this.stage}`,
-			alarmName: `Support Bandit Complete Outage in ${this.stage}`,
+			alarmName: `Support Bandit - missing data in ${this.stage}`,
 			alarmDescription: `No view data was retrieved from BigQuery. This indicates a complete upstream outage. Check https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A865473395570%3AstateMachine%3Asupport-bandit-${this.stage}`,
 			metric: new Metric({
 				metricName: 'NoViewsData',
