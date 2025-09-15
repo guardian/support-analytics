@@ -8,7 +8,6 @@ interface VariantSample {
 	annualisedValueInGBP: number;
 	annualisedValueInGBPPerView: number;
 	views: number;
-	totalViewsForComponentType?: number;
 }
 
 export interface TestSample {
@@ -42,7 +41,6 @@ function buildDynamoRecord(
 		annualisedValueInGBP: row.sum_av_gbp,
 		annualisedValueInGBPPerView: row.sum_av_gbp_per_view,
 		views: row.views,
-		totalViewsForComponentType: row.total_views_for_component_type,
 	}));
 
 	return {

@@ -5,9 +5,7 @@ import {
 	buildTotalComponentViewsQuery,
 } from "./build-query";
 import {
-	mergeQueryResults,
-	parseTestSpecificResult,
-	parseTotalComponentViewsResult,
+	parseTotalComponentViewsResult, parseVariantQueryRows
 } from "./parse-result";
 
 describe("build-query functions", () => {
@@ -90,7 +88,7 @@ describe("parse-result functions", () => {
 				{},
 			];
 
-			const result = parseTestSpecificResult(mockResult);
+			const result = parseVariantQueryRows(mockResult);
 
 			expect(result).toEqual([
 				{
@@ -110,44 +108,9 @@ describe("parse-result functions", () => {
 				{},
 			];
 
-			expect(() => parseTestSpecificResult(mockResult)).toThrow(
+			expect(() => parseVariantQueryRows(mockResult)).toThrow(
 				QueryReturnedInvalidDataError
 			);
-		});
-	});
-
-	describe("mergeQueryResults", () => {
-		it("should merge test specific results with total component views", () => {
-			const testSpecificResults = [
-				{
-					test_name: "TestName",
-					variant_name: "control",
-					views: 100,
-					sum_av_gbp: 10.5,
-					sum_av_gbp_per_view: 0.105,
-					acquisitions: 5,
-				},
-			];
-			const totalComponentViews = {
-				total_views_for_component_type: 1000,
-			};
-
-			const result = mergeQueryResults(
-				testSpecificResults,
-				totalComponentViews
-			);
-
-			expect(result).toEqual([
-				{
-					test_name: "TestName",
-					variant_name: "control",
-					views: 100,
-					sum_av_gbp: 10.5,
-					sum_av_gbp_per_view: 0.105,
-					acquisitions: 5,
-					total_views_for_component_type: 1000,
-				},
-			]);
 		});
 	});
 });
