@@ -209,32 +209,14 @@ export class Bandit extends GuStack {
 
 		const namespace = `support-bandit-${this.stage}`;
 
-		new GuAlarm(this, 'NoDataAlarm', {
+		new GuAlarm(this, 'NoViewsDataAlarm', {
 			app: appName,
 			actionsEnabled: isProd,
 			snsTopicName: `alarms-handler-topic-${this.stage}`,
-			alarmName: `Support Bandit No Data in ${this.stage}`,
-			alarmDescription: `A high percentage of bandit tests returned no data from BigQuery. This may indicate an upstream issue. Check https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A865473395570%3AstateMachine%3Asupport-bandit-${this.stage}`,
+			alarmName: `Support Bandit - missing data in ${this.stage}`,
+			alarmDescription: `No view data was retrieved from BigQuery. This indicates a complete upstream outage. Check https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A865473395570%3AstateMachine%3Asupport-bandit-${this.stage}`,
 			metric: new Metric({
-				metricName: 'PercentageTestsWithoutData',
-				namespace,
-				statistic: 'Average',
-				period: Duration.minutes(60),
-			}),
-			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
-			evaluationPeriods: 2, // Trigger only if 2 consecutive hours have high percentage
-			threshold: 80, // Alert if more than 80% of tests have no data
-			treatMissingData: TreatMissingData.NOT_BREACHING,
-		});
-
-		new GuAlarm(this, 'CompleteOutageAlarm', {
-			app: appName,
-			actionsEnabled: isProd,
-			snsTopicName: `alarms-handler-topic-${this.stage}`,
-			alarmName: `Support Bandit Complete Outage in ${this.stage}`,
-			alarmDescription: `All bandit tests returned no data from BigQuery. This indicates a complete upstream outage. Check https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A865473395570%3AstateMachine%3Asupport-bandit-${this.stage}`,
-			metric: new Metric({
-				metricName: 'TestsWithData',
+				metricName: 'NoViewsData',
 				namespace,
 				statistic: 'Sum',
 				period: Duration.minutes(60),

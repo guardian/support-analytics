@@ -1,6 +1,4 @@
-import type { SimpleQueryRowsResponse } from "@google-cloud/bigquery";
 import { BigQuery } from "@google-cloud/bigquery";
-import { addHours } from "date-fns";
 import type {
 	BaseExternalAccountClient,
 	ExternalAccountClientOptions,
@@ -11,19 +9,15 @@ import {
 	buildTestSpecificQuery,
 	buildTotalComponentViewsQuery,
 } from "./build-query";
-import {
-	mergeQueryResults,
-	parseTestSpecificResult,
-	parseTotalComponentViewsResult,
+import type { VariantQueryRow
 } from "./parse-result";
-import type { TotalComponentViewsResult } from "./query-types";
+import {
+	parseTotalComponentViewsResult,
+	parseVariantQueryRows
+} from "./parse-result";
 
-// Memoization cache for total component views
-const totalComponentViewsCache = new Map<string, TotalComponentViewsResult>();
-
-export const clearTotalComponentViewsCache = (): void => {
-	totalComponentViewsCache.clear();
-};
+// stage is hardcoded to PROD as we don't have sufficient data for page views in the CODE tables to run the query successfully
+const bigqueryStage = 'PROD';
 
 export const buildAuthClient = (
 	clientConfig: string
@@ -43,74 +37,47 @@ export const buildAuthClient = (
 export interface BigQueryResult {
 	testName: string;
 	channel: string;
-	rows: SimpleQueryRowsResponse;
+	rows: VariantQueryRow[];
 }
 
-const createCacheKey = (
-	channel: string,
-	stage: string,
-	start: Date,
-	end: Date
-): string => {
-	return `${channel}-${stage}-${start.toISOString()}-${end.toISOString()}`;
-};
-
-const getTotalComponentViews = async (
-	bigquery: BigQuery,
-	channel: string,
+export const getTotalComponentViewsForChannels = async (
+	authClient: BaseExternalAccountClient,
+	channels: string[],
 	stage: "CODE" | "PROD",
 	start: Date,
 	end: Date
-): Promise<TotalComponentViewsResult> => {
-	const cacheKey = createCacheKey(channel, stage, start, end);
+): Promise<number> => {
+	const bigquery = new BigQuery({
+		projectId: `datatech-platform-${stage.toLowerCase()}`,
+		authClient,
+	});
 
-	const cachedResult = totalComponentViewsCache.get(cacheKey);
-	if (cachedResult) {
-		return cachedResult;
-	}
-
-	const query = buildTotalComponentViewsQuery(channel, stage, start, end);
-	// console.log("Running total component views query: ", query);
+	const query = buildTotalComponentViewsQuery(channels, bigqueryStage, start, end);
 	const rows = await bigquery.query({ query });
 	const result = parseTotalComponentViewsResult(rows);
 
-	totalComponentViewsCache.set(cacheKey, result);
-	return result;
+	return result.total_views;
 };
 
 export const getDataForBanditTest = async (
 	authClient: BaseExternalAccountClient,
 	stage: "CODE" | "PROD",
 	test: BanditTestConfig,
-	start: Date
+	start: Date,
+	end: Date,
 ): Promise<BigQueryResult> => {
 	const bigquery = new BigQuery({
 		projectId: `datatech-platform-${stage.toLowerCase()}`,
 		authClient,
 	});
 
-	const end = addHours(start, 1);
 	const testName = test.name;
 	const channel = test.channel;
 
-	const [totalComponentViews, testSpecificQuery] = await Promise.all([
-		getTotalComponentViews(bigquery, channel, "PROD", start, end),
-		buildTestSpecificQuery(test, "PROD", start, end),
-	]);
+	const query = buildTestSpecificQuery(test, bigqueryStage, start, end);
+	console.log("Running test specific query: ", query);
+	const bigQueryRows = await bigquery.query({ query });
+	const rows = parseVariantQueryRows(bigQueryRows);
 
-	// console.log("Running test specific query: ", testSpecificQuery);
-	const testSpecificRows = await bigquery.query({ query: testSpecificQuery });
-	const testSpecificResults = parseTestSpecificResult(testSpecificRows);
-
-	const mergedResults = mergeQueryResults(
-		testSpecificResults,
-		totalComponentViews
-	);
-	const rows: SimpleQueryRowsResponse = [
-		mergedResults,
-		{},
-	] as SimpleQueryRowsResponse;
-
-	//stage is hardcoded to PROD above as we don't have sufficient data for page views in the CODE tables to run the query successfully
 	return { testName, channel, rows };
 };

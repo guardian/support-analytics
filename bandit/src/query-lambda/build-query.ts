@@ -20,17 +20,17 @@ const formatTimestamps = (start: Date, end: Date) => ({
 });
 
 export const buildTotalComponentViewsQuery = (
-	channel: string,
+	channels: string[],
 	stage: "CODE" | "PROD",
 	start: Date,
 	end: Date
 ): string => {
 	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
-	const componentType = getComponentType(channel);
+	const componentTypes = channels.map(channel => getComponentType(channel));
 
 	return `
 SELECT
-	COUNT(*) as total_views_for_component_type
+	COUNT(*) as total_views
 FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
 CROSS JOIN UNNEST(component_event_array) as ce
 WHERE received_date >= DATE_SUB('${format(
@@ -41,7 +41,7 @@ AND received_date <= '${format(start, "yyyy-MM-dd")}'
 AND ce.event_timestamp >= '${startTimestamp}'
 AND ce.event_timestamp < '${endTimestamp}'
 AND ce.event_action = "VIEW"
-AND ce.component_type = "${componentType}"
+AND ce.component_type IN (${componentTypes.map(c => `"${c}"`).join(', ')})
 	`;
 };
 

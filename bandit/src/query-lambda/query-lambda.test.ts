@@ -1,4 +1,3 @@
-import type { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { putMetric } from "../lib/aws/cloudwatch";
 import { putBanditTestMetrics } from "./query-lambda";
 
@@ -11,37 +10,25 @@ describe("putBanditTestMetrics", () => {
 		const mockPutMetric = putMetric as jest.Mock;
 		mockPutMetric.mockClear();
 
-		const banditTestConfigs = [{ name: "Test1", channel: "Epic" }];
-		const writeRequests: DocumentClient.WriteRequest[] = [
-			{
-				PutRequest: {
-					Item: {
-						testName: "Epic_Test1",
-						variants: [
-							{
-								variantName: "Variant1",
-								annualisedValueInGBP: 10,
-								annualisedValueInGBPPerView: 0.1,
-								views: 100,
-								totalViewsForComponentType: 1000,
-							},
-						],
-						timestamp: "2023-01-01 00:00:00.000",
-					},
+		const testsData = [{
+			testName: 'Test1',
+			channel: 'Epic',
+			rows: [
+				{
+					test_name: "Test1",
+					variant_name: "Variant1",
+					views: 100,
+					sum_av_gbp: 10,
+					sum_av_gbp_per_view: 0.1,
+					acquisitions: 5,
 				},
-			},
-		];
+			]
+		}];
 
-		await putBanditTestMetrics(banditTestConfigs, writeRequests);
+		await putBanditTestMetrics(testsData);
 
-		expect(mockPutMetric).toHaveBeenCalledTimes(4);
+		expect(mockPutMetric).toHaveBeenCalledTimes(2);
 		expect(mockPutMetric).toHaveBeenCalledWith("TotalBanditTests", 1);
-		expect(mockPutMetric).toHaveBeenCalledWith("TestsWithData", 1);
-		expect(mockPutMetric).toHaveBeenCalledWith("TestsWithoutData", 0);
-		expect(mockPutMetric).toHaveBeenCalledWith(
-			"PercentageTestsWithoutData",
-			0,
-			"Percent"
-		);
+		expect(mockPutMetric).toHaveBeenCalledWith("TestsWithVariantData", 1);
 	});
 });

@@ -1,13 +1,10 @@
 import * as AWS from "aws-sdk";
-import type { WriteRequest } from "aws-sdk/clients/dynamodb";
-import { set, subHours } from "date-fns";
+import { addHours, set, subHours } from "date-fns";
 import { putMetric } from "../lib/aws/cloudwatch";
 import type { BanditTestConfig, Methodology, Test } from "../lib/models";
-import type { BigQueryResult } from "./bigquery";
-import { buildAuthClient, getDataForBanditTest } from "./bigquery";
-import type { TestSample } from "./dynamo";
+import type { BigQueryResult} from "./bigquery";
+import { buildAuthClient , getDataForBanditTest, getTotalComponentViewsForChannels } from "./bigquery";
 import { buildWriteRequest, writeBatch } from "./dynamo";
-import { parseResultFromBigQuery } from "./parse-result";
 import { getSSMParam } from "./ssm";
 
 const stage = process.env.STAGE;
@@ -31,59 +28,31 @@ const getTestConfigs = (test: Test): BanditTestConfig[] => {
 };
 
 export const putBanditTestMetrics = async (
-	banditTestConfigs: BanditTestConfig[],
-	writeRequests: WriteRequest[]
-) => {
-	const totalTests = banditTestConfigs.length;
-	const testsWithData = writeRequests.filter((req) => {
-		const item = req.PutRequest?.Item as TestSample | undefined;
-		if (!item?.variants) {
-			return false;
-		}
+	testsData: BigQueryResult[],
+): Promise<void> => {
+	const totalTests = testsData.length;
 
-		if (!Array.isArray(item.variants) || item.variants.length === 0) {
-			return false;
-		}
-
-		return item.variants.some(
-			(variant) =>
-				variant.totalViewsForComponentType &&
-				variant.totalViewsForComponentType > 0
-		);
-	}).length;
-
-	const testsWithoutData = totalTests - testsWithData;
-
-	console.log(
-		JSON.stringify({
-			message: "Calculating metrics for",
-			banditTestConfigs,
-			writeRequests,
-		})
-	);
+	const testsWithVariantData = testsData.filter(test =>
+		test.rows.length > 0
+	).length;
 
 	await Promise.all([
 		putMetric("TotalBanditTests", totalTests),
-		putMetric("TestsWithData", testsWithData),
-		putMetric("TestsWithoutData", testsWithoutData),
+		putMetric("TestsWithVariantData", testsWithVariantData),
 	]).catch((error) => {
 		console.error("Failed to send CloudWatch metrics:", String(error));
 	});
+}
 
-	if (totalTests > 0) {
-		const percentageWithoutData = (testsWithoutData / totalTests) * 100;
-		await putMetric(
-			"PercentageTestsWithoutData",
-			percentageWithoutData,
-			"Percent"
-		).catch((error) => {
-			console.error(
-				"Failed to send percentage CloudWatch metric:",
-				String(error)
-			);
-		});
-	}
-};
+const getTotalVariantViews = (testsData: BigQueryResult[]): number => {
+	return testsData.reduce((sum, test) =>
+		sum + test.rows.reduce(
+			(testSum, variant) => testSum + variant.views,
+				0
+			),
+		0
+	);
+}
 
 export async function run(input: QueryLambdaInput): Promise<void> {
 	if (stage !== "CODE" && stage !== "PROD") {
@@ -99,6 +68,7 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	 */
 	const start = subHours(currentHour, 2);
 	const startTimestamp = start.toISOString().replace("T", " ");
+	const end = addHours(start, 1);
 	const client = await getSSMParam(ssmPath).then(buildAuthClient);
 
 	const banditTestConfigs: BanditTestConfig[] = input.tests.flatMap((test) =>
@@ -107,24 +77,41 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 
 	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
 		banditTestConfigs.map((test) =>
-			getDataForBanditTest(client, stage, test, start)
+			getDataForBanditTest(client, stage, test, start, end)
 		)
 	);
 
 	const writeRequests = resultsFromBigQuery.map(
 		({ testName, channel, rows }) => {
-			const parsed = parseResultFromBigQuery(rows);
 			console.log(
 				JSON.stringify({
 					message: `Writing row for ${testName}: `,
-					parsed,
+					rows,
 				})
 			);
-			return buildWriteRequest(parsed, testName, channel, startTimestamp);
+			return buildWriteRequest(rows, testName, channel, startTimestamp);
 		}
 	);
 
-	await putBanditTestMetrics(banditTestConfigs, writeRequests);
+	const totalVariantViews = getTotalVariantViews(resultsFromBigQuery);
+
+	if (banditTestConfigs.length > 0 && totalVariantViews === 0) {
+		/**
+		 * None of the bandit tests have any impressions for the queried window.
+		 * This can happen if other tests have been given higher priority.
+		 * But it could also be because of an upstream data issue. Here we query for total views across all channels, to check if there's a data issue
+		 */
+		console.log('Total variant views was 0, checking for upstream data issue...')
+		const channels = new Set(banditTestConfigs.map(config => config.channel));
+		const totalViewsForChannels = await getTotalComponentViewsForChannels(client, Array.from(channels), stage, start, end);
+
+		console.log(`Total views across all tests is ${totalViewsForChannels}`);
+		if (totalViewsForChannels === 0) {
+			await putMetric('NoViewsData', 1);
+		}
+	}
+
+	await putBanditTestMetrics(resultsFromBigQuery);
 
 	if (writeRequests.length <= 0) {
 		console.log("No data to write");

@@ -5,9 +5,7 @@ import {
 	buildTotalComponentViewsQuery,
 } from "./build-query";
 import {
-	mergeQueryResults,
-	parseTestSpecificResult,
-	parseTotalComponentViewsResult,
+	parseTotalComponentViewsResult, parseVariantQueryRows
 } from "./parse-result";
 
 describe("build-query functions", () => {
@@ -19,14 +17,14 @@ describe("build-query functions", () => {
 	describe("buildTotalComponentViewsQuery", () => {
 		it("should build a query for total component views", () => {
 			const query = buildTotalComponentViewsQuery(
-				"Epic",
+				["Epic"],
 				stage,
 				start,
 				end
 			);
 
 			expect(query).toContain(
-				"COUNT(*) as total_views_for_component_type"
+				"COUNT(*) as total_views"
 			);
 			expect(query).toContain("ACQUISITIONS_EPIC");
 			expect(query).toContain("datatech-platform-prod");
@@ -53,13 +51,13 @@ describe("parse-result functions", () => {
 	describe("parseTotalComponentViewsResult", () => {
 		it("should parse total component views result", () => {
 			const mockResult: SimpleQueryRowsResponse = [
-				[{ total_views_for_component_type: 1000 }],
+				[{ total_views: 1000 }],
 				{},
 			];
 
 			const result = parseTotalComponentViewsResult(mockResult);
 
-			expect(result).toEqual({ total_views_for_component_type: 1000 });
+			expect(result).toEqual({ total_views: 1000 });
 		});
 
 		it("should throw error for invalid result", () => {
@@ -90,7 +88,7 @@ describe("parse-result functions", () => {
 				{},
 			];
 
-			const result = parseTestSpecificResult(mockResult);
+			const result = parseVariantQueryRows(mockResult);
 
 			expect(result).toEqual([
 				{
@@ -110,44 +108,9 @@ describe("parse-result functions", () => {
 				{},
 			];
 
-			expect(() => parseTestSpecificResult(mockResult)).toThrow(
+			expect(() => parseVariantQueryRows(mockResult)).toThrow(
 				QueryReturnedInvalidDataError
 			);
-		});
-	});
-
-	describe("mergeQueryResults", () => {
-		it("should merge test specific results with total component views", () => {
-			const testSpecificResults = [
-				{
-					test_name: "TestName",
-					variant_name: "control",
-					views: 100,
-					sum_av_gbp: 10.5,
-					sum_av_gbp_per_view: 0.105,
-					acquisitions: 5,
-				},
-			];
-			const totalComponentViews = {
-				total_views_for_component_type: 1000,
-			};
-
-			const result = mergeQueryResults(
-				testSpecificResults,
-				totalComponentViews
-			);
-
-			expect(result).toEqual([
-				{
-					test_name: "TestName",
-					variant_name: "control",
-					views: 100,
-					sum_av_gbp: 10.5,
-					sum_av_gbp_per_view: 0.105,
-					acquisitions: 5,
-					total_views_for_component_type: 1000,
-				},
-			]);
 		});
 	});
 });
