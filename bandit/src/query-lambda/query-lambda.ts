@@ -1,14 +1,20 @@
-import * as AWS from "aws-sdk";
+import { DynamoDB } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { addHours, set, subHours } from "date-fns";
 import { putMetric } from "../lib/aws/cloudwatch";
+import { region } from "../lib/aws/config";
 import type { BanditTestConfig, Methodology, Test } from "../lib/models";
-import type { BigQueryResult} from "./bigquery";
-import { buildAuthClient , getDataForBanditTest, getTotalComponentViewsForChannels } from "./bigquery";
+import type { BigQueryResult } from "./bigquery";
+import {
+	buildAuthClient,
+	getDataForBanditTest,
+	getTotalComponentViewsForChannels,
+} from "./bigquery";
 import { buildWriteRequest, writeBatch } from "./dynamo";
 import { getSSMParam } from "./ssm";
 
 const stage = process.env.STAGE;
-const docClient = new AWS.DynamoDB.DocumentClient({ region: "eu-west-1" });
+const docClient = DynamoDBDocumentClient.from(new DynamoDB({ region }));
 
 export interface QueryLambdaInput {
 	tests: Test[];
@@ -28,12 +34,12 @@ const getTestConfigs = (test: Test): BanditTestConfig[] => {
 };
 
 export const putBanditTestMetrics = async (
-	testsData: BigQueryResult[],
+	testsData: BigQueryResult[]
 ): Promise<void> => {
 	const totalTests = testsData.length;
 
-	const testsWithVariantData = testsData.filter(test =>
-		test.rows.length > 0
+	const testsWithVariantData = testsData.filter(
+		(test) => test.rows.length > 0
 	).length;
 
 	await Promise.all([
@@ -42,17 +48,16 @@ export const putBanditTestMetrics = async (
 	]).catch((error) => {
 		console.error("Failed to send CloudWatch metrics:", String(error));
 	});
-}
+};
 
 const getTotalVariantViews = (testsData: BigQueryResult[]): number => {
-	return testsData.reduce((sum, test) =>
-		sum + test.rows.reduce(
-			(testSum, variant) => testSum + variant.views,
-				0
-			),
+	return testsData.reduce(
+		(sum, test) =>
+			sum +
+			test.rows.reduce((testSum, variant) => testSum + variant.views, 0),
 		0
 	);
-}
+};
 
 export async function run(input: QueryLambdaInput): Promise<void> {
 	if (stage !== "CODE" && stage !== "PROD") {
@@ -101,13 +106,23 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 		 * This can happen if other tests have been given higher priority.
 		 * But it could also be because of an upstream data issue. Here we query for total views across all channels, to check if there's a data issue
 		 */
-		console.log('Total variant views was 0, checking for upstream data issue...')
-		const channels = new Set(banditTestConfigs.map(config => config.channel));
-		const totalViewsForChannels = await getTotalComponentViewsForChannels(client, Array.from(channels), stage, start, end);
+		console.log(
+			"Total variant views was 0, checking for upstream data issue..."
+		);
+		const channels = new Set(
+			banditTestConfigs.map((config) => config.channel)
+		);
+		const totalViewsForChannels = await getTotalComponentViewsForChannels(
+			client,
+			Array.from(channels),
+			stage,
+			start,
+			end
+		);
 
 		console.log(`Total views across all tests is ${totalViewsForChannels}`);
 		if (totalViewsForChannels === 0) {
-			await putMetric('NoViewsData', 1);
+			await putMetric("NoViewsData", 1);
 		}
 	}
 
