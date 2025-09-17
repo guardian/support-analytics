@@ -1,10 +1,9 @@
-import type { WriteRequest } from '@aws-sdk/client-dynamodb';
+import type { BatchWriteItemCommandInput } from '@aws-sdk/client-dynamodb';
 import type {
 	BatchWriteCommandOutput,
 	DynamoDBDocumentClient,
 } from '@aws-sdk/lib-dynamodb';
 import { BatchWriteCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
-import { marshall } from '@aws-sdk/util-dynamodb';
 import { addDays, addHours } from 'date-fns';
 import type { QueryRow } from '../parse';
 import { SUPER_MODE_DURATION_IN_HOURS } from './constants';
@@ -29,10 +28,12 @@ export function writeRowsForSuperMode(
 	);
 }
 
-function buildWriteRequestForSuperMode(row: QueryRow): WriteRequest {
+export type DocumentWriteRequest = { PutRequest: { Item: DynamoRecord } };
+
+function buildWriteRequestForSuperMode(row: QueryRow): DocumentWriteRequest {
 	return {
 		PutRequest: {
-			Item: marshall(buildDynamoRecord(row)),
+			Item: buildDynamoRecord(row),
 		},
 	};
 }
@@ -53,19 +54,25 @@ function buildDynamoRecord(
 }
 
 function writeBatchForSuperMode(
-	batch: WriteRequest[],
+	batch: unknown[],
 	stage: string,
 	docClient: DynamoDBDocumentClient,
 ): Promise<BatchWriteCommandOutput> {
 	const table = `super-mode-calculator-${stage.toUpperCase()}`;
 
-	return docClient.send(
-		new BatchWriteCommand({
-			RequestItems: {
-				[table]: batch,
-			},
-		}),
-	);
+	// Build a typed request items object that can carry either document items (plain JS objects)
+	// or AttributeValue maps; we type the inner arrays as `Record<string, unknown>` which is
+	// sufficient for the DynamoDBDocumentClient at runtime while keeping TypeScript happy.
+	// At runtime, `batch` will be either an array of low-level WriteRequest (AttributeValue maps)
+	// or document-style write requests. The DynamoDBDocumentClient accepts document-style items.
+	// We construct a RequestItems object and cast it to the expected type for the BatchWriteCommand.
+	const request = {
+		RequestItems: {
+			[table]: batch,
+		} as unknown as BatchWriteItemCommandInput['RequestItems'],
+	} as BatchWriteItemCommandInput;
+
+	return docClient.send(new BatchWriteCommand(request));
 }
 
 const DYNAMO_MAX_BATCH_SIZE = 25;
