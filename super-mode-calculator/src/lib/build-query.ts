@@ -10,7 +10,7 @@ import { toDateHourString, toDateString } from './date';
 export const buildQueryForSuperMode = (
 	stage: 'CODE' | 'PROD',
 	now: Date = new Date(),
-) => {
+): string => {
 	const end = subHours(now, 1);
 	const windowStartDate = subHours(end, SUPER_MODE_WINDOW_IN_HOURS);
 

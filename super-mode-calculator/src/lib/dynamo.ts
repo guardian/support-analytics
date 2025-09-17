@@ -1,6 +1,9 @@
-import type { AWSError } from 'aws-sdk';
-import type { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import type { PromiseResult } from 'aws-sdk/lib/request';
+import type { BatchWriteItemCommandInput } from '@aws-sdk/client-dynamodb';
+import type {
+	BatchWriteCommandOutput,
+	DynamoDBDocumentClient,
+} from '@aws-sdk/lib-dynamodb';
+import { BatchWriteCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { addDays, addHours } from 'date-fns';
 import type { QueryRow } from '../parse';
 import { SUPER_MODE_DURATION_IN_HOURS } from './constants';
@@ -16,10 +19,8 @@ export interface DynamoRecord extends QueryRow {
 export function writeRowsForSuperMode(
 	rows: QueryRow[],
 	stage: string,
-	docClient: DocumentClient,
-): Promise<
-	Array<PromiseResult<DocumentClient.BatchWriteItemOutput, AWSError>>
-> {
+	docClient: DynamoDBDocumentClient,
+): Promise<BatchWriteCommandOutput[]> {
 	const batches = buildBatches(rows.map(buildWriteRequestForSuperMode));
 
 	return Promise.all(
@@ -27,9 +28,9 @@ export function writeRowsForSuperMode(
 	);
 }
 
-function buildWriteRequestForSuperMode(
-	row: QueryRow,
-): DocumentClient.WriteRequest {
+export type DocumentWriteRequest = { PutRequest: { Item: DynamoRecord } };
+
+function buildWriteRequestForSuperMode(row: QueryRow): DocumentWriteRequest {
 	return {
 		PutRequest: {
 			Item: buildDynamoRecord(row),
@@ -53,19 +54,25 @@ function buildDynamoRecord(
 }
 
 function writeBatchForSuperMode(
-	batch: DocumentClient.WriteRequest[],
+	batch: unknown[],
 	stage: string,
-	docClient: DocumentClient,
-): Promise<PromiseResult<DocumentClient.BatchWriteItemOutput, AWSError>> {
+	docClient: DynamoDBDocumentClient,
+): Promise<BatchWriteCommandOutput> {
 	const table = `super-mode-calculator-${stage.toUpperCase()}`;
 
-	return docClient
-		.batchWrite({
-			RequestItems: {
-				[table]: batch,
-			},
-		})
-		.promise();
+	// Build a typed request items object that can carry either document items (plain JS objects)
+	// or AttributeValue maps; we type the inner arrays as `Record<string, unknown>` which is
+	// sufficient for the DynamoDBDocumentClient at runtime while keeping TypeScript happy.
+	// At runtime, `batch` will be either an array of low-level WriteRequest (AttributeValue maps)
+	// or document-style write requests. The DynamoDBDocumentClient accepts document-style items.
+	// We construct a RequestItems object and cast it to the expected type for the BatchWriteCommand.
+	const request = {
+		RequestItems: {
+			[table]: batch,
+		} as unknown as BatchWriteItemCommandInput['RequestItems'],
+	} as BatchWriteItemCommandInput;
+
+	return docClient.send(new BatchWriteCommand(request));
 }
 
 const DYNAMO_MAX_BATCH_SIZE = 25;
@@ -86,7 +93,7 @@ function buildBatches<T>(
 
 export async function queryActiveArticlesForSuperMode(
 	stage: string,
-	docClient: AWS.DynamoDB.DocumentClient,
+	docClient: DynamoDBDocumentClient,
 	now: Date = new Date(),
 ): Promise<DynamoRecord[]> {
 	const tomorrow = addDays(now, 1);
@@ -110,10 +117,10 @@ function queryDateForSuperMode(
 	endDate: string,
 	endTimestamp: string,
 	stage: string,
-	docClient: AWS.DynamoDB.DocumentClient,
+	docClient: DynamoDBDocumentClient,
 ) {
-	return docClient
-		.query({
+	return docClient.send(
+		new QueryCommand({
 			TableName: `super-mode-calculator-${stage.toUpperCase()}`,
 			IndexName: 'end',
 			KeyConditionExpression: 'endDate = :ed AND endTimestamp > :et ',
@@ -121,6 +128,6 @@ function queryDateForSuperMode(
 				':ed': endDate,
 				':et': endTimestamp,
 			},
-		})
-		.promise();
+		}),
+	);
 }

@@ -1,49 +1,50 @@
 import { putMetric } from "./cloudwatch";
 
-const mockPutMetricData = jest.fn();
+const mockSend = jest.fn();
 
-jest.mock("aws-sdk", () => {
+// Mock AWS SDK v3 client
+jest.mock("@aws-sdk/client-cloudwatch", () => {
 	return {
-		CloudWatch: jest.fn(() => ({
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Mock function needs to return unknown type for Jest compatibility
-			putMetricData: (...args: unknown[]) => mockPutMetricData(...args),
+		// CloudWatchClient is a class whose instances have a `send` method
+		CloudWatchClient: jest.fn(() => ({
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-return -- forwarding unknown args to the jest mock which intentionally has a loose type for testing
+			send: (...args: unknown[]) => mockSend(...args),
 		})),
-		ChainableTemporaryCredentials: jest.fn(),
-		SharedIniFileCredentials: jest.fn(),
-		config: {
-			region: "",
-		},
+		PutMetricDataCommand: jest.fn((input: unknown) => ({ input })),
 	};
 });
 
 describe("putMetric", () => {
 	beforeEach(() => {
-		mockPutMetricData.mockClear();
-		mockPutMetricData.mockImplementation(() => ({
-			promise: jest.fn().mockResolvedValue({}),
-		}));
+		mockSend.mockClear();
+		// AWS SDK v3 clients return a Promise from `send`
+		mockSend.mockImplementation(() => Promise.resolve({}));
 	});
 
 	it("should send a metric to CloudWatch", async () => {
 		await putMetric("TestMetric", 1);
-		expect(mockPutMetricData).toHaveBeenCalledWith({
-			Namespace: "support-bandit-PROD",
-			MetricData: [
-				{
-					MetricName: "TestMetric",
-					Value: 1,
-					Unit: "Count",
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Jest expect.any() returns unknown type
-					Timestamp: expect.any(Date),
-				},
-			],
-		});
+		// Our PutMetricDataCommand mock returns an object like { input }
+		expect(mockSend).toHaveBeenCalledWith(
+			expect.objectContaining({
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- PutMetricDataCommand mock returns an unknown-typed `input` used only for assertions in this test
+				input: expect.objectContaining({
+					Namespace: "support-bandit-PROD",
+					MetricData: [
+						expect.objectContaining({
+							MetricName: "TestMetric",
+							Value: 1,
+							Unit: "Count",
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Jest expect.any() returns unknown type
+							Timestamp: expect.any(Date),
+						}),
+					],
+				}),
+			})
+		);
 	});
 
 	it("should log an error if sending the metric fails", async () => {
-		mockPutMetricData.mockReturnValueOnce({
-			promise: jest.fn().mockRejectedValue(new Error("Failed")),
-		});
+		mockSend.mockRejectedValueOnce(new Error("Failed"));
 
 		const consoleErrorSpy = jest
 			.spyOn(console, "error")

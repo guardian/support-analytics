@@ -1,17 +1,3 @@
-import * as AWS from "aws-sdk";
-
-const stage = process.env.STAGE ?? "PROD";
-
-const credentials =
-	stage === "DEV"
-		? new AWS.SharedIniFileCredentials({
-				profile: process.env.AWS_PROFILE ?? "membership",
-		  })
-		: new AWS.ChainableTemporaryCredentials();
-
-export const config = {
-	region: "eu-west-1",
-	namespace: `support-bandit-${stage}`,
-	stage,
-	credentials,
-};
+export const stage = (process.env.STAGE ?? "PROD") as "DEV" | "CODE" | "PROD";
+export const region = "eu-west-1";
+export const namespace = `support-bandit-${stage}`;
