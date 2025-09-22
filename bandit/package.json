@@ -1,37 +1,38 @@
 {
-	"name": "bandit",
-	"version": "1.0.0",
-	"description": "Lambda for updating multi-armed bandit data",
-	"buildDir": "./target",
-	"scripts": {
-		"test": "jest",
-		"lint": "eslint 'src/**/*.ts'",
-		"build": "tsc",
-		"local": "STAGE=CODE AWS_PROFILE=membership ts-node ./src/query-lambda/local.ts",
-		"gbt-local": "STAGE=CODE AWS_PROFILE=membership ts-node ./src/get-bandit-tests/local.ts",
-		"backfill": "STAGE=CODE AWS_PROFILE=membership AthenaOutputBucket=gu-support-analytics ts-node ./src/scripts/backfill.ts"
-	},
-	"dependencies": {
-		"@aws-sdk/client-cloudwatch": "^3.888.0",
-		"@aws-sdk/client-dynamodb": "^3.888.0",
-		"@aws-sdk/client-ssm": "^3.888.0",
-		"@aws-sdk/credential-providers": "^3.888.0",
-		"@aws-sdk/lib-dynamodb": "^3.888.0",
-		"@google-cloud/bigquery": "^6.0.3",
-		"date-fns": "2.30.0",
-		"zod": "^3.0.0"
-	},
-	"devDependencies": {
-		"@guardian/eslint-config-typescript": "^1.0.2",
-		"@guardian/prettier": "^1.0.0",
-		"@types/jest": "^30.0.0",
-		"@types/node": "^22.10.6",
-		"eslint": "^8.19.0",
-		"jest": "^30.0.5",
-		"prettier": "^2.7.1",
-		"ts-jest": "^29.4.0",
-		"ts-node": "^10.9.1",
-		"typescript": "^5.7.3"
-	},
-	"packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "name": "bandit",
+  "version": "1.0.0",
+  "description": "Lambda for updating multi-armed bandit data",
+  "buildDir": "./target",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint 'src/**/*.ts'",
+    "build": "tsc",
+    "local": "STAGE=CODE AWS_PROFILE=membership ts-node ./src/query-lambda/local.ts",
+    "gbt-local": "STAGE=CODE AWS_PROFILE=membership ts-node ./src/get-bandit-tests/local.ts",
+    "backfill": "STAGE=CODE AWS_PROFILE=membership AthenaOutputBucket=gu-support-analytics ts-node ./src/scripts/backfill.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudwatch": "^3.888.0",
+    "@aws-sdk/client-dynamodb": "^3.888.0",
+    "@aws-sdk/client-ssm": "^3.888.0",
+    "@aws-sdk/credential-providers": "^3.888.0",
+    "@aws-sdk/lib-dynamodb": "^3.888.0",
+    "@google-cloud/bigquery": "^6.0.3",
+    "date-fns": "2.30.0",
+    "zod": "^3.0.0"
+  },
+  "devDependencies": {
+    "@guardian/eslint-config-typescript": "^1.0.2",
+    "@guardian/prettier": "^1.0.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.10.6",
+    "eslint": "^8.19.0",
+    "jest": "^30.0.5",
+    "prettier": "^2.7.1",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.7.3"
+  },
+  "prettier": "@guardian/prettier",
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
