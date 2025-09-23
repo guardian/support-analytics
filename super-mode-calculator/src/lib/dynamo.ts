@@ -4,9 +4,9 @@ import type {
 } from '@aws-sdk/lib-dynamodb';
 import { BatchWriteCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { addDays, addHours } from 'date-fns';
+import type { QueryRow } from '../parse';
 import { SUPER_MODE_DURATION_IN_HOURS } from './constants';
 import { toDateHourString, toDateString } from './date';
-import type { QueryRow } from '../parse';
 
 export interface DynamoRecord extends QueryRow {
 	id: string;
