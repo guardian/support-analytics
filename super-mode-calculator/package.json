@@ -31,7 +31,7 @@
 		"@aws-sdk/client-dynamodb": "^3.890.0",
 		"@aws-sdk/client-ssm": "^3.890.0",
 		"@aws-sdk/lib-dynamodb": "^3.890.0",
-		"@google-cloud/bigquery": "7.9.4",
+		"@google-cloud/bigquery": "8.1.1",
 		"date-fns": "^4.1.0",
 		"zod": "^3.22.4"
 	}
