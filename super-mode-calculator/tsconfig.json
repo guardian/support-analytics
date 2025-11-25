@@ -6,7 +6,8 @@
     "allowJs": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
-    "outDir": "./target"
+    "outDir": "./target",
+    "esModuleInterop": true
   },
   "include": ["./src"]
 }
