@@ -15,7 +15,7 @@
     "@aws-sdk/client-cloudwatch": "^3.888.0",
     "@aws-sdk/client-dynamodb": "^3.888.0",
     "@aws-sdk/client-ssm": "^3.888.0",
-    "@aws-sdk/credential-providers": "^3.888.0",
+    "@aws-sdk/credential-providers": "^3.947.0",
     "@aws-sdk/lib-dynamodb": "^3.888.0",
     "@google-cloud/bigquery": "^6.0.3",
     "date-fns": "2.30.0",
