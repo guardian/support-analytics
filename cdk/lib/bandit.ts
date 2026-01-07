@@ -35,7 +35,7 @@ export class Bandit extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-bandit-tests-${this.stage}`,
-				runtime: Runtime.NODEJS_20_X,
+				runtime: Runtime.NODEJS_22_X,
 				handler: 'get-bandit-tests/get-bandit-tests.run',
 				fileName: `${appName}.zip`,
 				loggingFormat,
