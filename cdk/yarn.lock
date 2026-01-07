@@ -358,9 +358,10 @@
   version "5.0.0"
   resolved "https://registry.npmjs.org/@guardian/prettier/-/prettier-5.0.0.tgz"
 
-"@guardian/tsconfig@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.npmjs.org/@guardian/tsconfig/-/tsconfig-0.2.0.tgz"
+"@guardian/tsconfig@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@guardian/tsconfig/-/tsconfig-1.0.1.tgz#010fa1c2af6418a1a208507e36ca27b7eec5b9b3"
+  integrity sha512-PB24nZ6WTBB8aZ9EyxJw1vC5FYkGqwMQ/O5Oogp6P5HCQU5MN0JpUXvpYci7kwV2oXD1Az06UBnLyyVXOVMadQ==
 
 "@humanwhocodes/config-array@^0.11.14":
   version "0.11.14"
