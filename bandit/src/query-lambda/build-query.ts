@@ -1,13 +1,13 @@
-import { format, subDays } from "date-fns";
-import type { BanditTestConfig } from "../lib/models";
+import { format, subDays } from 'date-fns';
+import type { BanditTestConfig } from '../lib/models';
 
 const ANNUALISED_VALUE_CAP = 250;
 
-type Channel = "Epic" | "Banner1" | "Banner2";
+type Channel = 'Epic' | 'Banner1' | 'Banner2';
 const ComponentTypeMapping: Record<Channel, string> = {
-	Epic: "ACQUISITIONS_EPIC",
-	Banner1: "ACQUISITIONS_ENGAGEMENT_BANNER",
-	Banner2: "ACQUISITIONS_SUBSCRIPTIONS_BANNER",
+	Epic: 'ACQUISITIONS_EPIC',
+	Banner1: 'ACQUISITIONS_ENGAGEMENT_BANNER',
+	Banner2: 'ACQUISITIONS_SUBSCRIPTIONS_BANNER',
 };
 
 const getComponentType = (channel: string): string => {
@@ -15,18 +15,18 @@ const getComponentType = (channel: string): string => {
 };
 
 const formatTimestamps = (start: Date, end: Date) => ({
-	startTimestamp: start.toISOString().replace("T", " "),
-	endTimestamp: end.toISOString().replace("T", " "),
+	startTimestamp: start.toISOString().replace('T', ' '),
+	endTimestamp: end.toISOString().replace('T', ' '),
 });
 
 export const buildTotalComponentViewsQuery = (
 	channels: string[],
-	stage: "CODE" | "PROD",
+	stage: 'CODE' | 'PROD',
 	start: Date,
-	end: Date
+	end: Date,
 ): string => {
 	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
-	const componentTypes = channels.map(channel => getComponentType(channel));
+	const componentTypes = channels.map((channel) => getComponentType(channel));
 
 	return `
 SELECT
@@ -35,21 +35,21 @@ FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anon
 CROSS JOIN UNNEST(component_event_array) as ce
 WHERE received_date >= DATE_SUB('${format(
 		start,
-		"yyyy-MM-dd"
+		'yyyy-MM-dd',
 	)}', INTERVAL 1 DAY)
-AND received_date <= '${format(start, "yyyy-MM-dd")}'
+AND received_date <= '${format(start, 'yyyy-MM-dd')}'
 AND ce.event_timestamp >= '${startTimestamp}'
 AND ce.event_timestamp < '${endTimestamp}'
 AND ce.event_action = "VIEW"
-AND ce.component_type IN (${componentTypes.map(c => `"${c}"`).join(', ')})
+AND ce.component_type IN (${componentTypes.map((c) => `"${c}"`).join(', ')})
 	`;
 };
 
 export const buildTestSpecificQuery = (
 	test: BanditTestConfig,
-	stage: "CODE" | "PROD",
+	stage: 'CODE' | 'PROD',
 	start: Date,
-	end: Date
+	end: Date,
 ): string => {
 	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
 	const dateForCurrencyConversionTable = subDays(start, 1); //This table is updated daily  but has a lag of 1 day
@@ -58,14 +58,14 @@ export const buildTestSpecificQuery = (
 	return `
 WITH exchange_rates AS (
     SELECT target, date, (1/rate) AS reverse_rate FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
-	WHERE date = '${format(dateForCurrencyConversionTable, "yyyy-MM-dd")}'),
+	WHERE date = '${format(dateForCurrencyConversionTable, 'yyyy-MM-dd')}'),
 gbp_rate AS (
 	SELECT
 	 rate, date
 	FROM  datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
 	WHERE target = 'GBP' AND  date = '${format(
 		dateForCurrencyConversionTable,
-		"yyyy-MM-dd"
+		'yyyy-MM-dd',
 	)}'),
 acquisitions AS (
     SELECT
@@ -162,8 +162,11 @@ views AS (
   -- Include previous day, as a pageview's received_date may be before midnight and a component_event after
   WHERE received_date >= DATE_SUB('${format(
 		start,
-		"yyyy-MM-dd"
-  )}', INTERVAL 1 DAY) AND received_date <= '${format(start, "yyyy-MM-dd")}'
+		'yyyy-MM-dd',
+  )}', INTERVAL 1 DAY) AND received_date <= DATE_ADD('${format(
+		end,
+		'yyyy-MM-dd',
+	)}', INTERVAL 1 DAY)
   AND ce.event_timestamp >= '${startTimestamp}' AND ce.event_timestamp < '${endTimestamp}'
   AND ce.event_action = "VIEW"
   AND ce.component_type =  "${componentType}"
