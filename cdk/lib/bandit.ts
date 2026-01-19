@@ -123,7 +123,7 @@ export class Bandit extends GuStack {
 		const queryLambda = new GuLambdaFunction(this, 'query-lambda', {
 			app: appName,
 			functionName: `${appName}-query-${this.stage}`,
-			runtime: Runtime.NODEJS_20_X,
+			runtime: Runtime.NODEJS_22_X,
 			handler: 'query-lambda/query-lambda.run',
 			fileName: `${appName}.zip`,
 			loggingFormat,
