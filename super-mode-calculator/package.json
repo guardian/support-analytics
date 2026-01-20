@@ -28,7 +28,7 @@
 		"typescript": "^5.7.3"
 	},
 	"dependencies": {
-		"@aws-sdk/client-dynamodb": "^3.890.0",
+		"@aws-sdk/client-dynamodb": "^3.947.0",
 		"@aws-sdk/client-ssm": "^3.890.0",
 		"@aws-sdk/lib-dynamodb": "^3.890.0",
 		"@google-cloud/bigquery": "8.1.1",
