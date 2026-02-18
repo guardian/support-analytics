@@ -1,34 +1,33 @@
-import { BigQuery } from "@google-cloud/bigquery";
+import { BigQuery } from '@google-cloud/bigquery';
 import type {
 	BaseExternalAccountClient,
 	ExternalAccountClientOptions,
-} from "google-auth-library";
-import { ExternalAccountClient } from "google-auth-library";
-import type { BanditTestConfig } from "../lib/models";
+} from 'google-auth-library';
+import { ExternalAccountClient } from 'google-auth-library';
+import type { BanditTestConfig } from '../lib/models';
 import {
 	buildTestSpecificQuery,
 	buildTotalComponentViewsQuery,
-} from "./build-query";
-import type { VariantQueryRow
-} from "./parse-result";
+} from './build-query';
+import type { VariantQueryRow } from './parse-result';
 import {
 	parseTotalComponentViewsResult,
-	parseVariantQueryRows
-} from "./parse-result";
+	parseVariantQueryRows,
+} from './parse-result';
 
 // stage is hardcoded to PROD as we don't have sufficient data for page views in the CODE tables to run the query successfully
 const bigqueryStage = 'PROD';
 
 export const buildAuthClient = (
-	clientConfig: string
+	clientConfig: string,
 ): Promise<BaseExternalAccountClient> =>
 	new Promise((resolve, reject) => {
 		const parsedConfig = JSON.parse(
-			clientConfig
+			clientConfig,
 		) as ExternalAccountClientOptions;
 		const authClient = ExternalAccountClient.fromJSON(parsedConfig);
 		if (!authClient) {
-			reject("Failed to create Google Auth Client");
+			reject('Failed to create Google Auth Client');
 			return;
 		}
 		resolve(authClient);
@@ -43,16 +42,21 @@ export interface BigQueryResult {
 export const getTotalComponentViewsForChannels = async (
 	authClient: BaseExternalAccountClient,
 	channels: string[],
-	stage: "CODE" | "PROD",
+	stage: 'CODE' | 'PROD',
 	start: Date,
-	end: Date
+	end: Date,
 ): Promise<number> => {
 	const bigquery = new BigQuery({
 		projectId: `datatech-platform-${stage.toLowerCase()}`,
 		authClient,
 	});
 
-	const query = buildTotalComponentViewsQuery(channels, bigqueryStage, start, end);
+	const query = buildTotalComponentViewsQuery(
+		channels,
+		bigqueryStage,
+		start,
+		end,
+	);
 	const rows = await bigquery.query({ query });
 	const result = parseTotalComponentViewsResult(rows);
 
@@ -61,10 +65,11 @@ export const getTotalComponentViewsForChannels = async (
 
 export const getDataForBanditTest = async (
 	authClient: BaseExternalAccountClient,
-	stage: "CODE" | "PROD",
+	stage: 'CODE' | 'PROD',
 	test: BanditTestConfig,
 	start: Date,
 	end: Date,
+	pricingCaseStatement: string,
 ): Promise<BigQueryResult> => {
 	const bigquery = new BigQuery({
 		projectId: `datatech-platform-${stage.toLowerCase()}`,
@@ -74,8 +79,14 @@ export const getDataForBanditTest = async (
 	const testName = test.name;
 	const channel = test.channel;
 
-	const query = buildTestSpecificQuery(test, bigqueryStage, start, end);
-	console.log("Running test specific query: ", query);
+	const query = buildTestSpecificQuery(
+		test,
+		bigqueryStage,
+		start,
+		end,
+		pricingCaseStatement,
+	);
+	console.log('Running test specific query: ', query);
 	const bigQueryRows = await bigquery.query({ query });
 	const rows = parseVariantQueryRows(bigQueryRows);
 

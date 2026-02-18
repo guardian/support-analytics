@@ -50,6 +50,7 @@ export const buildTestSpecificQuery = (
 	stage: 'CODE' | 'PROD',
 	start: Date,
 	end: Date,
+	pricingCaseStatement: string,
 ): string => {
 	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
 	const dateForCurrencyConversionTable = subDays(start, 1); //This table is updated daily  but has a lag of 1 day
@@ -71,82 +72,7 @@ acquisitions AS (
     SELECT
       ab.name AS  test_name,
       ab.variant AS variant_name,
-      CASE product
-        WHEN 'SUPPORTER_PLUS' THEN
-          CASE currency
-            WHEN 'GBP' THEN
-              CASE payment_frequency
-                WHEN 'MONTHLY' THEN 12
-                WHEN 'ANNUALLY' THEN 120
-                END
-            WHEN 'USD' THEN
-              CASE payment_frequency
-                WHEN 'MONTHLY' THEN 15
-                WHEN 'ANNUALLY' THEN 150
-                END
-            WHEN 'AUD' THEN
-              CASE payment_frequency
-                WHEN 'MONTHLY' THEN 20
-                WHEN 'ANNUALLY' THEN 200
-                END
-            WHEN 'EUR' THEN
-              CASE payment_frequency
-                WHEN 'MONTHLY' THEN 12
-                WHEN 'ANNUALLY' THEN 120
-                END
-            WHEN 'NZD' THEN
-              CASE payment_frequency
-                WHEN 'MONTHLY' THEN 20
-                WHEN 'ANNUALLY' THEN 200
-                END
-            WHEN 'CAD' THEN
-              CASE payment_frequency
-                WHEN 'MONTHLY' THEN 15
-                WHEN 'ANNUALLY' THEN 150
-                END
-            END
-        WHEN 'DIGITAL_SUBSCRIPTION' THEN
-          CASE currency
-            WHEN 'GBP' THEN
-              CASE payment_frequency
-                WHEN 'MONTHLY' THEN 12
-                WHEN 'QUARTERLY' THEN 36
-                WHEN 'ANNUALLY' THEN 120
-                END
-            WHEN 'USD' THEN
-              CASE payment_frequency
-                WHEN 'MONTHLY' THEN 15
-                WHEN 'QUARTERLY' THEN 45
-                WHEN 'ANNUALLY' THEN 150
-                END
-            WHEN 'AUD' THEN
-              CASE payment_frequency
-                WHEN 'MONTHLY' THEN 20
-                WHEN 'QUARTERLY' THEN 60
-                WHEN 'ANNUALLY' THEN 200
-                END
-            WHEN 'EUR' THEN
-              CASE payment_frequency
-                WHEN 'MONTHLY' THEN 12
-                WHEN 'QUARTERLY' THEN 36
-                WHEN 'ANNUALLY' THEN 120
-                END
-            WHEN 'NZD' THEN
-              CASE payment_frequency
-                WHEN 'MONTHLY' THEN 20
-                WHEN 'QUARTERLY' THEN 60
-                WHEN 'ANNUALLY' THEN 200
-                END
-            WHEN 'CAD' THEN
-              CASE payment_frequency
-                WHEN 'MONTHLY' THEN 15
-                WHEN 'QUARTERLY' THEN 45
-                WHEN 'ANNUALLY' THEN 150
-                END
-            END
-        WHEN 'CONTRIBUTION' THEN amount
-        WHEN 'RECURRING_CONTRIBUTION' THEN amount
-        END
+      ${pricingCaseStatement}
         AS amount,
       product,
       currency,

@@ -4,6 +4,10 @@ import { addHours, set, subHours } from 'date-fns';
 import { putMetric } from '../lib/aws/cloudwatch';
 import { region } from '../lib/aws/config';
 import type { BanditTestConfig, Methodology, Test } from '../lib/models';
+import {
+	buildPricingCaseStatement,
+	createProductCatalogService,
+} from '../lib/product-catalog';
 import type { BigQueryResult } from './bigquery';
 import {
 	buildAuthClient,
@@ -80,9 +84,23 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 		getTestConfigs(test),
 	);
 
+	// Fetch product catalog and generate pricing CASE statement
+	console.log('Fetching product catalog...');
+	const catalogService = createProductCatalogService(stage);
+	await catalogService.fetchCatalog();
+	const pricingCaseStatement = buildPricingCaseStatement(catalogService);
+	console.log('Product catalog fetched successfully');
+
 	const resultsFromBigQuery: BigQueryResult[] = await Promise.all(
 		banditTestConfigs.map((test) =>
-			getDataForBanditTest(client, stage, test, start, end),
+			getDataForBanditTest(
+				client,
+				stage,
+				test,
+				start,
+				end,
+				pricingCaseStatement,
+			),
 		),
 	);
 
