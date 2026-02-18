@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition -- Runtime checks needed for Record type lookups which can return undefined */
 import { z } from 'zod';
 
 const RatePlanSchema = z.object({
@@ -6,12 +5,31 @@ const RatePlanSchema = z.object({
 	pricing: z.record(z.string(), z.number()),
 });
 
-const ProductSchema = z.object({
-	active: z.boolean(),
-	ratePlans: z.record(z.string(), RatePlanSchema),
+const SupporterPlusRatePlansSchema = z.object({
+	Monthly: RatePlanSchema,
+	Annual: RatePlanSchema,
 });
 
-const ProductCatalogSchema = z.record(z.string(), ProductSchema);
+const DigitalSubscriptionRatePlansSchema = z.object({
+	Monthly: RatePlanSchema,
+	Quarterly: RatePlanSchema,
+	Annual: RatePlanSchema,
+});
+
+const SupporterPlusProductSchema = z.object({
+	active: z.boolean(),
+	ratePlans: SupporterPlusRatePlansSchema,
+});
+
+const DigitalSubscriptionProductSchema = z.object({
+	active: z.boolean(),
+	ratePlans: DigitalSubscriptionRatePlansSchema,
+});
+
+const ProductCatalogSchema = z.object({
+	SupporterPlus: SupporterPlusProductSchema,
+	DigitalSubscription: DigitalSubscriptionProductSchema,
+});
 
 export type ProductCatalog = z.infer<typeof ProductCatalogSchema>;
 export type RatePlan = z.infer<typeof RatePlanSchema>;
@@ -22,16 +40,20 @@ export interface PriceQuery {
 	billingPeriod: string;
 }
 
-const PRODUCT_NAME_MAP: Record<string, string | undefined> = {
+const PRODUCT_NAME_MAP = {
 	SUPPORTER_PLUS: 'SupporterPlus',
 	DIGITAL_SUBSCRIPTION: 'DigitalSubscription',
-};
+} as const;
 
-const BILLING_PERIOD_MAP: Record<string, string | undefined> = {
+const BILLING_PERIOD_MAP = {
 	MONTHLY: 'Monthly',
 	ANNUALLY: 'Annual',
 	QUARTERLY: 'Quarterly',
-};
+} as const;
+
+function hasOwn<T extends object>(object: T, key: PropertyKey): key is keyof T {
+	return Object.prototype.hasOwnProperty.call(object, key);
+}
 
 export class ProductCatalogService {
 	private catalog: ProductCatalog | null = null;
@@ -67,8 +89,7 @@ export class ProductCatalogService {
 			);
 		}
 
-		const productName = PRODUCT_NAME_MAP[query.product];
-		if (productName === undefined) {
+		if (!hasOwn(PRODUCT_NAME_MAP, query.product)) {
 			throw new Error(
 				`Unknown product: ${
 					query.product
@@ -77,15 +98,11 @@ export class ProductCatalogService {
 				)}`,
 			);
 		}
+		const productName = PRODUCT_NAME_MAP[query.product];
 
-		// Runtime check needed: Zod record types don't guarantee key existence at runtime
 		const product = this.catalog[productName];
-		if (product === undefined) {
-			throw new Error(`Product not found in catalog: ${productName}`);
-		}
 
-		const billingPeriod = BILLING_PERIOD_MAP[query.billingPeriod];
-		if (billingPeriod === undefined) {
+		if (!hasOwn(BILLING_PERIOD_MAP, query.billingPeriod)) {
 			throw new Error(
 				`Unknown billing period: ${
 					query.billingPeriod
@@ -94,22 +111,22 @@ export class ProductCatalogService {
 				)}`,
 			);
 		}
+		const billingPeriod = BILLING_PERIOD_MAP[query.billingPeriod];
 
-		// Runtime check needed: Zod record types don't guarantee key existence at runtime
-		const ratePlan = product.ratePlans[billingPeriod];
-		if (ratePlan === undefined) {
+		if (!hasOwn(product.ratePlans, billingPeriod)) {
 			throw new Error(
 				`Rate plan not found for ${productName} with billing period ${billingPeriod}`,
 			);
 		}
+		const ratePlan = product.ratePlans[billingPeriod];
 
-		// Runtime check needed: Zod record types don't guarantee key existence at runtime
-		const price = ratePlan.pricing[query.currency];
-		if (price === undefined) {
+		const requestedCurrency = query.currency;
+		if (!hasOwn(ratePlan.pricing, query.currency)) {
 			throw new Error(
-				`Price not found for ${productName} ${billingPeriod} in ${query.currency}`,
+				`Price not found for ${productName} ${billingPeriod} in ${requestedCurrency}`,
 			);
 		}
+		const price = ratePlan.pricing[query.currency];
 
 		return price;
 	}
@@ -164,9 +181,10 @@ export function createProductCatalogService(
 export function buildPricingCaseStatement(
 	catalogService: ProductCatalogService,
 ): string {
-	const products = ['SUPPORTER_PLUS', 'DIGITAL_SUBSCRIPTION'];
+	const products = ['SUPPORTER_PLUS', 'DIGITAL_SUBSCRIPTION'] as const;
+	type Product = (typeof products)[number];
 	const currencies = ['GBP', 'USD', 'AUD', 'EUR', 'NZD', 'CAD'];
-	const billingPeriods: Record<string, string[]> = {
+	const billingPeriods: Record<Product, string[]> = {
 		SUPPORTER_PLUS: ['MONTHLY', 'ANNUALLY'],
 		DIGITAL_SUBSCRIPTION: ['MONTHLY', 'QUARTERLY', 'ANNUALLY'],
 	};
@@ -177,8 +195,7 @@ export function buildPricingCaseStatement(
 		const currencyCases: string[] = [];
 
 		for (const currency of currencies) {
-			// Fallback to empty array if product not in map
-			const periods = billingPeriods[product] || [];
+			const periods = billingPeriods[product];
 			const periodCases: string[] = [];
 
 			for (const period of periods) {
