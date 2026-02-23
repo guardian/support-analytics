@@ -34,12 +34,6 @@ const ProductCatalogSchema = z.object({
 export type ProductCatalog = z.infer<typeof ProductCatalogSchema>;
 export type RatePlan = z.infer<typeof RatePlanSchema>;
 
-export interface PriceQuery {
-	product: string;
-	currency: string;
-	billingPeriod: string;
-}
-
 const PRODUCT_NAME_MAP = {
 	SUPPORTER_PLUS: 'SupporterPlus',
 	DIGITAL_SUBSCRIPTION: 'DigitalSubscription',
@@ -51,8 +45,13 @@ const BILLING_PERIOD_MAP = {
 	QUARTERLY: 'Quarterly',
 } as const;
 
-function hasOwn<T extends object>(object: T, key: PropertyKey): key is keyof T {
-	return Object.prototype.hasOwnProperty.call(object, key);
+export type ProductType = keyof typeof PRODUCT_NAME_MAP;
+export type BillingPeriodType = keyof typeof BILLING_PERIOD_MAP;
+
+export interface PriceQuery {
+	product: ProductType;
+	currency: string;
+	billingPeriod: BillingPeriodType;
 }
 
 export class ProductCatalogService {
@@ -89,52 +88,27 @@ export class ProductCatalogService {
 			);
 		}
 
-		if (!hasOwn(PRODUCT_NAME_MAP, query.product)) {
-			throw new Error(
-				`Unknown product: ${
-					query.product
-				}. Expected one of: ${Object.keys(PRODUCT_NAME_MAP).join(
-					', ',
-				)}`,
-			);
-		}
 		const productName = PRODUCT_NAME_MAP[query.product];
-
 		const product = this.catalog[productName];
+		const billingPeriod = BILLING_PERIOD_MAP[
+			query.billingPeriod
+		] as keyof typeof product.ratePlans;
 
-		if (!hasOwn(BILLING_PERIOD_MAP, query.billingPeriod)) {
-			throw new Error(
-				`Unknown billing period: ${
-					query.billingPeriod
-				}. Expected one of: ${Object.keys(BILLING_PERIOD_MAP).join(
-					', ',
-				)}`,
-			);
-		}
-		const billingPeriod = BILLING_PERIOD_MAP[query.billingPeriod];
-
-		if (!hasOwn(product.ratePlans, billingPeriod)) {
-			throw new Error(
-				`Rate plan not found for ${productName} with billing period ${billingPeriod}`,
-			);
-		}
 		const ratePlan = product.ratePlans[billingPeriod];
 
-		const requestedCurrency = query.currency;
-		if (!hasOwn(ratePlan.pricing, query.currency)) {
+		if (!(query.currency in ratePlan.pricing)) {
 			throw new Error(
-				`Price not found for ${productName} ${billingPeriod} in ${requestedCurrency}`,
+				`Price not found for ${productName} ${billingPeriod} in ${query.currency}`,
 			);
 		}
-		const price = ratePlan.pricing[query.currency];
 
-		return price;
+		return ratePlan.pricing[query.currency];
 	}
 
 	getAllPrices(
-		product: string,
+		product: ProductType,
 		currencies: string[],
-		billingPeriods: string[],
+		billingPeriods: BillingPeriodType[],
 	): Map<string, Map<string, number>> {
 		const result = new Map<string, Map<string, number>>();
 
@@ -181,10 +155,9 @@ export function createProductCatalogService(
 export function buildPricingCaseStatement(
 	catalogService: ProductCatalogService,
 ): string {
-	const products = ['SUPPORTER_PLUS', 'DIGITAL_SUBSCRIPTION'] as const;
-	type Product = (typeof products)[number];
+	const products: ProductType[] = ['SUPPORTER_PLUS', 'DIGITAL_SUBSCRIPTION'];
 	const currencies = ['GBP', 'USD', 'AUD', 'EUR', 'NZD', 'CAD'];
-	const billingPeriods: Record<Product, string[]> = {
+	const billingPeriods: Record<ProductType, BillingPeriodType[]> = {
 		SUPPORTER_PLUS: ['MONTHLY', 'ANNUALLY'],
 		DIGITAL_SUBSCRIPTION: ['MONTHLY', 'QUARTERLY', 'ANNUALLY'],
 	};

@@ -188,26 +188,6 @@ describe('ProductCatalogService', () => {
 			).toThrow('Product catalog not loaded');
 		});
 
-		it('should throw error for unknown product', () => {
-			expect(() =>
-				service.getPrice({
-					product: 'UNKNOWN_PRODUCT',
-					currency: 'GBP',
-					billingPeriod: 'MONTHLY',
-				}),
-			).toThrow('Unknown product: UNKNOWN_PRODUCT');
-		});
-
-		it('should throw error for unknown billing period', () => {
-			expect(() =>
-				service.getPrice({
-					product: 'SUPPORTER_PLUS',
-					currency: 'GBP',
-					billingPeriod: 'WEEKLY',
-				}),
-			).toThrow('Unknown billing period: WEEKLY');
-		});
-
 		it('should throw error for missing currency', () => {
 			expect(() =>
 				service.getPrice({
