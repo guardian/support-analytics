@@ -12,11 +12,11 @@
     "backfill": "STAGE=CODE AWS_PROFILE=membership AthenaOutputBucket=gu-support-analytics ts-node ./src/scripts/backfill.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-cloudwatch": "^3.890.0",
-    "@aws-sdk/client-dynamodb": "^3.890.0",
-    "@aws-sdk/client-ssm": "^3.890.0",
-    "@aws-sdk/credential-providers": "^3.890.0",
-    "@aws-sdk/lib-dynamodb": "^3.890.0",
+    "@aws-sdk/client-cloudwatch": "^3.995.0",
+    "@aws-sdk/client-dynamodb": "^3.995.0",
+    "@aws-sdk/client-ssm": "^3.995.0",
+    "@aws-sdk/credential-providers": "^3.995.0",
+    "@aws-sdk/lib-dynamodb": "^3.995.0",
     "@google-cloud/bigquery": "^6.0.3",
     "date-fns": "2.30.0",
     "zod": "^3.0.0"
