@@ -19,7 +19,7 @@
     "@aws-sdk/lib-dynamodb": "^3.995.0",
     "@google-cloud/bigquery": "^6.0.3",
     "date-fns": "2.30.0",
-    "zod": "^3.0.0"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@guardian/eslint-config-typescript": "^1.0.2",
