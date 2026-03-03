@@ -46,11 +46,8 @@ jobs:
           pnpm test
           pnpm run build
 
-          cp package.json target
-          pushd target
-          pnpm install --production
-          zip -r support-bandit ./*
-          popd
+          cd target
+          zip -r bandit.zip lambdas/
 
       - name: Build cdk
         working-directory: ./cdk
