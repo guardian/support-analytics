@@ -51,7 +51,8 @@ jobs:
       - name: Copy files to Riff Raff package
         working-directory: ./super-mode-calculator
         run: |
-          zip -r target/super-mode.zip target/lambda.js
+          cd target
+          zip -r super-mode.zip lambdas/
 
       - name: Build cdk
         working-directory: ./cdk
