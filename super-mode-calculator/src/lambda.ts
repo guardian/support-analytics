@@ -18,7 +18,7 @@ const docClient = DynamoDBDocumentClient.from(
 
 export async function handler(): Promise<void> {
 	if (stage !== 'CODE' && stage !== 'PROD') {
-		return Promise.reject(`Invalid stage: ${stage ?? ''}`);
+		return Promise.reject(Error(`Invalid stage: ${stage ?? ''}`));
 	}
 
 	const gcpConfig = await getSSMParam('gcp-wif-credentials-config', stage);

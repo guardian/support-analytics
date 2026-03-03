@@ -18,7 +18,7 @@ export const buildAuthClient = (
 		if (authClient) {
 			resolve(authClient);
 		} else {
-			reject('Failed to create Google Auth Client');
+			reject(Error('Failed to create Google Auth Client'));
 		}
 	});
 
