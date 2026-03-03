@@ -37,8 +37,6 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version-file: 'bandit/.nvmrc'
-          cache-dependency-path: 'bandit/pnpm-lock.yaml'
-          cache: 'pnpm'
 
       - name: bandit test + build
         working-directory: ./bandit

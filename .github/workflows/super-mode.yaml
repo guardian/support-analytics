@@ -39,8 +39,6 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v6
         with:
-          cache: 'pnpm'
-          cache-dependency-path: 'super-mode-calculator/pnpm-lock.yaml'
           node-version-file: "super-mode-calculator/.nvmrc"
 
       - name: pnpm install, lint, build
