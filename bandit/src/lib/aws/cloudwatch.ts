@@ -1,9 +1,9 @@
-import type { StandardUnit } from "@aws-sdk/client-cloudwatch";
+import type { StandardUnit } from '@aws-sdk/client-cloudwatch';
 import {
 	CloudWatchClient,
 	PutMetricDataCommand,
-} from "@aws-sdk/client-cloudwatch";
-import { namespace, region } from "./config";
+} from '@aws-sdk/client-cloudwatch';
+import { namespace, region } from './config';
 
 const cloudwatch = new CloudWatchClient({
 	region,
@@ -12,7 +12,7 @@ const cloudwatch = new CloudWatchClient({
 export const putMetric = async (
 	metricName: string,
 	value: number,
-	unit: StandardUnit = "Count"
+	unit: StandardUnit = 'Count',
 ): Promise<void> => {
 	try {
 		await cloudwatch.send(
@@ -26,10 +26,10 @@ export const putMetric = async (
 						Timestamp: new Date(),
 					},
 				],
-			})
+			}),
 		);
 		console.log(`CloudWatch metric sent: ${metricName} = ${value}`);
 	} catch (error) {
-		console.error("Failed to send CloudWatch metric:", String(error));
+		console.error('Failed to send CloudWatch metric:', String(error));
 	}
 };

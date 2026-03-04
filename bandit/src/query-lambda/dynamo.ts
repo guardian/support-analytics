@@ -1,9 +1,9 @@
 import type {
 	BatchWriteCommandOutput,
 	DynamoDBDocumentClient,
-} from "@aws-sdk/lib-dynamodb";
-import { BatchWriteCommand } from "@aws-sdk/lib-dynamodb";
-import type { VariantQueryRow } from "./parse-result";
+} from '@aws-sdk/lib-dynamodb';
+import { BatchWriteCommand } from '@aws-sdk/lib-dynamodb';
+import type { VariantQueryRow } from './parse-result';
 
 interface VariantSample {
 	variantName: string;
@@ -25,7 +25,7 @@ export function buildWriteRequest(
 	rows: VariantQueryRow[],
 	testName: string,
 	channel: string,
-	startTimestamp: string
+	startTimestamp: string,
 ): DocumentWriteRequest {
 	return {
 		PutRequest: {
@@ -38,7 +38,7 @@ function buildDynamoRecord(
 	rows: VariantQueryRow[],
 	testName: string,
 	channel: string,
-	startTimestamp: string
+	startTimestamp: string,
 ): TestSample {
 	const variants = rows.map((row) => ({
 		variantName: row.variant_name,
@@ -48,7 +48,7 @@ function buildDynamoRecord(
 	}));
 
 	return {
-		testName: channel + "_" + testName,
+		testName: channel + '_' + testName,
 		variants,
 		timestamp: startTimestamp,
 	};
@@ -57,7 +57,7 @@ function buildDynamoRecord(
 export function writeBatch(
 	batch: DocumentWriteRequest[],
 	stage: string,
-	docClient: DynamoDBDocumentClient
+	docClient: DynamoDBDocumentClient,
 ): Promise<BatchWriteCommandOutput> {
 	const table = `support-bandit-${stage.toUpperCase()}`;
 
@@ -66,6 +66,6 @@ export function writeBatch(
 			RequestItems: {
 				[table]: batch,
 			},
-		})
+		}),
 	);
 }
