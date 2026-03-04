@@ -25,12 +25,12 @@
   },
   "devDependencies": {
     "@guardian/eslint-config": "^14.0.0",
-    "@guardian/prettier": "^2.1.5",
+    "@guardian/prettier": "^10.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.6",
     "eslint": "^9.39.1",
     "jest": "^30.0.5",
-    "prettier": "^2.7.1",
+    "prettier": "^3.7.4",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.1",
     "typescript": "^5.7.3"
