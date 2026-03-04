@@ -11,6 +11,8 @@
 	"description": "Super mode calculator step functions",
 	"scripts": {
 		"lint": "eslint '*/**/*.ts'",
+		"check-formatting": "prettier --check \"**/*.ts\"",
+		"fix-formatting": "prettier --write \"**/*.ts\"",
 		"build": "esbuild src/lambda.ts --bundle --platform=node --outfile=target/lambdas/lambda.js --external:@aws-sdk/*",
 		"local": "STAGE=CODE AthenaOutputBucket=gu-support-analytics SchemaName=acquisition AWS_PROFILE=membership ts-node src/local/run.ts"
 	},

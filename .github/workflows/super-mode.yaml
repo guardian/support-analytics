@@ -46,6 +46,7 @@ jobs:
         run: |
           pnpm install
           pnpm lint
+          pnpm check-formatting
           pnpm run build
 
       - name: Copy files to Riff Raff package

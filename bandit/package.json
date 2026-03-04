@@ -6,6 +6,8 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint 'src/**/*.ts'",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild src/get-bandit-tests/get-bandit-tests.ts src/query-lambda/query-lambda.ts --bundle --platform=node --outdir=target --outbase=src --external:@aws-sdk/*",
     "local": "STAGE=CODE AWS_PROFILE=membership ts-node ./src/query-lambda/local.ts",
     "gbt-local": "STAGE=CODE AWS_PROFILE=membership ts-node ./src/get-bandit-tests/local.ts",
