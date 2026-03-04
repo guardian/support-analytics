@@ -33,5 +33,6 @@
 		"google-auth-library": "^10.6.1",
 		"zod": "^4.3.6"
 	},
+	"prettier": "@guardian/prettier",
 	"packageManager": "pnpm@8.15.7"
 }
