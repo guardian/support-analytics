@@ -1,13 +1,13 @@
 {
     "compilerOptions": {
-      "target": "ESNEXT",
-      "module": "commonjs",
-      "strict": true,
-      "allowJs": true,
-      "resolveJsonModule": true,
-      "moduleResolution": "node",
-      "outDir": "./target"
-    },
+		"target": "ES2023",
+		"module": "commonjs",
+		"lib": ["ES2024"],
+		"strict": true,
+		"allowJs": true,
+		"resolveJsonModule": true,
+		"moduleResolution": "node",
+		"outDir": "./target"
+	},
     "include": ["./src"]
   }
-  

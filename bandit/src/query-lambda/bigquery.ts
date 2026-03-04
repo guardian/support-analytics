@@ -27,7 +27,7 @@ export const buildAuthClient = (
 		) as ExternalAccountClientOptions;
 		const authClient = ExternalAccountClient.fromJSON(parsedConfig);
 		if (!authClient) {
-			reject('Failed to create Google Auth Client');
+			reject(Error('Failed to create Google Auth Client'));
 			return;
 		}
 		resolve(authClient);

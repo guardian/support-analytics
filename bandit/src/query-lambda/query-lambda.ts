@@ -65,7 +65,7 @@ const getTotalVariantViews = (testsData: BigQueryResult[]): number => {
 
 export async function run(input: QueryLambdaInput): Promise<void> {
 	if (stage !== 'CODE' && stage !== 'PROD') {
-		return Promise.reject(`Invalid stage: ${stage ?? ''}`);
+		return Promise.reject(Error(`Invalid stage: ${stage ?? ''}`));
 	}
 
 	const ssmPath = `/bandit-testing/${stage}/gcp-wif-credentials-config`;
