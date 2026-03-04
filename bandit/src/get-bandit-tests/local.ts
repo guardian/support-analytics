@@ -1,4 +1,4 @@
-import { run } from "./get-bandit-tests";
+import { run } from './get-bandit-tests';
 
 run()
 	.then((tests) => console.log(tests))

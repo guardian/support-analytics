@@ -1,6 +1,6 @@
-import type { SimpleQueryRowsResponse } from "@google-cloud/bigquery";
-import { z } from "zod";
-import { QueryReturnedInvalidDataError } from "../lib/errors";
+import type { SimpleQueryRowsResponse } from '@google-cloud/bigquery';
+import { z } from 'zod';
+import { QueryReturnedInvalidDataError } from '../lib/errors';
 
 const variantQueryRowSchema = z.object({
 	test_name: z.string(),
@@ -22,7 +22,7 @@ const totalComponentViewsSchema = z.object({
 type TotalComponentViews = z.infer<typeof totalComponentViewsSchema>;
 
 export function parseVariantQueryRows(
-	result: SimpleQueryRowsResponse
+	result: SimpleQueryRowsResponse,
 ): VariantQueryRow[] {
 	const parse = variantQueryRowsSchema.safeParse(result[0]);
 
@@ -35,14 +35,14 @@ export function parseVariantQueryRows(
 }
 
 export function parseTotalComponentViewsResult(
-	result: SimpleQueryRowsResponse
+	result: SimpleQueryRowsResponse,
 ): TotalComponentViews {
 	const parse = totalComponentViewsSchema.safeParse(result[0][0]);
 
 	if (!parse.success) {
 		console.log(
-			"Failed to parse total component views result:",
-			String(parse.error)
+			'Failed to parse total component views result:',
+			String(parse.error),
 		);
 		throw new QueryReturnedInvalidDataError();
 	}

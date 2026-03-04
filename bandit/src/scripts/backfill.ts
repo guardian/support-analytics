@@ -1,5 +1,5 @@
 import * as dateFns from 'date-fns';
-import { run as runQuery } from "../query-lambda/query-lambda";
+import { run as runQuery } from '../query-lambda/query-lambda';
 
 /**
  * Runs the query and creates a Dynamodb row for every hour from START to now.
@@ -14,7 +14,11 @@ if (!testName || !start) {
 	console.error('Required environment variables: TEST_NAME or START');
 	process.exit(1);
 }
-const end = dateFns.set(new Date(), { minutes: 0, seconds: 0, milliseconds: 0 });
+const end = dateFns.set(new Date(), {
+	minutes: 0,
+	seconds: 0,
+	milliseconds: 0,
+});
 
 const dates: Date[] = [];
 let date = new Date(start);
@@ -23,23 +27,20 @@ while (date < end) {
 	dates.push(date);
 }
 
-const tests = [{ name: testName , channel: channel}];
+const tests = [{ name: testName, channel: channel }];
 
-const result = dates.reduce(
-	(prev, date) => {
-		return prev.then(() => {
-			console.log('Running for date', date);
-			return runQuery({tests, date})
-				.then((result) => {
-					console.log(result);
-				})
-				.catch((err) => {
-					console.error(err);
-				});
-		});
-	},
-	Promise.resolve()
-);
+const result = dates.reduce((prev, date) => {
+	return prev.then(() => {
+		console.log('Running for date', date);
+		return runQuery({ tests, date })
+			.then((result) => {
+				console.log(result);
+			})
+			.catch((err) => {
+				console.error(err);
+			});
+	});
+}, Promise.resolve());
 
 result.catch((err) => {
 	console.log(err);

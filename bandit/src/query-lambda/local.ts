@@ -1,10 +1,10 @@
-import { run as runQuery } from "./query-lambda";
+import { run as runQuery } from './query-lambda';
 
 const tests = [
 	{
-		name: "2024-03-05_EPIC_PRIMARY__US",
-		channel: "Epic",
-		launchDate: "2024-03-15",
+		name: '2024-03-05_EPIC_PRIMARY__US',
+		channel: 'Epic',
+		launchDate: '2024-03-15',
 	},
 ];
 
@@ -13,7 +13,7 @@ const wait = () =>
 		setTimeout(resolve, 12000);
 	});
 
-runQuery({tests})
+runQuery({ tests })
 	.then(async (result) => {
 		await wait();
 		return result;

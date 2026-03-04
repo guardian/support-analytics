@@ -1,34 +1,34 @@
 import {
 	type DynamoDBDocumentClient,
 	QueryCommand,
-} from "@aws-sdk/lib-dynamodb";
+} from '@aws-sdk/lib-dynamodb';
 
 const runQuery = (
 	stage: string,
 	docClient: DynamoDBDocumentClient,
-	channel: string
+	channel: string,
 ) =>
 	docClient.send(
 		new QueryCommand({
 			TableName: `support-admin-console-channel-tests-${stage.toUpperCase()}`,
-			KeyConditionExpression: "channel = :channel",
+			KeyConditionExpression: 'channel = :channel',
 			ExpressionAttributeNames: {
-				"#status": "status",
+				'#status': 'status',
 			},
 			ExpressionAttributeValues: {
-				":channel": channel,
-				":draft": "Draft",
+				':channel': channel,
+				':draft': 'Draft',
 			},
-			FilterExpression: "#status <> :draft",
-		})
+			FilterExpression: '#status <> :draft',
+		}),
 	);
 export function queryChannelTests(
 	stage: string,
-	docClient: DynamoDBDocumentClient
+	docClient: DynamoDBDocumentClient,
 ) {
 	return Promise.all([
-		runQuery(stage, docClient, "Epic"),
-		runQuery(stage, docClient, "Banner1"),
-		runQuery(stage, docClient, "Banner2"),
+		runQuery(stage, docClient, 'Epic'),
+		runQuery(stage, docClient, 'Banner1'),
+		runQuery(stage, docClient, 'Banner2'),
 	]);
 }
