@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint 'src/**/*.ts'",
-    "build": "esbuild src/**/*.ts --bundle --platform=node --outdir=target/lambdas --external:@aws-sdk/*",
+    "build": "esbuild src/get-bandit-tests/get-bandit-tests.ts src/query-lambda/query-lambda.ts --bundle --platform=node --outdir=target --outbase=src --external:@aws-sdk/*",
     "local": "STAGE=CODE AWS_PROFILE=membership ts-node ./src/query-lambda/local.ts",
     "gbt-local": "STAGE=CODE AWS_PROFILE=membership ts-node ./src/get-bandit-tests/local.ts",
     "backfill": "STAGE=CODE AWS_PROFILE=membership AthenaOutputBucket=gu-support-analytics ts-node ./src/scripts/backfill.ts"

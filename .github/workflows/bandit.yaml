@@ -47,7 +47,7 @@ jobs:
           pnpm run build
 
           cd target
-          zip -r support-bandit.zip lambdas/
+          zip -r support-bandit.zip get-bandit-tests/ query-lambda/
 
       - name: Build cdk
         working-directory: ./cdk
