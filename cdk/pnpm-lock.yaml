@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  fast-xml-parser: '>=5.5.6'
+
 devDependencies:
   '@guardian/cdk':
     specifier: 61.3.4
