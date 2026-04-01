@@ -32,7 +32,7 @@
 		"@google-cloud/bigquery": "8.1.1",
 		"date-fns": "^4.1.0",
 		"esbuild": "^0.27.3",
-		"google-auth-library": "^10.6.1",
+		"google-auth-library": "^10.6.2",
 		"zod": "^4.3.6"
 	},
 	"prettier": "@guardian/prettier",
