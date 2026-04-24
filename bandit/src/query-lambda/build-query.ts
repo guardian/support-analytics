@@ -39,6 +39,23 @@ const formatTimestamps = (start: Date, end: Date) => ({
 	endTimestamp: end.toISOString().replace('T', ' '),
 });
 
+const buildComponentViewsQuery = (
+	componentChannels: string[],
+	stage: 'CODE' | 'PROD',
+	start: Date,
+	startTimestamp: string,
+	endTimestamp: string,
+): string => `
+SELECT COUNT(*) as total_views
+FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
+CROSS JOIN UNNEST(component_event_array) as ce
+WHERE received_date >= DATE_SUB('${format(start, 'yyyy-MM-dd')}', INTERVAL 1 DAY)
+AND received_date <= '${format(start, 'yyyy-MM-dd')}'
+AND ce.event_timestamp >= '${startTimestamp}'
+AND ce.event_timestamp < '${endTimestamp}'
+AND ce.event_action = "VIEW"
+AND ce.component_type IN (${componentChannels.map((c) => `"${getComponentType(c)}"`).join(', ')})`;
+
 export const buildTotalComponentViewsQuery = (
 	channels: string[],
 	stage: 'CODE' | 'PROD',
@@ -59,19 +76,13 @@ export const buildTotalComponentViewsQuery = (
 		);
 		const componentQuery =
 			componentChannels.length > 0
-				? `
-SELECT COUNT(*) as total_views
-FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
-CROSS JOIN UNNEST(component_event_array) as ce
-WHERE received_date >= DATE_SUB('${format(
+				? buildComponentViewsQuery(
+						componentChannels,
+						stage,
 						start,
-						'yyyy-MM-dd',
-					)}', INTERVAL 1 DAY)
-AND received_date <= '${format(start, 'yyyy-MM-dd')}'
-AND ce.event_timestamp >= '${startTimestamp}'
-AND ce.event_timestamp < '${endTimestamp}'
-AND ce.event_action = "VIEW"
-AND ce.component_type IN (${componentChannels.map((c) => `"${getComponentType(c)}"`).join(', ')})`
+						startTimestamp,
+						endTimestamp,
+					)
 				: '';
 
 		// Create separate queries for each landing page channel type
@@ -109,51 +120,37 @@ AND ${getLandingPagePathFilter(channel)}`);
 	}
 
 	// Original logic for component-only tests
-	const componentTypes = channels.map((channel) => getComponentType(channel));
-
-	return `
-SELECT
-	COUNT(*) as total_views
-FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
-CROSS JOIN UNNEST(component_event_array) as ce
-WHERE received_date >= DATE_SUB('${format(
+	return buildComponentViewsQuery(
+		channels,
+		stage,
 		start,
-		'yyyy-MM-dd',
-	)}', INTERVAL 1 DAY)
-AND received_date <= '${format(start, 'yyyy-MM-dd')}'
-AND ce.event_timestamp >= '${startTimestamp}'
-AND ce.event_timestamp < '${endTimestamp}'
-AND ce.event_action = "VIEW"
-AND ce.component_type IN (${componentTypes.map((c) => `"${c}"`).join(', ')})
-	`;
+		startTimestamp,
+		endTimestamp,
+	);
 };
 
-export const buildTestSpecificQuery = (
-	test: BanditTestConfig,
-	stage: 'CODE' | 'PROD',
-	start: Date,
-	end: Date,
-	pricingCaseStatement: string,
-): string => {
-	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
-	const dateForCurrencyConversionTable = subDays(start, 1); //This table is updated daily  but has a lag of 1 day
-	const isLandingPage = isLandingPageTest(test);
-
-	// For landing pages, we use ab_test_array instead of component_event_array
-	// and filter by host/path instead of component_type
-	if (isLandingPage) {
-		return `
+const buildExchangeRatesCtes = (stage: 'CODE' | 'PROD', date: Date): string => `
 WITH exchange_rates AS (
     SELECT target, date, (1/rate) AS reverse_rate FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
-	WHERE date = '${format(dateForCurrencyConversionTable, 'yyyy-MM-dd')}'),
+	WHERE date = '${format(date, 'yyyy-MM-dd')}'),
 gbp_rate AS (
 	SELECT
 	 rate, date
 	FROM  datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
-	WHERE target = 'GBP' AND  date = '${format(
-		dateForCurrencyConversionTable,
-		'yyyy-MM-dd',
-	)}'),
+	WHERE target = 'GBP' AND  date = '${format(date, 'yyyy-MM-dd')}'),`;
+
+const buildAcquisitionsCte = (
+	stage: 'CODE' | 'PROD',
+	startTimestamp: string,
+	endTimestamp: string,
+	testName: string,
+	pricingCaseStatement: string,
+	componentTypeFilter?: string,
+): string => {
+	const componentTypeClause = componentTypeFilter
+		? `\n    AND component_type = "${componentTypeFilter}"`
+		: '';
+	return `
 acquisitions AS (
     SELECT
       ab.name AS  test_name,
@@ -165,9 +162,12 @@ acquisitions AS (
       payment_frequency,
     FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event AS acq
     CROSS JOIN UNNEST(ab_tests) AS ab
-    WHERE event_timestamp >= timestamp '${startTimestamp}' AND event_timestamp <  timestamp '${endTimestamp}'
-    AND name = '${test.name}'
-),
+    WHERE event_timestamp >= timestamp '${startTimestamp}' AND event_timestamp <  timestamp '${endTimestamp}'${componentTypeClause}
+    AND name = '${testName}'
+),`;
+};
+
+const buildAvAndAggCtes = (): string => `
 acqusitions_with_av AS (
   SELECT
     acq.*,
@@ -201,7 +201,14 @@ acquisitions_agg AS (
     COUNT(*) acquisitions
   FROM acqusitions_with_av_gbp
   GROUP BY 1,2
-),
+),`;
+
+const buildLandingPageViewsCte = (
+	stage: 'CODE' | 'PROD',
+	start: Date,
+	channel: string,
+	testName: string,
+): string => `
 views AS (
   SELECT
     ab.ab_test_name AS test_name,
@@ -210,90 +217,21 @@ views AS (
   FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
   CROSS JOIN UNNEST(ab_test_array) as ab
   -- Include previous day, as a pageview's received_date may be before midnight and an ab_test after
-  WHERE received_date >= DATE_SUB('${format(
-		start,
-		'yyyy-MM-dd',
-  )}', INTERVAL 1 DAY) AND received_date <= '${format(start, 'yyyy-MM-dd')}'
+  WHERE received_date >= DATE_SUB('${format(start, 'yyyy-MM-dd')}', INTERVAL 1 DAY) AND received_date <= '${format(start, 'yyyy-MM-dd')}'
   AND host = 'support.theguardian.com'
-  AND ${getLandingPagePathFilter(test.channel)}
-  AND ab.ab_test_name = '${test.name}'
+  AND ${getLandingPagePathFilter(channel)}
+  AND ab.ab_test_name = '${testName}'
   GROUP BY 1,2
-)
-SELECT
-	views.test_name,
-	views.variant_name,
-	views.views,
-	COALESCE(acquisitions_agg.sum_av_gbp, 0) AS sum_av_gbp,
-	SAFE_DIVIDE(COALESCE(acquisitions_agg.sum_av_gbp, 0), views.views) AS sum_av_gbp_per_view,
-	COALESCE(acquisitions_agg.acquisitions,0) AS acquisitions
-FROM views
-LEFT JOIN acquisitions_agg USING (test_name, variant_name)`;
-	}
+)`;
 
-	// Original logic for component-based tests
-	const componentType = getComponentType(test.channel);
-
-	return `
-WITH exchange_rates AS (
-    SELECT target, date, (1/rate) AS reverse_rate FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
-	WHERE date = '${format(dateForCurrencyConversionTable, 'yyyy-MM-dd')}'),
-gbp_rate AS (
-	SELECT
-	 rate, date
-	FROM  datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
-	WHERE target = 'GBP' AND  date = '${format(
-		dateForCurrencyConversionTable,
-		'yyyy-MM-dd',
-	)}'),
-acquisitions AS (
-    SELECT
-      ab.name AS  test_name,
-      ab.variant AS variant_name,
-      ${pricingCaseStatement}
-        AS amount,
-      product,
-      currency,
-      payment_frequency,
-    FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event AS acq
-    CROSS JOIN UNNEST(ab_tests) AS ab
-    WHERE event_timestamp >= timestamp '${startTimestamp}' AND event_timestamp <  timestamp '${endTimestamp}'
-    AND component_type = "${componentType}"
-    AND name = '${test.name}'
-),
-acqusitions_with_av AS (
-  SELECT
-    acq.*,
-    date,
-    CASE payment_frequency
-      WHEN 'ONE_OFF' THEN amount * exch.reverse_rate
-      WHEN 'MONTHLY' THEN (amount * exch.reverse_rate)*12
-      WHEN 'ANNUALLY' THEN amount * exch.reverse_rate
-      END
-    AS av_eur,
-    exch.reverse_rate
-  FROM acquisitions AS acq
-  JOIN exchange_rates AS exch ON acq.currency = exch.target
-),
-acqusitions_with_av_gbp AS(
-  SELECT
-	acq_av.*,
-	CASE acq_av.currency
-		WHEN 'GBP' THEN av_eur
-		ELSE av_eur * (gbp_rate.rate)
-		END
-	AS av_gbp
-	FROM acqusitions_with_av AS acq_av
-	JOIN  gbp_rate  ON acq_av.date = gbp_rate.date
-	),
-acquisitions_agg AS (
-  SELECT
-    test_name,
-    variant_name,
-    SUM(IF( av_gbp >= ${ANNUALISED_VALUE_CAP}, ${ANNUALISED_VALUE_CAP},  av_gbp)) sum_av_gbp,
-    COUNT(*) acquisitions
-  FROM acqusitions_with_av_gbp
-  GROUP BY 1,2
-),
+const buildComponentViewsCte = (
+	stage: 'CODE' | 'PROD',
+	start: Date,
+	startTimestamp: string,
+	endTimestamp: string,
+	componentType: string,
+	testName: string,
+): string => `
 views AS (
   SELECT
     ce.ab_test_name AS test_name,
@@ -302,16 +240,15 @@ views AS (
   FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
   CROSS JOIN UNNEST(component_event_array) as ce
   -- Include previous day, as a pageview's received_date may be before midnight and a component_event after
-  WHERE received_date >= DATE_SUB('${format(
-		start,
-		'yyyy-MM-dd',
-  )}', INTERVAL 1 DAY) AND received_date <= '${format(start, 'yyyy-MM-dd')}'
+  WHERE received_date >= DATE_SUB('${format(start, 'yyyy-MM-dd')}', INTERVAL 1 DAY) AND received_date <= '${format(start, 'yyyy-MM-dd')}'
   AND ce.event_timestamp >= '${startTimestamp}' AND ce.event_timestamp < '${endTimestamp}'
   AND ce.event_action = "VIEW"
   AND ce.component_type =  "${componentType}"
-  AND ce.ab_test_name = '${test.name}'
+  AND ce.ab_test_name = '${testName}'
   GROUP BY 1,2
-)
+)`;
+
+const buildFinalSelect = (): string => `
 SELECT
 	views.test_name,
 	views.variant_name,
@@ -321,4 +258,83 @@ SELECT
 	COALESCE(acquisitions_agg.acquisitions,0) AS acquisitions
 FROM views
 LEFT JOIN acquisitions_agg USING (test_name, variant_name)`;
+
+const buildLandingPageTestQuery = (
+	test: BanditTestConfig,
+	stage: 'CODE' | 'PROD',
+	start: Date,
+	end: Date,
+	pricingCaseStatement: string,
+): string => {
+	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
+	const date = subDays(start, 1); //This table is updated daily but has a lag of 1 day
+	return (
+		buildExchangeRatesCtes(stage, date) +
+		buildAcquisitionsCte(
+			stage,
+			startTimestamp,
+			endTimestamp,
+			test.name,
+			pricingCaseStatement,
+		) +
+		buildAvAndAggCtes() +
+		buildLandingPageViewsCte(stage, start, test.channel, test.name) +
+		buildFinalSelect()
+	);
 };
+
+const buildComponentTestQuery = (
+	test: BanditTestConfig,
+	stage: 'CODE' | 'PROD',
+	start: Date,
+	end: Date,
+	pricingCaseStatement: string,
+): string => {
+	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
+	const date = subDays(start, 1); //This table is updated daily but has a lag of 1 day
+	const componentType = getComponentType(test.channel);
+	return (
+		buildExchangeRatesCtes(stage, date) +
+		buildAcquisitionsCte(
+			stage,
+			startTimestamp,
+			endTimestamp,
+			test.name,
+			pricingCaseStatement,
+			componentType,
+		) +
+		buildAvAndAggCtes() +
+		buildComponentViewsCte(
+			stage,
+			start,
+			startTimestamp,
+			endTimestamp,
+			componentType,
+			test.name,
+		) +
+		buildFinalSelect()
+	);
+};
+
+export const buildTestSpecificQuery = (
+	test: BanditTestConfig,
+	stage: 'CODE' | 'PROD',
+	start: Date,
+	end: Date,
+	pricingCaseStatement: string,
+): string =>
+	isLandingPageTest(test)
+		? buildLandingPageTestQuery(
+				test,
+				stage,
+				start,
+				end,
+				pricingCaseStatement,
+			)
+		: buildComponentTestQuery(
+				test,
+				stage,
+				start,
+				end,
+				pricingCaseStatement,
+			);
