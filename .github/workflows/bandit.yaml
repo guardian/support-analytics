@@ -59,7 +59,7 @@ jobs:
           pnpm synth
 
       - name: bandit riff-raff
-        uses: guardian/actions-riff-raff@v4
+        uses: guardian/actions-riff-raff@v4.3.0
         with:
           app: bandit
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
