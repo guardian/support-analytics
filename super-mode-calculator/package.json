@@ -36,7 +36,7 @@
 		"zod": "^4.3.6"
 	},
 	"prettier": "@guardian/prettier",
-	"packageManager": "pnpm@8.15.7",
+	"packageManager": "pnpm@10.33.0",
 	"pnpm": {
 		"overrides": {
 			"fast-xml-parser": ">=5.5.6",
