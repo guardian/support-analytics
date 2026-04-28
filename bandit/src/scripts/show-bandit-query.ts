@@ -48,11 +48,14 @@ async function showGeneratedQuery() {
 	);
 	console.log('='.repeat(80));
 
+	const startTimestamp = start.toISOString().replace('T', ' ');
+	const endTimestamp = end.toISOString().replace('T', ' ');
 	const totalViewsQuery = buildTotalComponentViewsQuery(
 		mixedChannels,
 		'PROD',
 		start,
-		end,
+		startTimestamp,
+		endTimestamp,
 	);
 
 	console.log(totalViewsQuery);

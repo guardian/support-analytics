@@ -19,7 +19,7 @@ const formatTimestamps = (start: Date, end: Date) => ({
 	endTimestamp: end.toISOString().replace('T', ' '),
 });
 
-const buildComponentViewsQuery = (
+export const buildTotalComponentViewsQuery = (
 	componentChannels: string[],
 	stage: 'CODE' | 'PROD',
 	start: Date,
@@ -35,68 +35,6 @@ AND ce.event_timestamp >= '${startTimestamp}'
 AND ce.event_timestamp < '${endTimestamp}'
 AND ce.event_action = "VIEW"
 AND ce.component_type IN (${componentChannels.map((c) => `"${getComponentType(c)}"`).join(', ')})`;
-
-export const buildTotalComponentViewsQuery = (
-	channels: string[],
-	stage: 'CODE' | 'PROD',
-	start: Date,
-	end: Date,
-): string => {
-	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
-
-	const hasLandingPages = channels.includes('SupportLandingPage');
-
-	// If we have landing page tests, we need to query both component_event_array and ab_test_array
-	if (hasLandingPages) {
-		const componentChannels = channels.filter(
-			(channel) => channel !== 'SupportLandingPage',
-		);
-		const componentQuery =
-			componentChannels.length > 0
-				? buildComponentViewsQuery(
-						componentChannels,
-						stage,
-						start,
-						startTimestamp,
-						endTimestamp,
-					)
-				: '';
-
-		const landingPageQuery = `
-SELECT COUNT(*) as total_views
-FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
-CROSS JOIN UNNEST(ab_test_array) as ab
-WHERE received_date >= DATE_SUB('${format(
-			start,
-			'yyyy-MM-dd',
-		)}', INTERVAL 1 DAY)
-AND received_date <= '${format(start, 'yyyy-MM-dd')}'
-AND host = 'support.theguardian.com'
-AND path LIKE '%/contribute'`;
-
-		const allQueries = componentQuery
-			? [componentQuery, landingPageQuery]
-			: [landingPageQuery];
-
-		// Combine all queries with UNION ALL
-		if (allQueries.length > 1) {
-			return `SELECT SUM(total_views) as total_views FROM (${allQueries.join(' UNION ALL ')})`;
-		} else if (allQueries.length === 1) {
-			return allQueries[0];
-		} else {
-			return 'SELECT 0 as total_views';
-		}
-	}
-
-	// Original logic for component-only tests
-	return buildComponentViewsQuery(
-		channels,
-		stage,
-		start,
-		startTimestamp,
-		endTimestamp,
-	);
-};
 
 const buildExchangeRatesCtes = (stage: 'CODE' | 'PROD', date: Date): string => `
 WITH exchange_rates AS (
