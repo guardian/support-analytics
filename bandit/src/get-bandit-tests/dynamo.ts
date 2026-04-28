@@ -31,6 +31,5 @@ export function queryChannelTests(
 		runQuery(stage, docClient, 'Banner1'),
 		runQuery(stage, docClient, 'Banner2'),
 		runQuery(stage, docClient, 'SupportLandingPage'),
-		runQuery(stage, docClient, 'OneTimeCheckout'),
 	]);
 }

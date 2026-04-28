@@ -7,13 +7,7 @@ import {
 	buildTotalComponentViewsQuery,
 } from '../query-lambda/build-query';
 
-const CHANNELS = [
-	'Epic',
-	'Banner1',
-	'Banner2',
-	'SupportLandingPage',
-	'OneTimeCheckout',
-] as const;
+const CHANNELS = ['Epic', 'Banner1', 'Banner2', 'SupportLandingPage'] as const;
 
 async function showGeneratedQuery() {
 	console.log('Fetching product catalog from CODE environment...\n');

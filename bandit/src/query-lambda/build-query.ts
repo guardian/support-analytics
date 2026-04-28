@@ -14,26 +14,6 @@ const getComponentType = (channel: string): string => {
 	return ComponentTypeMapping[channel as ComponentChannel];
 };
 
-const isLandingPageTest = (test: BanditTestConfig): boolean => {
-	// Landing page tests are identified by specific channels (DynamoDB)
-	return (
-		test.channel === 'SupportLandingPage' ||
-		test.channel === 'OneTimeCheckout'
-	);
-};
-
-// Helper function to get the correct path filter for landing page channels (BigQuery)
-const getLandingPagePathFilter = (channel: string): string => {
-	switch (channel) {
-		case 'SupportLandingPage':
-			return "path LIKE '%/contribute'";
-		case 'OneTimeCheckout':
-			return "path LIKE '%/one-time-checkout'";
-		default:
-			return "path LIKE '%/contribute'"; // fallback
-	}
-};
-
 const formatTimestamps = (start: Date, end: Date) => ({
 	startTimestamp: start.toISOString().replace('T', ' '),
 	endTimestamp: end.toISOString().replace('T', ' '),
@@ -64,15 +44,12 @@ export const buildTotalComponentViewsQuery = (
 ): string => {
 	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
 
-	const landingPageChannels = ['SupportLandingPage', 'OneTimeCheckout'];
-	const hasLandingPages = channels.some((channel) =>
-		landingPageChannels.includes(channel),
-	);
+	const hasLandingPages = channels.includes('SupportLandingPage');
 
 	// If we have landing page tests, we need to query both component_event_array and ab_test_array
 	if (hasLandingPages) {
 		const componentChannels = channels.filter(
-			(channel) => !landingPageChannels.includes(channel),
+			(channel) => channel !== 'SupportLandingPage',
 		);
 		const componentQuery =
 			componentChannels.length > 0
@@ -85,29 +62,21 @@ export const buildTotalComponentViewsQuery = (
 					)
 				: '';
 
-		// Create separate queries for each landing page channel type
-		const landingPageQueries: string[] = [];
-		const landingPageChannelsInUse = channels.filter((channel) =>
-			landingPageChannels.includes(channel),
-		);
-
-		landingPageChannelsInUse.forEach((channel) => {
-			landingPageQueries.push(`
+		const landingPageQuery = `
 SELECT COUNT(*) as total_views
 FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
 CROSS JOIN UNNEST(ab_test_array) as ab
 WHERE received_date >= DATE_SUB('${format(
-				start,
-				'yyyy-MM-dd',
-			)}', INTERVAL 1 DAY)
+			start,
+			'yyyy-MM-dd',
+		)}', INTERVAL 1 DAY)
 AND received_date <= '${format(start, 'yyyy-MM-dd')}'
 AND host = 'support.theguardian.com'
-AND ${getLandingPagePathFilter(channel)}`);
-		});
+AND path LIKE '%/contribute'`;
 
 		const allQueries = componentQuery
-			? [componentQuery, ...landingPageQueries]
-			: landingPageQueries;
+			? [componentQuery, landingPageQuery]
+			: [landingPageQuery];
 
 		// Combine all queries with UNION ALL
 		if (allQueries.length > 1) {
@@ -219,7 +188,7 @@ views AS (
   -- Include previous day, as a pageview's received_date may be before midnight and an ab_test after
   WHERE received_date >= DATE_SUB('${format(start, 'yyyy-MM-dd')}', INTERVAL 1 DAY) AND received_date <= '${format(start, 'yyyy-MM-dd')}'
   AND host = 'support.theguardian.com'
-  AND ${getLandingPagePathFilter(channel)}
+  AND path LIKE '%/contribute'
   AND ab.ab_test_name = '${testName}'
   GROUP BY 1,2
 )`;
@@ -323,7 +292,7 @@ export const buildTestSpecificQuery = (
 	end: Date,
 	pricingCaseStatement: string,
 ): string =>
-	isLandingPageTest(test)
+	test.channel === 'SupportLandingPage'
 		? buildLandingPageTestQuery(
 				test,
 				stage,

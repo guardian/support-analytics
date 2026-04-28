@@ -8,7 +8,7 @@ The multi-armed bandit decision-making happens in SDC. (Original [here](https://
 
 ### get-bandit-tests
 
-The first lambda in the state machine is `get-bandit-tests`. It queries the DynamoDB table `support-admin-console-channel-tests-{stage}` for tests across all five channels (`Epic`, `Banner1`, `Banner2`, `SupportLandingPage`, and `OneTimeCheckout`) that have a multi-armed bandit methodology in their `methodologies` field. It returns a list of these tests as its output.
+The first lambda in the state machine is `get-bandit-tests`. It queries the DynamoDB table `support-admin-console-channel-tests-{stage}` for tests across four channels (`Epic`, `Banner1`, `Banner2`, and `SupportLandingPage`) that have a multi-armed bandit methodology in their `methodologies` field. It returns a list of these tests as its output.
 
 ### query-lambda
 
@@ -18,14 +18,13 @@ It writes this data to a DynamoDB table `support-bandit-`. The data recorded con
 
 #### Landing Page Support
 
-The system now supports bandit sampling for landing pages using the `ab_test_array` column instead of `component_event_array`. Landing pages are identified by specific channels:
+The system supports bandit sampling for landing pages using the `ab_test_array` column instead of `component_event_array`. Landing pages are identified by the `SupportLandingPage` channel:
 
 - **SupportLandingPage**: Uses `host = 'support.theguardian.com'` AND `path LIKE '%/contribute'`
-- **OneTimeCheckout**: Uses `host = 'support.theguardian.com'` AND `path LIKE '%/one-time-checkout'`
 
-Landing page tests are detected by channel type (`SupportLandingPage` or `OneTimeCheckout`). For these tests, the system queries `ab_test_array` with fields `ab_test_name` and `ab_test_variant`, rather than the component-based approach.
+Landing page tests are detected by channel type (`SupportLandingPage`). For these tests, the system queries `ab_test_array` with fields `ab_test_name` and `ab_test_variant`, rather than the component-based approach.
 
-The system queries all five channels: `Epic`, `Banner1`, `Banner2`, `SupportLandingPage`, and `OneTimeCheckout` from the DynamoDB `support-admin-console-channel-tests-{stage}` table.
+The system queries four channels: `Epic`, `Banner1`, `Banner2`, and `SupportLandingPage` from the DynamoDB `support-admin-console-channel-tests-{stage}` table.
 
 ![Step functions architecture](docs/step-function-architecture.png)
 Diagram showing the architecture of this state machine.
