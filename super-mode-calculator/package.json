@@ -17,33 +17,33 @@
 		"local": "STAGE=CODE AthenaOutputBucket=gu-support-analytics SchemaName=acquisition AWS_PROFILE=membership ts-node src/local/run.ts"
 	},
 	"devDependencies": {
-		"@guardian/eslint-config": "^14.0.0",
-		"@types/node": "^22.10.6",
-		"eslint": "^9.39.1",
-		"prettier": "^3.7.4",
-		"@guardian/prettier": "^10.0.0",
-		"ts-node": "^10.9.1",
-		"typescript": "^5.9.3"
+		"@guardian/eslint-config": "14.0.0",
+		"@types/node": "22.10.6",
+		"eslint": "9.39.1",
+		"prettier": "3.7.4",
+		"@guardian/prettier": "10.0.0",
+		"ts-node": "10.9.1",
+		"typescript": "5.9.3"
 	},
 	"dependencies": {
-		"@aws-sdk/client-dynamodb": "^3.995.0",
-		"@aws-sdk/client-ssm": "^3.995.0",
-		"@aws-sdk/lib-dynamodb": "^3.995.0",
+		"@aws-sdk/client-dynamodb": "3.995.0",
+		"@aws-sdk/client-ssm": "3.995.0",
+		"@aws-sdk/lib-dynamodb": "3.995.0",
 		"@google-cloud/bigquery": "8.1.1",
-		"date-fns": "^4.1.0",
-		"esbuild": "^0.27.3",
-		"google-auth-library": "^10.6.1",
-		"zod": "^4.3.6"
+		"date-fns": "4.1.0",
+		"esbuild": "0.27.3",
+		"google-auth-library": "10.6.1",
+		"zod": "4.3.6"
 	},
 	"prettier": "@guardian/prettier",
-	"packageManager": "pnpm@8.15.7",
+	"packageManager": "pnpm@10.33.0",
 	"pnpm": {
 		"overrides": {
-			"fast-xml-parser": ">=5.5.6",
-			"flatted": ">=3.4.2",
-			"picomatch": ">=2.3.2",
-			"picomatch@4": ">=4.0.4",
-			"@tootallnate/once": ">=3.0.1"
+			"fast-xml-parser": "5.5.6",
+			"flatted": "3.4.2",
+			"picomatch": "2.3.2",
+			"picomatch@4": "4.0.4",
+			"@tootallnate/once": "3.0.1"
 		}
 	}
 }
