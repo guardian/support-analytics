@@ -3,15 +3,15 @@ import type { BanditTestConfig } from '../lib/models';
 
 const ANNUALISED_VALUE_CAP = 250;
 
-type Channel = 'Epic' | 'Banner1' | 'Banner2';
-const ComponentTypeMapping: Record<Channel, string> = {
+type ComponentChannel = 'Epic' | 'Banner1' | 'Banner2';
+const ComponentTypeMapping: Record<ComponentChannel, string> = {
 	Epic: 'ACQUISITIONS_EPIC',
 	Banner1: 'ACQUISITIONS_ENGAGEMENT_BANNER',
 	Banner2: 'ACQUISITIONS_SUBSCRIPTIONS_BANNER',
 };
 
 const getComponentType = (channel: string): string => {
-	return ComponentTypeMapping[channel as Channel];
+	return ComponentTypeMapping[channel as ComponentChannel];
 };
 
 const formatTimestamps = (start: Date, end: Date) => ({
@@ -20,54 +20,44 @@ const formatTimestamps = (start: Date, end: Date) => ({
 });
 
 export const buildTotalComponentViewsQuery = (
-	channels: string[],
+	componentChannels: string[],
 	stage: 'CODE' | 'PROD',
 	start: Date,
-	end: Date,
-): string => {
-	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
-	const componentTypes = channels.map((channel) => getComponentType(channel));
-
-	return `
-SELECT
-	COUNT(*) as total_views
+	startTimestamp: string,
+	endTimestamp: string,
+): string => `
+SELECT COUNT(*) as total_views
 FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
 CROSS JOIN UNNEST(component_event_array) as ce
-WHERE received_date >= DATE_SUB('${format(
-		start,
-		'yyyy-MM-dd',
-	)}', INTERVAL 1 DAY)
+WHERE received_date >= DATE_SUB('${format(start, 'yyyy-MM-dd')}', INTERVAL 1 DAY)
 AND received_date <= '${format(start, 'yyyy-MM-dd')}'
 AND ce.event_timestamp >= '${startTimestamp}'
 AND ce.event_timestamp < '${endTimestamp}'
 AND ce.event_action = "VIEW"
-AND ce.component_type IN (${componentTypes.map((c) => `"${c}"`).join(', ')})
-	`;
-};
+AND ce.component_type IN (${componentChannels.map((c) => `"${getComponentType(c)}"`).join(', ')})`;
 
-export const buildTestSpecificQuery = (
-	test: BanditTestConfig,
-	stage: 'CODE' | 'PROD',
-	start: Date,
-	end: Date,
-	pricingCaseStatement: string,
-): string => {
-	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
-	const dateForCurrencyConversionTable = subDays(start, 1); //This table is updated daily  but has a lag of 1 day
-	const componentType = getComponentType(test.channel);
-
-	return `
+const buildExchangeRatesCtes = (stage: 'CODE' | 'PROD', date: Date): string => `
 WITH exchange_rates AS (
     SELECT target, date, (1/rate) AS reverse_rate FROM datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
-	WHERE date = '${format(dateForCurrencyConversionTable, 'yyyy-MM-dd')}'),
+	WHERE date = '${format(date, 'yyyy-MM-dd')}'),
 gbp_rate AS (
 	SELECT
 	 rate, date
 	FROM  datatech-platform-${stage.toLowerCase()}.datalake.fixer_exchange_rates
-	WHERE target = 'GBP' AND  date = '${format(
-		dateForCurrencyConversionTable,
-		'yyyy-MM-dd',
-	)}'),
+	WHERE target = 'GBP' AND  date = '${format(date, 'yyyy-MM-dd')}'),`;
+
+const buildAcquisitionsCte = (
+	stage: 'CODE' | 'PROD',
+	startTimestamp: string,
+	endTimestamp: string,
+	testName: string,
+	pricingCaseStatement: string,
+	componentTypeFilter?: string,
+): string => {
+	const componentTypeClause = componentTypeFilter
+		? `\n    AND component_type = "${componentTypeFilter}"`
+		: '';
+	return `
 acquisitions AS (
     SELECT
       ab.name AS  test_name,
@@ -79,10 +69,12 @@ acquisitions AS (
       payment_frequency,
     FROM datatech-platform-${stage.toLowerCase()}.datalake.fact_acquisition_event AS acq
     CROSS JOIN UNNEST(ab_tests) AS ab
-    WHERE event_timestamp >= timestamp '${startTimestamp}' AND event_timestamp <  timestamp '${endTimestamp}'
-    AND component_type = "${componentType}"
-    AND name = '${test.name}'
-),
+    WHERE event_timestamp >= timestamp '${startTimestamp}' AND event_timestamp <  timestamp '${endTimestamp}'${componentTypeClause}
+    AND name = '${testName}'
+),`;
+};
+
+const buildAvAndAggCtes = (): string => `
 acqusitions_with_av AS (
   SELECT
     acq.*,
@@ -116,7 +108,37 @@ acquisitions_agg AS (
     COUNT(*) acquisitions
   FROM acqusitions_with_av_gbp
   GROUP BY 1,2
-),
+),`;
+
+const buildLandingPageViewsCte = (
+	stage: 'CODE' | 'PROD',
+	start: Date,
+	channel: string,
+	testName: string,
+): string => `
+views AS (
+  SELECT
+    ab.ab_test_name AS test_name,
+    ab.ab_test_variant AS variant_name,
+    COUNT(*) views
+  FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
+  CROSS JOIN UNNEST(ab_test_array) as ab
+  -- Include previous day, as a pageview's received_date may be before midnight and an ab_test after
+  WHERE received_date >= DATE_SUB('${format(start, 'yyyy-MM-dd')}', INTERVAL 1 DAY) AND received_date <= '${format(start, 'yyyy-MM-dd')}'
+  AND host = 'support.theguardian.com'
+  AND path LIKE '%/contribute'
+  AND ab.ab_test_name = '${testName}'
+  GROUP BY 1,2
+)`;
+
+const buildComponentViewsCte = (
+	stage: 'CODE' | 'PROD',
+	start: Date,
+	startTimestamp: string,
+	endTimestamp: string,
+	componentType: string,
+	testName: string,
+): string => `
 views AS (
   SELECT
     ce.ab_test_name AS test_name,
@@ -125,16 +147,15 @@ views AS (
   FROM datatech-platform-${stage.toLowerCase()}.online_traffic.fact_page_view_anonymised
   CROSS JOIN UNNEST(component_event_array) as ce
   -- Include previous day, as a pageview's received_date may be before midnight and a component_event after
-  WHERE received_date >= DATE_SUB('${format(
-		start,
-		'yyyy-MM-dd',
-  )}', INTERVAL 1 DAY) AND received_date <= '${format(start, 'yyyy-MM-dd')}'
+  WHERE received_date >= DATE_SUB('${format(start, 'yyyy-MM-dd')}', INTERVAL 1 DAY) AND received_date <= '${format(start, 'yyyy-MM-dd')}'
   AND ce.event_timestamp >= '${startTimestamp}' AND ce.event_timestamp < '${endTimestamp}'
   AND ce.event_action = "VIEW"
   AND ce.component_type =  "${componentType}"
-  AND ce.ab_test_name = '${test.name}'
+  AND ce.ab_test_name = '${testName}'
   GROUP BY 1,2
-)
+)`;
+
+const buildFinalSelect = (): string => `
 SELECT
 	views.test_name,
 	views.variant_name,
@@ -144,4 +165,83 @@ SELECT
 	COALESCE(acquisitions_agg.acquisitions,0) AS acquisitions
 FROM views
 LEFT JOIN acquisitions_agg USING (test_name, variant_name)`;
+
+const buildLandingPageTestQuery = (
+	test: BanditTestConfig,
+	stage: 'CODE' | 'PROD',
+	start: Date,
+	end: Date,
+	pricingCaseStatement: string,
+): string => {
+	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
+	const date = subDays(start, 1); //This table is updated daily but has a lag of 1 day
+	return (
+		buildExchangeRatesCtes(stage, date) +
+		buildAcquisitionsCte(
+			stage,
+			startTimestamp,
+			endTimestamp,
+			test.name,
+			pricingCaseStatement,
+		) +
+		buildAvAndAggCtes() +
+		buildLandingPageViewsCte(stage, start, test.channel, test.name) +
+		buildFinalSelect()
+	);
 };
+
+const buildComponentTestQuery = (
+	test: BanditTestConfig,
+	stage: 'CODE' | 'PROD',
+	start: Date,
+	end: Date,
+	pricingCaseStatement: string,
+): string => {
+	const { startTimestamp, endTimestamp } = formatTimestamps(start, end);
+	const date = subDays(start, 1); //This table is updated daily but has a lag of 1 day
+	const componentType = getComponentType(test.channel);
+	return (
+		buildExchangeRatesCtes(stage, date) +
+		buildAcquisitionsCte(
+			stage,
+			startTimestamp,
+			endTimestamp,
+			test.name,
+			pricingCaseStatement,
+			componentType,
+		) +
+		buildAvAndAggCtes() +
+		buildComponentViewsCte(
+			stage,
+			start,
+			startTimestamp,
+			endTimestamp,
+			componentType,
+			test.name,
+		) +
+		buildFinalSelect()
+	);
+};
+
+export const buildTestSpecificQuery = (
+	test: BanditTestConfig,
+	stage: 'CODE' | 'PROD',
+	start: Date,
+	end: Date,
+	pricingCaseStatement: string,
+): string =>
+	test.channel === 'SupportLandingPage'
+		? buildLandingPageTestQuery(
+				test,
+				stage,
+				start,
+				end,
+				pricingCaseStatement,
+			)
+		: buildComponentTestQuery(
+				test,
+				stage,
+				start,
+				end,
+				pricingCaseStatement,
+			);
