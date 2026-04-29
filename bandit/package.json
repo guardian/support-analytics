@@ -14,39 +14,39 @@
 		"backfill": "STAGE=CODE AWS_PROFILE=membership AthenaOutputBucket=gu-support-analytics ts-node ./src/scripts/backfill.ts"
 	},
 	"dependencies": {
-		"@aws-sdk/client-cloudwatch": "^3.995.0",
-		"@aws-sdk/client-dynamodb": "^3.995.0",
-		"@aws-sdk/client-ssm": "^3.995.0",
-		"@aws-sdk/credential-providers": "^3.995.0",
-		"@aws-sdk/lib-dynamodb": "^3.995.0",
-		"@google-cloud/bigquery": "^8.1.1",
+		"@aws-sdk/client-cloudwatch": "3.995.0",
+		"@aws-sdk/client-dynamodb": "3.995.0",
+		"@aws-sdk/client-ssm": "3.995.0",
+		"@aws-sdk/credential-providers": "3.995.0",
+		"@aws-sdk/lib-dynamodb": "3.995.0",
+		"@google-cloud/bigquery": "8.1.1",
 		"date-fns": "2.30.0",
-		"esbuild": "^0.27.3",
-		"google-auth-library": "^10.6.1",
-		"zod": "^3.0.0"
+		"esbuild": "0.27.3",
+		"google-auth-library": "10.6.1",
+		"zod": "4.3.6"
 	},
 	"devDependencies": {
-		"@guardian/eslint-config": "^14.0.0",
-		"@guardian/prettier": "^10.0.0",
-		"@types/jest": "^30.0.0",
-		"@types/node": "^22.10.6",
-		"eslint": "^9.39.1",
-		"jest": "^30.3.0",
-		"prettier": "^3.7.4",
-		"ts-jest": "^29.4.6",
-		"ts-node": "^10.9.1",
-		"typescript": "^5.7.3"
+		"@guardian/eslint-config": "14.0.0",
+		"@guardian/prettier": "10.0.0",
+		"@types/jest": "30.0.0",
+		"@types/node": "22.10.6",
+		"eslint": "9.39.1",
+		"jest": "30.3.0",
+		"prettier": "3.7.4",
+		"ts-jest": "29.4.6",
+		"ts-node": "10.9.1",
+		"typescript": "5.7.3"
 	},
 	"prettier": "@guardian/prettier",
 	"packageManager": "pnpm@10.33.0",
 	"pnpm": {
 		"overrides": {
-			"fast-xml-parser": ">=5.5.6",
-			"handlebars": ">=4.7.9",
-			"flatted": ">=3.4.2",
-			"picomatch": ">=2.3.2",
-			"picomatch@4": ">=4.0.4",
-			"@tootallnate/once": ">=3.0.1"
+			"fast-xml-parser": "5.5.6",
+			"handlebars": "4.7.9",
+			"flatted": "3.4.2",
+			"picomatch": "2.3.2",
+			"picomatch@4": "4.0.4",
+			"@tootallnate/once": "3.0.1"
 		}
 	}
 }
