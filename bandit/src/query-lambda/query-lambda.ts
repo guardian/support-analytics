@@ -22,7 +22,7 @@ const docClient = DynamoDBDocumentClient.from(new DynamoDB({ region }));
 
 export interface QueryLambdaInput {
 	tests: Test[];
-	date?: Date;
+	timestamp?: string;
 }
 
 // Each test may contain 1 or more bandit methodologies
@@ -69,7 +69,10 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 	}
 
 	const ssmPath = `/bandit-testing/${stage}/gcp-wif-credentials-config`;
-	const date = input.date ?? new Date(Date.now());
+	const date =
+		input.timestamp !== undefined
+			? new Date(input.timestamp)
+			: new Date(Date.now());
 	const currentHour = set(date, { minutes: 0, seconds: 0, milliseconds: 0 });
 	/**
 	 * Look back at the hour before last, to get a more complete set of events per hour.
