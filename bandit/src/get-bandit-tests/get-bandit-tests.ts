@@ -23,6 +23,10 @@ export async function run(): Promise<QueryLambdaInput> {
 	) as Test[];
 	const banditTests = filterBanditTests(tests);
 	return {
-		tests: banditTests,
+		tests: banditTests.map((test) => ({
+			name: test.name,
+			channel: test.channel,
+			methodologies: test.methodologies,
+		})),
 	};
 }
