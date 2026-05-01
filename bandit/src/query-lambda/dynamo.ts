@@ -54,9 +54,9 @@ function buildDynamoRecord(
 	};
 }
 
-const BATCH_SIZE = 25;
+const CHUNK_SIZE = 25;
 
-export async function writeBatch(
+export async function write(
 	batch: DocumentWriteRequest[],
 	stage: string,
 	docClient: DynamoDBDocumentClient,
@@ -64,8 +64,8 @@ export async function writeBatch(
 	const table = `support-bandit-${stage.toUpperCase()}`;
 
 	let result: BatchWriteCommandOutput = { $metadata: {} };
-	for (let i = 0; i < batch.length; i += BATCH_SIZE) {
-		const chunk = batch.slice(i, i + BATCH_SIZE);
+	for (let i = 0; i < batch.length; i += CHUNK_SIZE) {
+		const chunk = batch.slice(i, i + CHUNK_SIZE);
 		result = await docClient.send(
 			new BatchWriteCommand({
 				RequestItems: {

@@ -1,5 +1,5 @@
 import type { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
-import { buildWriteRequest, writeBatch } from './dynamo';
+import { buildWriteRequest, write } from './dynamo';
 import type { DocumentWriteRequest } from './dynamo';
 import type { VariantQueryRow } from './parse-result';
 
@@ -31,7 +31,7 @@ describe('writeBatch', () => {
 	it('should write all items in a single batch when under 25', async () => {
 		const items = Array.from({ length: 10 }, (_, i) => createItem(i));
 
-		await writeBatch(
+		await write(
 			items,
 			'PROD',
 			mockDocClient as unknown as DynamoDBDocumentClient,
@@ -43,7 +43,7 @@ describe('writeBatch', () => {
 	it('should chunk items into multiple batches when over 25', async () => {
 		const items = Array.from({ length: 28 }, (_, i) => createItem(i));
 
-		await writeBatch(
+		await write(
 			items,
 			'PROD',
 			mockDocClient as unknown as DynamoDBDocumentClient,
@@ -55,7 +55,7 @@ describe('writeBatch', () => {
 	it('should chunk exactly 25 items into one batch', async () => {
 		const items = Array.from({ length: 25 }, (_, i) => createItem(i));
 
-		await writeBatch(
+		await write(
 			items,
 			'PROD',
 			mockDocClient as unknown as DynamoDBDocumentClient,
@@ -67,7 +67,7 @@ describe('writeBatch', () => {
 	it('should chunk 26 items into two batches', async () => {
 		const items = Array.from({ length: 26 }, (_, i) => createItem(i));
 
-		await writeBatch(
+		await write(
 			items,
 			'PROD',
 			mockDocClient as unknown as DynamoDBDocumentClient,
@@ -79,7 +79,7 @@ describe('writeBatch', () => {
 	it('should use correct table name with stage', async () => {
 		const items = [createItem(1)];
 
-		await writeBatch(
+		await write(
 			items,
 			'staging',
 			mockDocClient as unknown as DynamoDBDocumentClient,
