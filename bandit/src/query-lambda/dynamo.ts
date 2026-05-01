@@ -1,7 +1,4 @@
-import type {
-	BatchWriteCommandOutput,
-	DynamoDBDocumentClient,
-} from '@aws-sdk/lib-dynamodb';
+import type { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { BatchWriteCommand } from '@aws-sdk/lib-dynamodb';
 import type { VariantQueryRow } from './parse-result';
 
@@ -60,13 +57,11 @@ export async function write(
 	batch: DocumentWriteRequest[],
 	stage: string,
 	docClient: DynamoDBDocumentClient,
-): Promise<BatchWriteCommandOutput> {
+): Promise<void> {
 	const table = `support-bandit-${stage.toUpperCase()}`;
-
-	let result: BatchWriteCommandOutput = { $metadata: {} };
 	for (let i = 0; i < batch.length; i += CHUNK_SIZE) {
 		const chunk = batch.slice(i, i + CHUNK_SIZE);
-		result = await docClient.send(
+		await docClient.send(
 			new BatchWriteCommand({
 				RequestItems: {
 					[table]: chunk,
@@ -74,5 +69,4 @@ export async function write(
 			}),
 		);
 	}
-	return result;
 }
