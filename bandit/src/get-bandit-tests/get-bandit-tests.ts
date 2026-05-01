@@ -17,7 +17,7 @@ const filterBanditTests = (tests: Test[]): Test[] =>
 			),
 	);
 
-export async function run(): Promise<QueryLambdaInput> {
+export async function run(event?: { timestamp?: string }): Promise<QueryLambdaInput> {
 	const tests = (await queryChannelTests(stage, docClient)).flatMap(
 		(test) => test.Items ?? [],
 	) as Test[];
@@ -28,5 +28,6 @@ export async function run(): Promise<QueryLambdaInput> {
 			channel: test.channel,
 			methodologies: test.methodologies,
 		})),
+		...(event?.timestamp !== undefined && { timestamp: event.timestamp }),
 	};
 }

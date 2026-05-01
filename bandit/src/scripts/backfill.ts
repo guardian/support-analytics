@@ -32,7 +32,7 @@ const tests = [{ name: testName, channel: channel }];
 const result = dates.reduce((prev, date) => {
 	return prev.then(() => {
 		console.log('Running for date', date);
-		return runQuery({ tests, date })
+		return runQuery({ tests, timestamp: date.toISOString() })
 			.then((result) => {
 				console.log(result);
 			})
