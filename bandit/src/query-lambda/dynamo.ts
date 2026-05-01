@@ -54,18 +54,25 @@ function buildDynamoRecord(
 	};
 }
 
-export function writeBatch(
+const BATCH_SIZE = 25;
+
+export async function writeBatch(
 	batch: DocumentWriteRequest[],
 	stage: string,
 	docClient: DynamoDBDocumentClient,
 ): Promise<BatchWriteCommandOutput> {
 	const table = `support-bandit-${stage.toUpperCase()}`;
 
-	return docClient.send(
-		new BatchWriteCommand({
-			RequestItems: {
-				[table]: batch,
-			},
-		}),
-	);
+	let result: BatchWriteCommandOutput = { $metadata: {} };
+	for (let i = 0; i < batch.length; i += BATCH_SIZE) {
+		const chunk = batch.slice(i, i + BATCH_SIZE);
+		result = await docClient.send(
+			new BatchWriteCommand({
+				RequestItems: {
+					[table]: chunk,
+				},
+			}),
+		);
+	}
+	return result;
 }
