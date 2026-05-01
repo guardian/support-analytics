@@ -45,3 +45,5 @@ To query for a specific hour (i.e. if you're backfilling a failed run), enter an
 }
 ```
 This will cause the query-lambda to query for the period 2026-05-01T07:00:00 to 2026-05-01T08:00:00, because it looks back at the hour before last.
+
+The Step functions console will indicate if the state machine succeeded or not. You can also click through to the lambda logs for more details, e.g. the query-lambda logs contain the queries that were sent to BigQuery.
