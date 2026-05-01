@@ -14,7 +14,7 @@ import {
 	getDataForBanditTest,
 	getTotalComponentViewsForChannels,
 } from './bigquery';
-import { buildWriteRequest, writeBatch } from './dynamo';
+import { buildWriteRequest, write } from './dynamo';
 import { getSSMParam } from './ssm';
 
 const stage = process.env.STAGE;
@@ -151,5 +151,5 @@ export async function run(input: QueryLambdaInput): Promise<void> {
 		return;
 	}
 
-	await writeBatch(writeRequests, stage, docClient);
+	await write(writeRequests, stage, docClient);
 }
