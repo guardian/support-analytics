@@ -540,7 +540,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
             "Value": "TEST",
           },
         ],
-        "Timeout": 60,
+        "Timeout": 120,
       },
       "Type": "AWS::Lambda::Function",
     },
