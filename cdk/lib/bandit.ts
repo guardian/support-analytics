@@ -127,7 +127,7 @@ export class Bandit extends GuStack {
 			handler: 'query-lambda/query-lambda.run',
 			fileName: `${appName}.zip`,
 			loggingFormat,
-			timeout: Duration.seconds(60),
+			timeout: Duration.seconds(120),
 			role: queryLambdaRole,
 		});
 
