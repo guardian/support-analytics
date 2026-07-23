@@ -956,6 +956,24 @@ exports[`The Bandit stack matches the snapshot 1`] = `
         "Name": "support-bandit-startup-TEST",
         "ScheduleExpression": "cron(45 * * * ? *)",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-analytics",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
