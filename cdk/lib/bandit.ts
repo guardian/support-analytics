@@ -70,7 +70,9 @@ export class Bandit extends GuStack {
 				name: 'timestamp',
 				type: AttributeType.STRING,
 			},
-			pointInTimeRecovery: this.stage === 'PROD',
+			pointInTimeRecoverySpecification: {
+				pointInTimeRecoveryEnabled: this.stage === 'PROD',
+			},
 			timeToLiveAttribute: 'ttlInSeconds',
 		});
 

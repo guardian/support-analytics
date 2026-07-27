@@ -40,7 +40,9 @@ export class SuperModeCalculator extends GuStack {
 				},
 				readCapacity: 5,
 				writeCapacity: 5,
-				pointInTimeRecovery: this.stage === 'PROD',
+				pointInTimeRecoverySpecification: {
+					pointInTimeRecoveryEnabled: this.stage === 'PROD',
+				},
 			},
 		);
 
