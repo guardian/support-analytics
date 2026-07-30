@@ -32,7 +32,7 @@
 		"@google-cloud/bigquery": "8.1.1",
 		"date-fns": "4.1.0",
 		"esbuild": "0.28.1",
-		"google-auth-library": "10.6.1",
+		"google-auth-library": "10.9.1",
 		"zod": "4.3.6"
 	},
 	"prettier": "@guardian/prettier",
@@ -43,7 +43,12 @@
 			"picomatch": "2.3.2",
 			"picomatch@4": "4.0.4",
 			"@tootallnate/once": "3.0.1",
-			"brace-expansion": ">=5.0.8"
+			"eslint-plugin-jsx-a11y>minimatch": ">=9.0.0",
+			"eslint-plugin-react>minimatch": ">=9.0.0",
+			"eslint>minimatch": ">=9.0.0",
+			"@eslint/config-array>minimatch": ">=9.0.0",
+			"@eslint/eslintrc>minimatch": ">=9.0.0",
+			"minimatch>brace-expansion": "5.0.8"
 		}
 	}
 }
