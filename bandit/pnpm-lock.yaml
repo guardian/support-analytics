@@ -10,7 +10,12 @@ overrides:
   picomatch: 2.3.2
   picomatch@4: 4.0.4
   '@tootallnate/once': 3.0.1
-  brace-expansion: '>=5.0.8'
+  eslint-plugin-jsx-a11y>minimatch: '>=9.0.0'
+  eslint-plugin-react>minimatch: '>=9.0.0'
+  eslint>minimatch: '>=9.0.0'
+  '@eslint/config-array>minimatch': '>=9.0.0'
+  '@eslint/eslintrc>minimatch': '>=9.0.0'
+  minimatch>brace-expansion: 5.0.8
 
 importers:
 
@@ -4011,7 +4016,7 @@ snapshots:
     dependencies:
       '@eslint/object-schema': 2.1.7
       debug: 4.4.3
-      minimatch: 3.1.5
+      minimatch: 10.2.5
     transitivePeerDependencies:
       - supports-color
 
@@ -4032,7 +4037,7 @@ snapshots:
       ignore: 5.3.2
       import-fresh: 3.3.1
       js-yaml: 4.3.0
-      minimatch: 3.1.5
+      minimatch: 10.2.5
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
       - supports-color
@@ -5355,7 +5360,7 @@ snapshots:
       hasown: 2.0.3
       jsx-ast-utils: 3.3.5
       language-tags: 1.0.9
-      minimatch: 3.1.5
+      minimatch: 10.2.5
       object.fromentries: 2.0.8
       safe-regex-test: 1.1.0
       string.prototype.includes: 2.0.1
@@ -5383,7 +5388,7 @@ snapshots:
       estraverse: 5.3.0
       hasown: 2.0.3
       jsx-ast-utils: 3.3.5
-      minimatch: 3.1.5
+      minimatch: 10.2.5
       object.entries: 1.1.9
       object.fromentries: 2.0.8
       object.values: 1.2.1
@@ -5437,7 +5442,7 @@ snapshots:
       is-glob: 4.0.3
       json-stable-stringify-without-jsonify: 1.0.1
       lodash.merge: 4.6.2
-      minimatch: 3.1.5
+      minimatch: 10.2.5
       natural-compare: 1.4.0
       optionator: 0.9.4
     transitivePeerDependencies:
