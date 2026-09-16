@@ -39,7 +39,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v6
         with:
-          node-version-file: "super-mode-calculator/.nvmrc"
+          node-version-file: ".tool-versions"
 
       - name: pnpm install, lint, build
         working-directory: ./super-mode-calculator
