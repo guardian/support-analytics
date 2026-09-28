@@ -26,9 +26,9 @@
 		"typescript": "5.9.3"
 	},
 	"dependencies": {
-		"@aws-sdk/client-dynamodb": "3.1045.0",
-		"@aws-sdk/client-ssm": "3.1045.0",
-		"@aws-sdk/lib-dynamodb": "3.1045.0",
+		"@aws-sdk/client-dynamodb": "3.1141.0",
+		"@aws-sdk/client-ssm": "3.1141.0",
+		"@aws-sdk/lib-dynamodb": "3.1141.0",
 		"@google-cloud/bigquery": "9.1.0",
 		"date-fns": "4.1.0",
 		"esbuild": "0.28.2",
