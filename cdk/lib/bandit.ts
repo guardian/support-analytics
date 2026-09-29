@@ -70,7 +70,9 @@ export class Bandit extends GuStack {
 				name: 'timestamp',
 				type: AttributeType.STRING,
 			},
-			pointInTimeRecovery: this.stage === 'PROD',
+			pointInTimeRecoverySpecification: {
+				pointInTimeRecoveryEnabled: this.stage === 'PROD',
+			},
 			timeToLiveAttribute: 'ttlInSeconds',
 		});
 
@@ -127,7 +129,7 @@ export class Bandit extends GuStack {
 			handler: 'query-lambda/query-lambda.run',
 			fileName: `${appName}.zip`,
 			loggingFormat,
-			timeout: Duration.seconds(60),
+			timeout: Duration.seconds(120),
 			role: queryLambdaRole,
 		});
 

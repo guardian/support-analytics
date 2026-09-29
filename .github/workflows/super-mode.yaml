@@ -37,9 +37,9 @@ jobs:
         shell: bash
 
       - name: Use Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v6.3.0
         with:
-          node-version-file: "super-mode-calculator/.nvmrc"
+          node-version-file: ".tool-versions"
 
       - name: pnpm install, lint, build
         working-directory: ./super-mode-calculator
@@ -64,7 +64,7 @@ jobs:
           pnpm synth
 
       - name: super-mode riff-raff
-        uses: guardian/actions-riff-raff@v4
+        uses: guardian/actions-riff-raff@v4.3.0
         with:
           app: super-mode
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}

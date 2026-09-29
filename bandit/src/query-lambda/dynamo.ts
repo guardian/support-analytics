@@ -1,7 +1,4 @@
-import type {
-	BatchWriteCommandOutput,
-	DynamoDBDocumentClient,
-} from '@aws-sdk/lib-dynamodb';
+import type { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { BatchWriteCommand } from '@aws-sdk/lib-dynamodb';
 import type { VariantQueryRow } from './parse-result';
 
@@ -54,18 +51,22 @@ function buildDynamoRecord(
 	};
 }
 
-export function writeBatch(
+const CHUNK_SIZE = 25;
+
+export async function write(
 	batch: DocumentWriteRequest[],
 	stage: string,
 	docClient: DynamoDBDocumentClient,
-): Promise<BatchWriteCommandOutput> {
+): Promise<void> {
 	const table = `support-bandit-${stage.toUpperCase()}`;
-
-	return docClient.send(
-		new BatchWriteCommand({
-			RequestItems: {
-				[table]: batch,
-			},
-		}),
-	);
+	for (let i = 0; i < batch.length; i += CHUNK_SIZE) {
+		const chunk = batch.slice(i, i + CHUNK_SIZE);
+		await docClient.send(
+			new BatchWriteCommand({
+				RequestItems: {
+					[table]: chunk,
+				},
+			}),
+		);
+	}
 }

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`The Bandit stack matches the snapshot 1`] = `
 {
@@ -540,7 +540,7 @@ exports[`The Bandit stack matches the snapshot 1`] = `
             "Value": "TEST",
           },
         ],
-        "Timeout": 60,
+        "Timeout": 120,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -956,6 +956,24 @@ exports[`The Bandit stack matches the snapshot 1`] = `
         "Name": "support-bandit-startup-TEST",
         "ScheduleExpression": "cron(45 * * * ? *)",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-analytics",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
         "Targets": [
           {
             "Arn": {

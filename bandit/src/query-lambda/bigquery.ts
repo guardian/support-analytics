@@ -51,11 +51,14 @@ export const getTotalComponentViewsForChannels = async (
 		authClient,
 	});
 
+	const startTimestamp = start.toISOString().replace('T', ' ');
+	const endTimestamp = end.toISOString().replace('T', ' ');
 	const query = buildTotalComponentViewsQuery(
 		channels,
 		bigqueryStage,
 		start,
-		end,
+		startTimestamp,
+		endTimestamp,
 	);
 	const rows = await bigquery.query({ query });
 	const result = parseTotalComponentViewsResult(rows);

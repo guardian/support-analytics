@@ -15,13 +15,16 @@ describe('build-query functions', () => {
 	const start = new Date('2023-01-01T00:00:00.000Z');
 	const end = new Date('2023-01-01T01:00:00.000Z');
 
-	describe('buildTotalComponentViewsQuery', () => {
+	describe('buildComponentViewsQuery', () => {
 		it('should build a query for total component views', () => {
+			const startTimestamp = start.toISOString().replace('T', ' ');
+			const endTimestamp = end.toISOString().replace('T', ' ');
 			const query = buildTotalComponentViewsQuery(
 				['Epic'],
 				stage,
 				start,
-				end,
+				startTimestamp,
+				endTimestamp,
 			);
 
 			expect(query).toContain('COUNT(*) as total_views');
