@@ -20,7 +20,7 @@
 		"@aws-sdk/credential-providers": "3.1141.0",
 		"@aws-sdk/lib-dynamodb": "3.1141.0",
 		"@google-cloud/bigquery": "9.1.0",
-		"date-fns": "2.30.0",
+		"date-fns": "4.1.0",
 		"esbuild": "0.28.2",
 		"google-auth-library": "11.1.0",
 		"zod": "4.3.6"
