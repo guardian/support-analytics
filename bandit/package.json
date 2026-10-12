@@ -27,7 +27,7 @@
 	},
 	"devDependencies": {
 		"@guardian/eslint-config": "16.0.0",
-		"@guardian/prettier": "10.0.0",
+		"@guardian/prettier": "11.0.0",
 		"@types/jest": "30.0.0",
 		"@types/node": "26.6.2",
 		"eslint": "9.39.5",
