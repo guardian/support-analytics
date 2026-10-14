@@ -33,7 +33,7 @@
 		"date-fns": "4.4.0",
 		"esbuild": "0.28.2",
 		"google-auth-library": "11.1.0",
-		"zod": "4.3.6"
+		"zod": "4.6.5"
 	},
 	"prettier": "@guardian/prettier",
 	"packageManager": "pnpm@10.33.0",
