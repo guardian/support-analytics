@@ -25,8 +25,8 @@ importers:
   .:
     dependencies:
       '@aws-sdk/client-cloudwatch':
-        specifier: 3.1142.0
-        version: 3.1142.0
+        specifier: 3.1147.0
+        version: 3.1147.0
       '@aws-sdk/client-dynamodb':
         specifier: 3.1142.0
         version: 3.1142.0
@@ -88,8 +88,8 @@ importers:
 
 packages:
 
-  '@aws-sdk/client-cloudwatch@3.1142.0':
-    resolution: {integrity: sha512-JAJ4pT5i1VpoY+XTwvYJSaLiXp8369mNBuWCgoKvncphDCf/Gu3P3qQaEA3TUOn7goZSqL5q8/klxSgoOAMiCg==}
+  '@aws-sdk/client-cloudwatch@3.1147.0':
+    resolution: {integrity: sha512-yTmWWwUe0zfrR00RZ/RlIc82tuK5imeMPu1KjI8eOW78htZPKssSNf76wXJ+QYlAxwlpr2SeYFAJ5egQSemHcQ==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/client-dynamodb@3.1142.0':
@@ -2922,12 +2922,12 @@ packages:
 
 snapshots:
 
-  '@aws-sdk/client-cloudwatch@3.1142.0':
+  '@aws-sdk/client-cloudwatch@3.1147.0':
     dependencies:
       '@aws-sdk/core': 3.978.1
       '@aws-sdk/credential-provider-node': 3.972.84
       '@aws-sdk/types': 3.974.6
-      '@smithy/core': 3.35.0
+      '@smithy/core': 3.35.1
       '@smithy/fetch-http-handler': 5.8.0
       '@smithy/middleware-compression': 4.6.2
       '@smithy/node-http-handler': 4.12.1
