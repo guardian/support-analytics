@@ -23,7 +23,7 @@
 		"eslint": "9.39.5",
 		"prettier": "3.7.4",
 		"ts-node": "10.9.1",
-		"typescript": "5.9.3"
+		"typescript": "6.0.3"
 	},
 	"dependencies": {
 		"@aws-sdk/client-dynamodb": "3.1147.0",
