@@ -21,7 +21,7 @@
 		"@guardian/prettier": "11.0.0",
 		"@types/node": "26.6.3",
 		"eslint": "9.39.5",
-		"prettier": "3.7.4",
+		"prettier": "3.9.10",
 		"ts-node": "10.9.1",
 		"typescript": "6.0.3"
 	},
