@@ -27,7 +27,7 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-dynamodb": "3.1155.0",
-		"@aws-sdk/client-ssm": "3.1152.0",
+		"@aws-sdk/client-ssm": "3.1155.0",
 		"@aws-sdk/lib-dynamodb": "3.1150.0",
 		"@google-cloud/bigquery": "9.3.0",
 		"date-fns": "4.4.0",
