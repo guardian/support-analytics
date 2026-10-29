@@ -19,7 +19,7 @@
 	"devDependencies": {
 		"@guardian/eslint-config": "16.0.0",
 		"@guardian/prettier": "11.0.0",
-		"@types/node": "26.6.3",
+		"@types/node": "26.6.5",
 		"eslint": "9.39.5",
 		"prettier": "3.9.10",
 		"ts-node": "10.9.1",
