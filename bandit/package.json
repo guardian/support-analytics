@@ -29,7 +29,7 @@
 		"@guardian/eslint-config": "16.0.0",
 		"@guardian/prettier": "11.0.0",
 		"@types/jest": "30.0.0",
-		"@types/node": "26.6.2",
+		"@types/node": "26.6.5",
 		"eslint": "9.39.5",
 		"jest": "30.5.2",
 		"prettier": "3.9.10",
