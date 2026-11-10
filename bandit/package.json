@@ -35,7 +35,7 @@
 		"prettier": "3.9.10",
 		"ts-jest": "29.4.14",
 		"ts-node": "10.9.2",
-		"typescript": "5.7.3"
+		"typescript": "6.0.3"
 	},
 	"prettier": "@guardian/prettier",
 	"packageManager": "pnpm@10.33.0",
