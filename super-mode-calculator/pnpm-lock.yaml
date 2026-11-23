@@ -32,8 +32,8 @@ importers:
         specifier: 3.1157.0
         version: 3.1157.0(@aws-sdk/client-dynamodb@3.1157.0)
       '@google-cloud/bigquery':
-        specifier: 9.5.0
-        version: 9.5.0
+        specifier: 9.6.1
+        version: 9.6.1
       date-fns:
         specifier: 4.4.0
         version: 4.4.0
@@ -499,8 +499,8 @@ packages:
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@google-cloud/bigquery@9.5.0':
-    resolution: {integrity: sha512-U0KozjO+GgDyV6tvzZhhmuUjjsfXlbcKgKW02j4oHMUaFUiznhq+Mtc0+KKfwK0g2rRm/x5BfQdego4OSr5ezQ==}
+  '@google-cloud/bigquery@9.6.1':
+    resolution: {integrity: sha512-+uluOi66FjTdW19p0nnJ5+rqsffS0ykHynJU7svDmA9uMn3C+pKOwOgnudmV8gDoPvAefmSPbZF/z2PqJ0TSPQ==}
     engines: {node: '>=22'}
     peerDependencies:
       '@google-cloud/bigquery-storage': ^6.3.0
@@ -2648,7 +2648,7 @@ snapshots:
       '@eslint/core': 0.17.0
       levn: 0.4.1
 
-  '@google-cloud/bigquery@9.5.0':
+  '@google-cloud/bigquery@9.6.1':
     dependencies:
       '@google-cloud/common': 8.2.2
       '@google-cloud/paginator': 7.2.0
